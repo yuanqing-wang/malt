@@ -18,7 +18,6 @@ class Letter(abc.ABC):
     def __init__(self, *args, **kwargs):
         pass
 
-
 # =============================================================================
 # MODULE CLASSES
 # =============================================================================
@@ -37,7 +36,12 @@ class Quote(Letter):
     def __init__(self, id):
         self.id = id
 
-class Quote(Letter):
+class MerchantToAssayerNote(Letter):
     """ A quote. """
+    def __init__(self, id):
+        self.id = id
+
+class Report(Letter):
+    """ A report. """
     def __init__(self, id):
         self.id = id

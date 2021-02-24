@@ -2,13 +2,15 @@
 # IMPORTS
 # =============================================================================
 import abc
+from typing import Union
 from .agent import Agent
+from .assayer import Assayer
 from .letters import QueryReceipt, OrderReceipt, Quote, MerchantToAssayerNote
 
 # =============================================================================
 # BASE CLASSES
 # =============================================================================
-class Merchant(Agent, abc.ABC):
+class Merchant(Agent):
     """ Base class for a merchant that sells small molecules.
 
     Methods
@@ -38,15 +40,16 @@ class Merchant(Agent, abc.ABC):
 
     @abc.abstractmethod
     def sale(
-        self, molecules: list, assayer: Agent, *args, **kwargs
+        self, quote: Quote, assayer: Assayer, *args, **kwargs
     ) -> MerchantToAssayerNote:
-        """ Execute an order with a molecule with a SMILES string and a
-        downstream assayer.
+        """ Execute with a quote and a downstream assayer.
 
         Parameters
         ----------
-        molecules : list
-            List of molecules to be sold.
+        quote : Quote
+            Quote that was generated for the molecules.
+        assayer : Assayer
+            Downstream assayer.
 
         Returns
         -------
@@ -66,3 +69,19 @@ class Merchant(Agent, abc.ABC):
             A function that generate the catalogue.
         """
         raise NotImplementedError
+
+    @abc.abstractmethod
+    def _check_query(self, query_receipt: QueryReceipt) -> Union[None, Quote]:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def _check_order(
+            self, order_receipt: OrderReceipt
+        ) -> Union[None, MerchantToAssayerNote]:
+        raise NotImplementedError
+
+    def check(self, receipt):
+        if isinstance(receipt, QueryReceipt):
+            return self._check_query(receipt)
+        elif isinstance(receipt, OrderReceipt):
+            return self._check_order(receipt)
