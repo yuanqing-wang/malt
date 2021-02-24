@@ -10,16 +10,3 @@ class Agent(object):
     """ Base class for agent. """
     def __init__(self):
         pass
-
-# =============================================================================
-# MODULE CLASSES
-# =============================================================================
-class Merchant(Agent):
-    """ Models a merchant. """
-    def __init__(self, catalogue=None):
-        self.catalogue = catalogue
-
-class Assayer(Agent):
-    """ Models an assayer. """
-    def __init__(self):
-        pass
