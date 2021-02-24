@@ -12,6 +12,10 @@ class Center(abc.ABC):
         super(Center, self).__init__()
 
     @abc.abstractmethod
+    def register_agent(self, agent):
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def receive_query(self, query):
         raise NotImplementedError
 

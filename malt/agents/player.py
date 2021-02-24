@@ -26,9 +26,11 @@ class Player(Agent):
         Distribution center.
 
     """
-    def __init__(self, center):
+    def __init__(self, center, name=""):
         super(Player, self).__init__()
         self.center = center
+        self.name = name
+        self.center.register_agent(self)
 
     def query(
         self, molecules: list, merchant: Merchant, assayer: Assayer
