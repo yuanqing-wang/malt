@@ -23,7 +23,7 @@ class Merchant(Agent):
         super(Merchant, self).__init__()
 
     @abc.abstractmethod
-    def quote(self, molecules: list, *args, **kwargs) -> Quote:
+    def quote(self, molecules: list) -> Quote:
         """ Generate a quote for a molecule with a SMILES string.
 
         Parameters

@@ -1,13 +1,14 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import abc
 from typing import Union
 from .agent import Agent
 from .center import Center
 from .merchant import Merchant
 from .assayer import Assayer
 from .letters import Quote, QueryReceipt, OrderReceipt, Report
+from ..policy import Policy
+from ..models.model import Model
 
 # =============================================================================
 # BASE CLASSES
@@ -18,43 +19,92 @@ class Player(Agent):
     Methods
     -------
     query(molecules, merchant, assayer)
-        Query about
+        Query about molecules with specific merchant and assayer.
+
+    check(receipt)
+        Check the status of a query or an order.
+
+    order(quote)
+        Place an order based on a quote.
 
     Attributes
     ----------
     center : Center
         Distribution center.
 
+    name : str
+        Name (ID) of the player.
+
     """
-    def __init__(self, center, name=""):
+    def __init__(self, center: Center, name: str = ""):
         super(Player, self).__init__()
         self.center = center
         self.name = name
-        self.center.register_agent(self)
+        self.center.register(self)
 
     def query(
         self, molecules: list, merchant: Merchant, assayer: Assayer
     ) -> QueryReceipt:
-        self.center.receive_query(
+        return self.center.receive_query(
             molecules=molecules,
+            player=self,
             merchant=merchant,
             assayer=assayer,
         )
 
-    def _check_query(self, query_receipt: QueryReceipt) -> Union[None, Quote]:
-        self.center.check_query(query_receipt=query_receipt)
-
-    def _check_order(self, order_receipt: OrderReceipt) -> Union[None, Report]:
-        self.center.check_order(order_receipt=order_receipt)
-
     def check(self, receipt):
-        if isinstance(receipt, QueryReceipt):
-            return self._check_query(receipt)
-        elif isinstance(receipt, OrderReceipt):
-            return self._check_order(receipt)
+        return self.center.check(
+            player=self,
+            receipt=receipt,
+        )
 
-    @abc.abstractmethod
     def order(
         self, quote: Quote
     ) -> OrderReceipt:
-        raise NotImplementedError
+        return self.center.order(quote=quote)
+
+# =============================================================================
+# MODULE CLASSES
+# =============================================================================
+class AutonomousPlayer(Player):
+    """ A player that explores the chemical space with a model and a policy.
+
+    Parameters
+    ----------
+    center : Center
+        The control center the player is attached to.
+    name : str
+        The name of the player.
+    model : malt.Model
+        A model that takes a batch of molecules and form a function for
+        predictive distribution.
+    policy : malt.Policy
+        A policy object that takes a predictive distribution and choose
+    training_kwargs : dict
+        Specifics for the training.
+
+    Methods
+    -------
+    train()
+        Train the model with some
+
+
+    """
+    def __init__(
+        self,
+        center: Center,
+        name: str,
+        model: Model,
+        policy: Policy,
+    ) -> None:
+        super(AutonomousPlayer, self).__init__(
+            center=center, model=model
+        )
+        self.model = model
+        self.policy = policy
+
+        from collections import OrderedDict
+        self.history = OrderedDict()
+
+    def train(self):
+        pass
