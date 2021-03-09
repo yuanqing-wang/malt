@@ -6,7 +6,8 @@ from .agent import Agent
 from .center import Center
 from .merchant import Merchant
 from .assayer import Assayer
-from .letters import Quote, QueryReceipt, OrderReceipt, Report
+from .letters import Letter
+from ..data.dataset import Dataset
 from ..policy import Policy
 from ..models.model import Model
 
@@ -44,7 +45,7 @@ class Player(Agent):
 
     def query(
         self, molecules: list, merchant: Merchant, assayer: Assayer
-    ) -> QueryReceipt:
+    ) -> Letter:
         return self.center.receive_query(
             molecules=molecules,
             player=self,
@@ -59,8 +60,8 @@ class Player(Agent):
         )
 
     def order(
-        self, quote: Quote
-    ) -> OrderReceipt:
+        self, quote: Letter
+    ) -> Letter:
         return self.center.order(quote=quote)
 
 # =============================================================================
@@ -80,8 +81,10 @@ class AutonomousPlayer(Player):
         predictive distribution.
     policy : malt.Policy
         A policy object that takes a predictive distribution and choose
-    training_kwargs : dict
-        Specifics for the training.
+        among the data points.
+    trainer : callable
+
+
 
     Methods
     -------
@@ -92,21 +95,22 @@ class AutonomousPlayer(Player):
     """
     def __init__(
         self,
-        center: Center,
         name: str,
+        center: Center,
         model: Model,
         policy: Policy,
-        training_kwargs: dict,
+        trainer: callable,
     ) -> None:
         super(AutonomousPlayer, self).__init__(
             center=center, model=model
         )
         self.model = model
         self.policy = policy
+        self.trainer = trainer
+        self.history = Dataset([])
 
-        from collections import OrderedDict
-        self.history = OrderedDict()
-        self.training_kwargs = training_kwargs
+    def train(self, trainer):
+        self.model = trainer(self)
+        return self.model
 
-    def train(self):
-        pass
+    
