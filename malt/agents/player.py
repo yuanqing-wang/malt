@@ -86,7 +86,7 @@ class AutonomousPlayer(Player):
     Methods
     -------
     train()
-        Train the model with some
+        Train the model with some training_kwargs as speicification.
 
 
     """
@@ -96,6 +96,7 @@ class AutonomousPlayer(Player):
         name: str,
         model: Model,
         policy: Policy,
+        training_kwargs: dict,
     ) -> None:
         super(AutonomousPlayer, self).__init__(
             center=center, model=model
@@ -105,6 +106,7 @@ class AutonomousPlayer(Player):
 
         from collections import OrderedDict
         self.history = OrderedDict()
+        self.training_kwargs = training_kwargs
 
     def train(self):
         pass
