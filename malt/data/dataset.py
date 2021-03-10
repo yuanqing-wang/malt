@@ -42,12 +42,21 @@ class Dataset(torch.utils.data.Dataset):
         else:
             return self.__class__(points=self.points[idx])
 
-    @staticmethod
-    def featurize(points):
-        for point in points:
+    def append(self, point):
+        """ Append a point to the dataset.
+
+        Parameters
+        ----------
+        point : Point
+            The data point to be appended.
+        """
+        self.points.append(point)
+
+    def featurize_all(self):
+        """ Featurize all points in dataset. """
+        for point in self.points:
             if not point.is_featurized():
                 point.featurize()
-        return points
 
     @staticmethod
     def _batch_as_tuple_of_g_and_y(points):

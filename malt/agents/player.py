@@ -10,6 +10,7 @@ from .letters import Letter
 from ..data.dataset import Dataset
 from ..policy import Policy
 from ..models.model import Model
+from ..point import Point
 
 # =============================================================================
 # BASE CLASSES
@@ -42,6 +43,7 @@ class Player(Agent):
         self.center = center
         self.name = name
         self.center.register(self)
+        self.portfolio = Dataset([])
 
     def query(
         self, molecules: list, merchant: Merchant, assayer: Assayer
@@ -63,6 +65,9 @@ class Player(Agent):
         self, quote: Letter
     ) -> Letter:
         return self.center.order(quote=quote)
+
+    def append(self, point: Point) -> None:
+        self.portfolio.append(point)
 
 # =============================================================================
 # MODULE CLASSES
@@ -107,10 +112,7 @@ class AutonomousPlayer(Player):
         self.model = model
         self.policy = policy
         self.trainer = trainer
-        self.history = Dataset([])
 
     def train(self, trainer):
         self.model = trainer(self)
         return self.model
-
-    

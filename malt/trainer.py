@@ -21,7 +21,7 @@ def get_default_trainer(
             batch_size=batch_size,
         ):
         # put data into loader
-        ds = player.history.view(batch_size=batch_size)
+        ds = player.portfolio.view(batch_size=batch_size)
 
         # get optimizer object
         optimizer = getattr(
