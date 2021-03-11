@@ -3,18 +3,26 @@
 # =============================================================================
 import abc
 import torch
+import dgl
+import functools
+from dgl.nn.pytorch import GraphConv
 
 # =============================================================================
 # BASE CLASSES
 # =============================================================================
-class Representation(torch.nn.Module, abc):
-    """ Base class for a regressor.
+class Representation(torch.nn.Module, abc.ABC):
+    """ Base class for a representation.
+
+    Methods
+    -------
+    forward(g)
+        Project a graph onto a fixed-dimensional space.
 
     """
     def __init__(self, *args, **kwargs):
         super(Representation, self).__init__()
 
-    @staticmethod
+    @abc.abstractmethod
     def forward(self, g):
         """ Forward pass.
 
@@ -24,3 +32,71 @@ class Representation(torch.nn.Module, abc):
             Input graph.
         """
         raise NotImplementedError
+
+
+# =============================================================================
+# MODULE CLASSES
+# =============================================================================
+class DGLRepresentation(Representation):
+    """ Representation with DGL layer. """
+    def __init__(
+            self,
+            layer: type = functools.partial(
+                GraphConv, allow_zero_in_degree=True
+            ),
+            in_features: int = 74,
+            hidden_features: int = 128,
+            out_features: int = 1,
+            depth: int = 3,
+            activation: callable = torch.nn.ReLU(),
+            global_pool: str = "sum",
+        ):
+        super(DGLRepresentation, self).__init__()
+
+        _in_features = in_features # first layer is input
+        # construct model
+        for idx in range(depth):
+            setattr(
+                self,
+                "gn%s" % idx,
+                layer(_in_features, hidden_features),
+            )
+            _in_features = hidden_features # hidden feature as input
+
+        # output
+        self.ff = torch.nn.Sequential(
+            torch.nn.Linear(hidden_features, hidden_features),
+            activation,
+            torch.nn.Linear(hidden_features, out_features),
+        )
+
+        self.depth = depth
+        self.global_pool = getattr(dgl, "%s_nodes" % global_pool)
+        self.activation = activation
+
+    def forward(self, g, field="h"):
+        """ Forward pass.
+
+        Parameters
+        ----------
+        g : dgl.DGLGraph
+            Input graph.
+
+        """
+        # make local copy
+        g = g.local_var()
+        h = g.ndata[field]
+
+        # loop through the depth
+        for idx in range(self.depth):
+            h = getattr(self, "gn%s" % idx)(g, h)
+            h = self.activation(h)
+        g.ndata[field] = h
+
+        # global pool
+        h = self.global_pool(g, field)
+
+        # final feedforward
+        h = self.ff(h)
+
+        return h

@@ -51,6 +51,7 @@ class Dataset(torch.utils.data.Dataset):
             The data point to be appended.
         """
         self.points.append(point)
+        return self
 
     def featurize_all(self):
         """ Featurize all points in dataset. """
@@ -58,8 +59,10 @@ class Dataset(torch.utils.data.Dataset):
             if not point.is_featurized():
                 point.featurize()
 
+        return self
+
     @staticmethod
-    def _batch_as_tuple_of_g_and_y(points):
+    def batch_of_g_and_y(points):
         # initialize results
         gs = []
         ys = []
@@ -77,7 +80,25 @@ class Dataset(torch.utils.data.Dataset):
         y = torch.tensor(ys)[:, None]
         return g, y
 
-    def view(self, collate_fn: Union[callable, None]=None, *args, **kwargs):
+    @staticmethod
+    def batch_of_g(points):
+        # initialize results
+        gs = []
+
+        # loop through the points
+        for point in points:
+            if not point.is_featurized(): # featurize
+                point.featurize()
+            gs.append(point.g)
+
+        g = dgl.batch(gs)
+        return g
+
+    def view(
+            self,
+            collate_fn: Union[callable, str]="batch_of_g_and_y",
+            *args, **kwargs
+        ):
         """ Provide a data loader from portfolio.
 
         Parameters
@@ -92,8 +113,8 @@ class Dataset(torch.utils.data.Dataset):
 
         """
         # provide default collate function
-        if collate_fn is None:
-            collate_fn = self._batch_as_tuple_of_g_and_y
+        if isinstance(collate_fn, str):
+            collate_fn = getattr(self, collate_fn)
 
         return torch.utils.data.DataLoader(
             dataset=self,
