@@ -19,11 +19,12 @@ class Representation(torch.nn.Module, abc.ABC):
         Project a graph onto a fixed-dimensional space.
 
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, out_features, *args, **kwargs) -> torch.Tensor:
         super(Representation, self).__init__()
+        self.out_features = out_features
 
     @abc.abstractmethod
-    def forward(self, g):
+    def forward(self, g) -> torch.Tensor:
         """ Forward pass.
 
         Parameters
@@ -51,7 +52,7 @@ class DGLRepresentation(Representation):
             activation: callable = torch.nn.ReLU(),
             global_pool: str = "sum",
         ):
-        super(DGLRepresentation, self).__init__()
+        super(DGLRepresentation, self).__init__(out_features=out_features)
 
         _in_features = in_features # first layer is input
         # construct model

@@ -11,8 +11,9 @@ class Regressor(torch.nn.Module, abc.ABC):
     """ Base class for a regressor.
 
     """
-    def __init__(self, out_features=2, *args, **kwargs):
+    def __init__(self, in_features, out_features, *args, **kwargs):
         super(Regressor, self).__init__()
+        self.in_features = in_features
         self.out_features = out_features
 
     @abc.abstractmethod
@@ -33,6 +34,7 @@ class NeuralNetworkRegressor(Regressor):
             activation: torch.nn.Module = torch.nn.ReLU(),
         ):
         super(NeuralNetworkRegressor, self).__init__(
+            in_features=in_features,
             out_features=out_features
         )
         # bookkeeping
@@ -52,4 +54,3 @@ class NeuralNetworkRegressor(Regressor):
 
     def forward(self, x):
         return self.ff(x)
-        
