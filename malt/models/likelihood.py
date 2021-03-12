@@ -36,30 +36,30 @@ class SimpleLikelihood(Likelihood):
 # =============================================================================
 class HomoschedasticGaussianLikelihood(SimpleLikelihood):
     """ A Gaussian likelihood with homoschedastic noise model. """
-    def __init__(self) -> None:
+    def __init__(self, log_sigma=0.0) -> None:
         super(HomoschedasticGaussianLikelihood, self).__init__(
             in_features=1,
         )
-        self.log_sigma = 0.0
+        self.log_sigma = torch.tensor(log_sigma)
 
     def condition(
             self,
             theta: torch.Tensor,
         ) -> torch.distributions.Distribution:
         # decompose theta
-        assert theta.dims() == 2
+        assert theta.dim() == 2
         assert theta.shape[1] == 1
         mu = theta
         return torch.distributions.Normal(
             loc=mu,
-            scale=self.log_sigma().exp(),
+            scale=self.log_sigma.exp(),
         )
 
 class HeteroschedasticGaussianLikelihood(SimpleLikelihood):
     """ A Gaussian likelihood with homoschedastic noise model. """
     def __init__(self) -> None:
         super(HeteroschedasticGaussianLikelihood, self).__init__(
-            in_features=1,
+            in_features=2,
         )
 
     def condition(
@@ -67,11 +67,11 @@ class HeteroschedasticGaussianLikelihood(SimpleLikelihood):
             theta: torch.Tensor
         ) -> torch.distributions.Distribution:
         # decompose theta
-        assert theta.dims() == 2
+        assert theta.dim() == 2
         assert theta.shape[1] == 2
         mu = theta[:, 0][:, None]
         log_sigma = theta[:, 1][:, None]
         return torch.distributions.Normal(
             loc=mu,
-            scale=log_sigma().exp(),
+            scale=log_sigma.exp(),
         )

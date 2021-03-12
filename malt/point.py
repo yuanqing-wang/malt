@@ -63,7 +63,7 @@ class Point(object):
         # featurize
         self.g = self.featurizer(self.smiles)
 
-        return self.g
+        return self
 
     def is_featurized(self):
         return (self.g is not None)

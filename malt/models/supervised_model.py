@@ -59,7 +59,9 @@ class SimpleSupervisedModel(SupervisedModel):
         theta = self.regressor(h)
 
         # parameters -> distribution
-        distribution = self.likelihood(theta)
+        distribution = self.likelihood.condition(theta)
+
+        return distribution
 
     def loss(self, g, y):
         # get predictive posterior distribution
