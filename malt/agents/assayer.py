@@ -3,7 +3,7 @@
 # =============================================================================
 import abc
 from .agent import Agent
-from .letters import QueryReceipt, OrderReceipt, Quote, MerchantToAssayerNote
+from .messages import QueryReceipt, OrderReceipt, Quote, MerchantToAssayerNote
 
 # =============================================================================
 # BASE CLASSES

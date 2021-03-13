@@ -1,0 +1,66 @@
+# =============================================================================
+# IMPORTS
+# =============================================================================
+import abc
+from agent import Agent
+
+# =============================================================================
+# BASE CLASS
+# =============================================================================
+class Message(abc.ABC):
+    """ Base class for messages between merchant, assayer, and player.
+
+    Parameters
+    ----------
+    to : Agent
+        Sender of message.
+    fro : Agent
+        Addressee of message.
+    points : List[Point]
+        A list of molecules with attributes.
+    id : int
+        The identification for the Message.
+
+    """
+    def __init__(
+            self,
+            to: Agent,
+            fro: Agent ,
+            points: list=[],
+            id: str=None,
+            extra={},
+        ):
+        self.points = points
+        if id is None:
+            import time
+            id = str(time.time())
+        self.id = id
+        self.extra = extra
+
+# =============================================================================
+# MODULE CLASSES
+# =============================================================================
+class QueryReceipt(Message):
+    """ Receipt for query. """
+    def __init__(self, *args, **kwargs):
+        super(QueryReceipt, self).__init__(*args, **kwargs)
+
+class OrderReceipt(Message):
+    """ Receipt for order. """
+    def __init__(self, *args, **kwargs):
+        super(OrderReceipt, self).__init__(*args, **kwargs)
+
+class Quote(Message):
+    """ Receipt for quote. """
+    def __init__(self, *args, **kwargs):
+        super(Quote, self).__init__(*args, **kwargs)
+
+class MerchantToAssayerNote(Message):
+    """ A note from merchant to assayer. """
+    def __init__(self, *args, **kwargs):
+        super(MerchantToAssayerNote, self).__init__(*args, **kwargs)
+
+class Report(Message):
+    """ A report. """
+    def __init__(self, *args, **kwargs):
+        super(Report, self).__init__(*args, **kwargs)

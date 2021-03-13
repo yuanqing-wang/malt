@@ -1,12 +1,12 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-from typing import Union
+from typing import Union, List
 from .agent import Agent
 from .center import Center
 from .merchant import Merchant
 from .assayer import Assayer
-from .letters import Letter
+from .messages import QueryReceipt, OrderReceipt, Quote, Report
 from ..data.dataset import Dataset
 from ..policy import Policy
 from ..models.model import Model
@@ -46,24 +46,24 @@ class Player(Agent):
         self.portfolio = Dataset([])
 
     def query(
-        self, molecules: list, merchant: Merchant, assayer: Assayer
-    ) -> Letter:
-        return self.center.receive_query(
-            molecules=molecules,
+        self, points: List[Point], merchant: Merchant, assayers: List[Assayer]
+    ) -> QueryReceipt:
+        return self.center.query(
+            points=points,
             player=self,
             merchant=merchant,
-            assayer=assayer,
+            assayer=List[Assayer],
         )
 
-    def check(self, receipt):
+    def check(self, query_receipt: QueryReceipt) -> Union[None, Quote]:
         return self.center.check(
             player=self,
-            receipt=receipt,
+            receipt=query_receipt,
         )
 
     def order(
-        self, quote: Letter
-    ) -> Letter:
+        self, quote: Quote
+    ) -> OrderReceipt:
         return self.center.order(quote=quote)
 
     def append(self, point: Point) -> None:
@@ -107,7 +107,7 @@ class AutonomousPlayer(Player):
         trainer: callable,
     ) -> None:
         super(AutonomousPlayer, self).__init__(
-            center=center, model=model
+            name=name, center=center,
         )
         self.model = model
         self.policy = policy

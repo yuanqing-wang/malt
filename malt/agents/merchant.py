@@ -5,7 +5,7 @@ import abc
 from typing import Union
 from .agent import Agent
 from .assayer import Assayer
-from .letters import QueryReceipt, OrderReceipt, Quote, MerchantToAssayerNote
+from .messages import QueryReceipt, OrderReceipt, Quote, MerchantToAssayerNote
 
 # =============================================================================
 # BASE CLASSES
