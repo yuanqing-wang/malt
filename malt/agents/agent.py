@@ -7,7 +7,7 @@ import abc
 # BASE CLASSES
 # =============================================================================
 class Agent(abc.ABC):
-    cache = []
+    cache = {}
     """ Base class for agent. """
     def __init__(self, center=None, name=None):
         self.center = center
