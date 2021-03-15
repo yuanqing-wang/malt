@@ -7,7 +7,7 @@ from .messages import Message, QueryReceipt, OrderReceipt, Quote
 from .player import Player
 from .merchant import Merchant
 from .assayer import Assayer
-from .point import Point
+from ..point import Point
 
 # =============================================================================
 # BASE CLASSES
@@ -63,6 +63,10 @@ class Center(abc.ABC):
             return self._check_order(receipt)
 
     @abc.abstractmethod
+    def order(self, player, quote):
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def _check_query(self, query_receipt):
         raise NotImplementedError
 
@@ -77,8 +81,8 @@ class Center(abc.ABC):
 # EXAMPLE MODULES
 # =============================================================================
 class NaiveCenter(Center):
-    def __init__(self):
-        super(NaiveCenter, self).__init__()
+    def __init__(self, name="center"):
+        super(NaiveCenter, self).__init__(name=name)
 
     def query(
             self,
@@ -140,14 +144,17 @@ class NaiveCenter(Center):
                 return self._combine_quote(
                     merchant_quote=merchant_quote,
                     assayer_quotes=assayer_quotes,
+                    player=query_receipt.to,
                 )
 
+        return None
 
     def _combine_quote(
-            self, merchant_quote: Quote, assayer_quotes: List[Quote]
+            self, merchant_quote: Quote, assayer_quotes: List[Quote],
+            player: Player,
         ):
         # initialize quote
-        quote = Quote()
+        quote = Quote(to=player, fro=self)
 
         # assert molecules are consistent
         for _assayer_quote in assayer_quotes:
@@ -162,4 +169,55 @@ class NaiveCenter(Center):
                 [_assayer_quote.price for _assayer_quote in assayer_quotes]
             )
 
+        # make cache
+        self.cache[quote.id] = {
+            "merchant_quote": merchant_quote,
+            "assayer_quotes": assayer_quotes,
+        }
+
         return quote
+
+    def order(self, quote: Quote):
+        # grab cache
+        _cache = self.cache[quote.id]
+        merchant_quote = _cache["merchant_quote"]
+        assayer_quotes = _cache["assayer_quotes"]
+
+        # order
+        merchant_order_receipt = merchant_quote.fro.order(merchant_quote)
+        assayer_order_receipts = [
+            assayer_quote.fro.order(assayer_quote)
+            for assayer_quote in assayer_quotes
+        ]
+
+        # initialize order receipt
+        order_receipt = OrderReceipt(to=quote.to, fro=self)
+
+        self.cache[order_receipt.id] = {
+            "merchant_order_receipt": merchant_order_receipt,
+            "assayer_order_receipts": assayer_order_receipts,
+        }
+
+        return order_receipt
+
+    def _check_order(self, order_receipt: OrderReceipt):
+        # grab cache
+        _cache = self.cache[order_receipt.id]
+        merchant_order_receipt = _cache["merchant_order_receipt"]
+        assayer_order_receipts = _cache["assayer_query_receipts"]
+
+        if merchant_order_receipt.fro.check(
+            merchant_order_receipt
+        ) is not None:
+            if all(
+                [
+                    (_assayer_order_receipt is not None)
+                    for _assayer_order_receipt in assayer_order_receipts
+                ]
+            ):
+                return [
+                    _assayer_order_receipt.fro.check(
+                        _assayer_order_receipt
+                    )
+                    for _assayer_order_receipt in assayer_order_receipts
+                ]

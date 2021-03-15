@@ -2,12 +2,11 @@
 # IMPORTS
 # =============================================================================
 import abc
-from .center import Center
 
 # =============================================================================
 # BASE CLASSES
 # =============================================================================
 class Agent(abc.ABC):
     """ Base class for agent. """
-    def __init__(self, center: Center):
+    def __init__(self, center=None):
         self.center = center

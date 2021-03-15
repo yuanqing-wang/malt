@@ -6,7 +6,7 @@ import abc
 # =============================================================================
 # BASE CLASSES
 # =============================================================================
-class PolicyBase(abc.ABC):
+class Policy(abc.ABC):
     """ Base class for policy. """
     def __init__(self):
         self.history = []

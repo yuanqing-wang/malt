@@ -3,13 +3,12 @@
 # =============================================================================
 from typing import Union, List
 from .agent import Agent
-from .center import Center
 from .merchant import Merchant
 from .assayer import Assayer
 from .messages import QueryReceipt, OrderReceipt, Quote, Report
 from ..data.dataset import Dataset
 from ..policy import Policy
-from ..models.model import Model
+from ..models.supervised_model import SupervisedModel
 from ..point import Point
 
 # =============================================================================
@@ -38,7 +37,7 @@ class Player(Agent):
         Name (ID) of the player.
 
     """
-    def __init__(self, center: Center, name: str = ""):
+    def __init__(self, center=None, name: str = ""):
         super(Player, self).__init__()
         self.center = center
         self.name = name
@@ -101,8 +100,8 @@ class AutonomousPlayer(Player):
     def __init__(
         self,
         name: str,
-        center: Center,
-        model: Model,
+        center,
+        model: SupervisedModel,
         policy: Policy,
         trainer: callable,
     ) -> None:

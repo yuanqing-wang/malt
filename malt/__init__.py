@@ -1,2 +1,2 @@
-from . import agents, data, models, point
+from . import agents, data, models, point, trainer
 from .point import Point
