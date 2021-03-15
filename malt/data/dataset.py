@@ -42,6 +42,17 @@ class Dataset(torch.utils.data.Dataset):
         else:
             return self.__class__(points=self.points[idx])
 
+    def __add__(self, points):
+        """ Combine two datasets. """
+        if isinstance(points, list):
+            return self.__class__(points=self.points + points)
+
+        elif isinstance(points, Dataset):
+            return self.__class__(points=self.points + points.points)
+
+        else:
+            raise RuntimeError("Addition only supports list and Dataset.")
+
     def append(self, point):
         """ Append a point to the dataset.
 

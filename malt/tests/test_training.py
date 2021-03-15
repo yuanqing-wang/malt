@@ -9,11 +9,16 @@ def test_training():
         likelihood=malt.models.likelihood.HomoschedasticGaussianLikelihood(),
     )
     trainer = malt.trainer.get_default_trainer()
-
+    center = malt.agents.center.NaiveCenter(name="NaiveCenter")
     player = malt.agents.player.AutonomousPlayer(
         name="AutonomousPlayer",
-        center=None,
+        center=center,
         policy=None,
         model=net,
         trainer=trainer,
     )
+
+    p0 = malt.Point(smiles="C", y=1.0).featurize()
+    p1 = malt.Point(smiles="CC", y=2.0).featurize()
+    player.portfolio += [p0, p1]
+    player.net = trainer(player)

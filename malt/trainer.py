@@ -20,14 +20,19 @@ def get_default_trainer(
             n_epochs=n_epochs,
             batch_size=batch_size,
         ):
+        # consider the case of one batch
+        if batch_size == -1:
+            batch_size = len(player.portfolio)
+
         # put data into loader
         ds = player.portfolio.view(batch_size=batch_size)
 
         # get optimizer object
         optimizer = getattr(
-            torch.optim
+            torch.optim,
+            optimizer,
         )(
-            player.net.parameters(),
+            player.model.parameters(),
             learning_rate,
         )
 
@@ -35,10 +40,10 @@ def get_default_trainer(
         for _ in range(n_epochs): # loop through the epochs
             for x in ds: # loop through the dataset
                 optimizer.zero_grad()
-                loss = player.net.loss(*x).mean() # average just in case
+                loss = player.model.loss(*x).mean() # average just in case
                 loss.backward()
                 optimizer.step()
 
-        return player.net
+        return player.model
 
     return _default_trainer
