@@ -1,6 +1,6 @@
 import pytest
 
-def test_training():
+def test_full_loop():
     import torch
     import malt
 
@@ -11,13 +11,15 @@ def test_training():
     )
     trainer = malt.trainer.get_default_trainer()
     center = malt.agents.center.NaiveCenter(name="NaiveCenter")
+    policy = malt.policy.Greedy()
     player = malt.agents.player.AutonomousPlayer(
         name="AutonomousPlayer",
         center=center,
-        policy=None,
+        policy=policy,
         model=net,
         trainer=trainer,
     )
+    
 
     p0 = malt.Point(smiles="C", y=1.0).featurize()
     p1 = malt.Point(smiles="CC", y=2.0).featurize()

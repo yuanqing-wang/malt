@@ -3,6 +3,7 @@
 # =============================================================================
 import abc
 from .agent import Agent
+from ..data.dataset import Dataset
 
 # =============================================================================
 # BASE CLASS
@@ -26,14 +27,14 @@ class Message(abc.ABC):
             self,
             to: Agent,
             fro: Agent ,
-            points: list=[],
+            points: Dataset=Dataset([]),
             id: str=None,
             extra={},
         ):
         self.points = points
         if id is None:
             import time
-            id = str(time.time())
+            id = int(time.time() * 100000)
         self.id = id
         self.extra = extra
 
@@ -61,6 +62,6 @@ class MerchantToAssayerNote(Message):
         super(MerchantToAssayerNote, self).__init__(*args, **kwargs)
 
 class Report(Message):
-    """ A report. """
+    """ Report. """
     def __init__(self, *args, **kwargs):
         super(Report, self).__init__(*args, **kwargs)

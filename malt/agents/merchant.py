@@ -6,7 +6,7 @@ from typing import Union
 from .agent import Agent
 from .assayer import Assayer
 from .messages import QueryReceipt, OrderReceipt, Quote, MerchantToAssayerNote
-
+from ..data.dataset import Dataset
 # =============================================================================
 # BASE CLASSES
 # =============================================================================
@@ -19,11 +19,11 @@ class Merchant(Agent):
         Offer a quote for the small molecule.
 
     """
-    def __init__(self):
-        super(Merchant, self).__init__()
+    def __init__(self, *args, **kwargs):
+        super(Merchant, self).__init__(*args, **kwargs)
 
     @abc.abstractmethod
-    def quote(self, molecules: list) -> Quote:
+    def query(self, points: Dataset) -> Quote:
         """ Generate a quote for a molecule with a SMILES string.
 
         Parameters
@@ -39,7 +39,7 @@ class Merchant(Agent):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def sale(
+    def order(
         self, quote: Quote, assayer: Assayer, *args, **kwargs
     ) -> MerchantToAssayerNote:
         """ Execute with a quote and a downstream assayer.

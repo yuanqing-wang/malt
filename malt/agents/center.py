@@ -8,6 +8,7 @@ from .player import Player
 from .merchant import Merchant
 from .assayer import Assayer
 from ..point import Point
+from ..data.dataset import Dataset
 
 # =============================================================================
 # BASE CLASSES
@@ -75,7 +76,7 @@ class Center(abc.ABC):
         raise NotImplementedError
 
     def _clean_cache(self):
-        self._cache = {}
+        self.cache = {}
 
 # =============================================================================
 # EXAMPLE MODULES
@@ -86,7 +87,7 @@ class NaiveCenter(Center):
 
     def query(
             self,
-            points: List[Point],
+            points: Dataset,
             player: Player,
             merchant: Merchant,
             assayers: List[Assayer],
@@ -164,10 +165,19 @@ class NaiveCenter(Center):
         quote.points = merchant_quote.points
 
         # add price
-        quote.extra["price"] = merchant_quote.price\
+        quote.extra["price"] = merchant_quote.extra["price"]\
             + sum(
-                [_assayer_quote.price for _assayer_quote in assayer_quotes]
+                [
+                    _assayer_quote.extra["price"]
+                    for _assayer_quote in assayer_quotes
+                ]
             )
+
+        # put merchant and assayer into extra
+        quote.extra["merchant"] = merchant_quote.fro
+        quote.extra["assayers"] = [
+            _assayer_quote.fro for _assayer_quote in assayer_quotes
+        ]
 
         # make cache
         self.cache[quote.id] = {

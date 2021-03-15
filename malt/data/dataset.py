@@ -29,6 +29,11 @@ class Dataset(torch.utils.data.Dataset):
     def __init__(self, points: Union[None, List[Point]]=None) -> None:
         self.points = points
 
+    def _construct_lookup(self):
+        self.lookup = {
+            point.smiles: point for point in self.points
+        }
+
     def __len__(self):
         if self.points is None:
             return 0
@@ -39,6 +44,10 @@ class Dataset(torch.utils.data.Dataset):
             raise RuntimeError("Empty Portfolio.")
         if isinstance(idx, int):
             return self.points[idx]
+        elif isinstance(idx, str):
+            if self.lookup is None:
+                self._construct_lookup()
+            return self.lookup[idx]
         else:
             return self.__class__(points=self.points[idx])
 
@@ -52,6 +61,9 @@ class Dataset(torch.utils.data.Dataset):
 
         else:
             raise RuntimeError("Addition only supports list and Dataset.")
+
+    def __iter__(self):
+        return iter(self.points)
 
     def append(self, point):
         """ Append a point to the dataset.
