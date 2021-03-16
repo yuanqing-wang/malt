@@ -2,7 +2,7 @@
 # IMPORTS
 # =============================================================================
 import abc
-from typing import Union
+from typing import Union, Callable
 from .agent import Agent
 from .assayer import Assayer
 from .messages import QueryReceipt, OrderReceipt, Quote, MerchantToAssayerNote
@@ -62,7 +62,7 @@ class Merchant(Agent):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def catalogue(self) -> callable:
+    def catalogue(self) -> Callable:
         """Offer a catalogue of all the available function.
 
         Returns
