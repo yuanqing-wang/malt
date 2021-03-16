@@ -11,14 +11,15 @@ from .data.dataset import Dataset
 # =============================================================================
 class Policy(torch.nn.Module, abc.ABC):
     """ Base class for policy. """
+
     def __init__(self):
         super(Policy, self).__init__()
 
     @abc.abstractmethod
     def forward(
-            self, distribution: torch.distributions.Distribution
-        ) -> torch.Tensor:
-        """ Provide the indices to acquire.
+        self, distribution: torch.distributions.Distribution
+    ) -> torch.Tensor:
+        """Provide the indices to acquire.
 
         Parameters
         ----------
@@ -33,25 +34,28 @@ class Policy(torch.nn.Module, abc.ABC):
         """
         raise NotImplementedError
 
+
 # =============================================================================
 # MODULE CLASSES
 # =============================================================================
 class Greedy(Policy):
     """ Greedy policy. """
+
     def __init__(
-            self,
-            utility_function=utility_functions.expected_improvement,
-            acquisition_size: int=1,
-        ):
+        self,
+        utility_function=utility_functions.expected_improvement,
+        acquisition_size: int = 1,
+    ):
         super(Greedy, self).__init__()
         self.utility_function = utility_function
         self.acquisition_size = acquisition_size
 
     def forward(
-            self, distribution: torch.distributions.Distribution
-        ) -> torch.Tensor:
+        self, distribution: torch.distributions.Distribution
+    ) -> torch.Tensor:
         score = self.utility_function(distribution)
         _, idxs = torch.topk(
-            score, self.acquisition_size,
+            score,
+            self.acquisition_size,
         )
         return idxs

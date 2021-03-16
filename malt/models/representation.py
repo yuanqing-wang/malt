@@ -11,7 +11,7 @@ from dgl.nn.pytorch import GraphConv
 # BASE CLASSES
 # =============================================================================
 class Representation(torch.nn.Module, abc.ABC):
-    """ Base class for a representation.
+    """Base class for a representation.
 
     Methods
     -------
@@ -19,13 +19,14 @@ class Representation(torch.nn.Module, abc.ABC):
         Project a graph onto a fixed-dimensional space.
 
     """
+
     def __init__(self, out_features, *args, **kwargs) -> torch.Tensor:
         super(Representation, self).__init__()
         self.out_features = out_features
 
     @abc.abstractmethod
     def forward(self, g) -> torch.Tensor:
-        """ Forward pass.
+        """Forward pass.
 
         Parameters
         ----------
@@ -40,21 +41,20 @@ class Representation(torch.nn.Module, abc.ABC):
 # =============================================================================
 class DGLRepresentation(Representation):
     """ Representation with DGL layer. """
+
     def __init__(
-            self,
-            layer: type = functools.partial(
-                GraphConv, allow_zero_in_degree=True
-            ),
-            in_features: int = 74,
-            hidden_features: int = 128,
-            out_features: int = 1,
-            depth: int = 3,
-            activation: callable = torch.nn.ReLU(),
-            global_pool: str = "sum",
-        ):
+        self,
+        layer: type = functools.partial(GraphConv, allow_zero_in_degree=True),
+        in_features: int = 74,
+        hidden_features: int = 128,
+        out_features: int = 1,
+        depth: int = 3,
+        activation: callable = torch.nn.ReLU(),
+        global_pool: str = "sum",
+    ):
         super(DGLRepresentation, self).__init__(out_features=out_features)
 
-        _in_features = in_features # first layer is input
+        _in_features = in_features  # first layer is input
         # construct model
         for idx in range(depth):
             setattr(
@@ -62,7 +62,7 @@ class DGLRepresentation(Representation):
                 "gn%s" % idx,
                 layer(_in_features, hidden_features),
             )
-            _in_features = hidden_features # hidden feature as input
+            _in_features = hidden_features  # hidden feature as input
 
         # output
         self.ff = torch.nn.Sequential(
@@ -76,7 +76,7 @@ class DGLRepresentation(Representation):
         self.activation = activation
 
     def forward(self, g, field="h"):
-        """ Forward pass.
+        """Forward pass.
 
         Parameters
         ----------

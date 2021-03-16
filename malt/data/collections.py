@@ -14,6 +14,7 @@ def _dataset_from_dgllife(dgllife_dataset):
         [Point(smiles, g, y.item()) for smiles, g, y in dgllife_dataset]
     )
 
+
 # =============================================================================
 # MODULE FUNCTIONS
 # =============================================================================
@@ -24,6 +25,7 @@ COLLECTIONS = [
 ]
 
 for collection in COLLECTIONS:
+
     def _get_collection():
         ds = getattr(dgllife.data, collection)(
             smiles_to_bigraph, CanonicalAtomFeaturizer()

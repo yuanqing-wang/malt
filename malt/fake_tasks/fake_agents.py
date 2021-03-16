@@ -5,8 +5,13 @@ from ..agents.center import Center
 from ..agents.player import Player
 from ..agents.merchant import Merchant
 from ..agents.assayer import Assayer
-from ..agents.messages import Quote, MerchantToAssayerNote, OrderReceipt,\
-    QueryReceipt, Report
+from ..agents.messages import (
+    Quote,
+    MerchantToAssayerNote,
+    OrderReceipt,
+    QueryReceipt,
+    Report,
+)
 
 # =============================================================================
 # MODULE CLASSES
@@ -14,12 +19,10 @@ from ..agents.messages import Quote, MerchantToAssayerNote, OrderReceipt,\
 class FakeMerchant(Merchant):
     def __init__(self, dataset, *args, **kwargs):
         super(FakeMerchant, self).__init__(*args, **kwargs)
-        self.dataset=dataset
+        self.dataset = dataset
 
     def query(self, points):
-        assert all(
-            [point in self.dataset for point in points]
-        )
+        assert all([point in self.dataset for point in points])
         quote = Quote(fro=self, to=self.center)
         quote.extra["price"] = 0.0
 
@@ -28,7 +31,6 @@ class FakeMerchant(Merchant):
         self.cache[query_receipt.id] = quote
 
         return query_receipt
-
 
     def order(self, quote):
         # get assayers
@@ -45,7 +47,8 @@ class FakeMerchant(Merchant):
 
         # generate order receipt
         order_receipt = OrderReceipt(
-            fro=self, to=self.center,
+            fro=self,
+            to=self.center,
         )
 
         return order_receipt
@@ -59,15 +62,15 @@ class FakeMerchant(Merchant):
     def catalogue(self):
         return lambda: self.dataset
 
+
 class FakeAssayer(Assayer):
     """ Fake assayer. """
+
     def __init__(self, dataset, *args, **kwargs):
         super(FakeAssayer, self).__init__()
 
     def query(self, points):
-        assert all(
-            [point in self.dataset for point in points]
-        )
+        assert all([point in self.dataset for point in points])
 
         quote = Quote(fro=self, to=self.center)
         quote.extra["price"] = 0.0
@@ -94,15 +97,12 @@ class FakeAssayer(Assayer):
 
     def _check_order(self, order_receipt: OrderReceipt):
         points = order_receipt.points
-        assert all(
-            [point in self.dataset for point in points]
-        )
+        assert all([point in self.dataset for point in points])
 
         report = Report(
-            fro=self, to=self.center,
+            fro=self,
+            to=self.center,
         )
 
         for point in points:
-            report.points.append(
-                self.dataset[point.dataset]
-            )
+            report.points.append(self.dataset[point.dataset])

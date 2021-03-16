@@ -3,20 +3,26 @@
 # =============================================================================
 import abc
 from .agent import Agent
-from .messages import QueryReceipt, OrderReceipt, Quote, MerchantToAssayerNote,\
-    Dataset
+from .messages import (
+    QueryReceipt,
+    OrderReceipt,
+    Quote,
+    MerchantToAssayerNote,
+    Dataset,
+)
 
 # =============================================================================
 # BASE CLASSES
 # =============================================================================
 class Assayer(Agent, abc.ABC):
     """ Models an assayer. """
+
     def __init__(self, *args, **kwargs):
         super(Assayer, self).__init__(*args, **kwargs)
 
     @abc.abstractmethod
     def query(self, points: Dataset) -> Quote:
-        """ Generate a quote for a molecule with a SMILES string.
+        """Generate a quote for a molecule with a SMILES string.
 
         Parameters
         ----------
@@ -32,16 +38,16 @@ class Assayer(Agent, abc.ABC):
 
     @abc.abstractmethod
     def order(
-            self,
-            quote: Quote,
+        self,
+        quote: Quote,
     ) -> OrderReceipt:
-        """ Conduct a sale to assay a list of compounds.
-        """
+        """Conduct a sale to assay a list of compounds."""
         raise NotImplementedError
 
     def receive_note(
-            self, merchant_to_assayer_note: MerchantToAssayerNote,
-        ):
+        self,
+        merchant_to_assayer_note: MerchantToAssayerNote,
+    ):
         pass
 
     @abc.abstractmethod

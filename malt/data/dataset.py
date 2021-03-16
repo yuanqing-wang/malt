@@ -10,7 +10,7 @@ from ..point import Point
 # MODULE CLASSES
 # =============================================================================
 class Dataset(torch.utils.data.Dataset):
-    """ A collection of Points with functionalities to be compatible with
+    """A collection of Points with functionalities to be compatible with
     training and optimization.
 
     Parameters
@@ -26,13 +26,12 @@ class Dataset(torch.utils.data.Dataset):
         Generate a torch.utils.data.DataLoader from this Dataset.
 
     """
-    def __init__(self, points: Union[None, List[Point]]=None) -> None:
+
+    def __init__(self, points: Union[None, List[Point]] = None) -> None:
         self.points = points
 
     def _construct_lookup(self):
-        self.lookup = {
-            point.smiles: point for point in self.points
-        }
+        self.lookup = {point.smiles: point for point in self.points}
 
     def __len__(self):
         if self.points is None:
@@ -66,7 +65,7 @@ class Dataset(torch.utils.data.Dataset):
         return iter(self.points)
 
     def append(self, point):
-        """ Append a point to the dataset.
+        """Append a point to the dataset.
 
         Parameters
         ----------
@@ -92,7 +91,7 @@ class Dataset(torch.utils.data.Dataset):
 
         # loop through the points
         for point in points:
-            if not point.is_featurized(): # featurize
+            if not point.is_featurized():  # featurize
                 point.featurize()
             if point.y is None:
                 raise RuntimeError("No data associated with data. ")
@@ -110,7 +109,7 @@ class Dataset(torch.utils.data.Dataset):
 
         # loop through the points
         for point in points:
-            if not point.is_featurized(): # featurize
+            if not point.is_featurized():  # featurize
                 point.featurize()
             gs.append(point.g)
 
@@ -118,11 +117,12 @@ class Dataset(torch.utils.data.Dataset):
         return g
 
     def view(
-            self,
-            collate_fn: Union[callable, str]="batch_of_g_and_y",
-            *args, **kwargs
-        ):
-        """ Provide a data loader from portfolio.
+        self,
+        collate_fn: Union[callable, str] = "batch_of_g_and_y",
+        *args,
+        **kwargs
+    ):
+        """Provide a data loader from portfolio.
 
         Parameters
         ----------

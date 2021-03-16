@@ -14,7 +14,7 @@ from ..data.dataset import Dataset
 # BASE CLASSES
 # =============================================================================
 class Center(abc.ABC):
-    """ Base class for center.
+    """Base class for center.
 
     Methods
     -------
@@ -25,6 +25,7 @@ class Center(abc.ABC):
         Receive a query from a player and distribute it to merchant and assayer.
 
     """
+
     cache = {}
     players = []
     merchants = []
@@ -78,6 +79,7 @@ class Center(abc.ABC):
     def _clean_cache(self):
         self.cache = {}
 
+
 # =============================================================================
 # EXAMPLE MODULES
 # =============================================================================
@@ -86,12 +88,12 @@ class NaiveCenter(Center):
         super(NaiveCenter, self).__init__(name=name)
 
     def query(
-            self,
-            points: Dataset,
-            player: Player,
-            merchant: Merchant,
-            assayers: List[Assayer],
-        ):
+        self,
+        points: Dataset,
+        player: Player,
+        merchant: Merchant,
+        assayers: List[Assayer],
+    ):
 
         # check that all of the agents are registered
         assert player in self.players
@@ -107,7 +109,9 @@ class NaiveCenter(Center):
 
         # initialize query receipt
         query_receipt = QueryReceipt(
-            points=points, to=player, fro=self,
+            points=points,
+            to=player,
+            fro=self,
         )
 
         # save copy in the cache
@@ -130,9 +134,8 @@ class NaiveCenter(Center):
         )
 
         assayer_quotes = [
-            _assayer_query_receipt.fro.check(
-                _assayer_query_receipt
-            ) for _assayer_query_receipt in assayer_query_receipts
+            _assayer_query_receipt.fro.check(_assayer_query_receipt)
+            for _assayer_query_receipt in assayer_query_receipts
         ]
 
         if merchant_quote is not None:
@@ -151,9 +154,11 @@ class NaiveCenter(Center):
         return None
 
     def _combine_quote(
-            self, merchant_quote: Quote, assayer_quotes: List[Quote],
-            player: Player,
-        ):
+        self,
+        merchant_quote: Quote,
+        assayer_quotes: List[Quote],
+        player: Player,
+    ):
         # initialize quote
         quote = Quote(to=player, fro=self)
 
@@ -165,13 +170,12 @@ class NaiveCenter(Center):
         quote.points = merchant_quote.points
 
         # add price
-        quote.extra["price"] = merchant_quote.extra["price"]\
-            + sum(
-                [
-                    _assayer_quote.extra["price"]
-                    for _assayer_quote in assayer_quotes
-                ]
-            )
+        quote.extra["price"] = merchant_quote.extra["price"] + sum(
+            [
+                _assayer_quote.extra["price"]
+                for _assayer_quote in assayer_quotes
+            ]
+        )
 
         # put merchant and assayer into extra
         quote.extra["merchant"] = merchant_quote.fro
@@ -216,9 +220,10 @@ class NaiveCenter(Center):
         merchant_order_receipt = _cache["merchant_order_receipt"]
         assayer_order_receipts = _cache["assayer_query_receipts"]
 
-        if merchant_order_receipt.fro.check(
-            merchant_order_receipt
-        ) is not None:
+        if (
+            merchant_order_receipt.fro.check(merchant_order_receipt)
+            is not None
+        ):
             if all(
                 [
                     (_assayer_order_receipt is not None)
@@ -226,8 +231,6 @@ class NaiveCenter(Center):
                 ]
             ):
                 return [
-                    _assayer_order_receipt.fro.check(
-                        _assayer_order_receipt
-                    )
+                    _assayer_order_receipt.fro.check(_assayer_order_receipt)
                     for _assayer_order_receipt in assayer_order_receipts
                 ]

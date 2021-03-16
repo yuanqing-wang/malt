@@ -8,9 +8,8 @@ import torch
 # BASE CLASSES
 # =============================================================================
 class Regressor(torch.nn.Module, abc.ABC):
-    """ Base class for a regressor.
+    """Base class for a regressor."""
 
-    """
     def __init__(self, in_features, out_features, *args, **kwargs):
         super(Regressor, self).__init__()
         self.in_features = in_features
@@ -20,22 +19,23 @@ class Regressor(torch.nn.Module, abc.ABC):
     def forward(self, *args, **kwargs):
         raise NotImplementedError
 
+
 # =============================================================================
 # MODULE CLASSES
 # =============================================================================
 class NeuralNetworkRegressor(Regressor):
     """ Regressor with neural network. """
+
     def __init__(
-            self,
-            in_features: int=128,
-            hidden_features: int=128,
-            out_features: int=128,
-            width: int = 2,
-            activation: torch.nn.Module = torch.nn.ReLU(),
-        ):
+        self,
+        in_features: int = 128,
+        hidden_features: int = 128,
+        out_features: int = 128,
+        width: int = 2,
+        activation: torch.nn.Module = torch.nn.ReLU(),
+    ):
         super(NeuralNetworkRegressor, self).__init__(
-            in_features=in_features,
-            out_features=out_features
+            in_features=in_features, out_features=out_features
         )
         # bookkeeping
         self.width = width
@@ -43,8 +43,8 @@ class NeuralNetworkRegressor(Regressor):
 
         # neural network
         modules = []
-        _in_features=in_features
-        for idx in range(width-1):
+        _in_features = in_features
+        for idx in range(width - 1):
             modules.append(torch.nn.Linear(_in_features, hidden_features))
             modules.append(activation)
             _in_features = hidden_features

@@ -5,11 +5,12 @@ from typing import Union
 import functools
 import dgl
 from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
+
 # =============================================================================
 # MODULE CLASSES
 # =============================================================================
 class Point(object):
-    """ Models a datapoint.
+    """Models a datapoint.
 
     Parameters
     ----------
@@ -31,17 +32,18 @@ class Point(object):
         Convert the SMILES string to a graph if there isn't one.
 
     """
+
     def __init__(
-            self,
-            smiles: str,
-            g: Union[dgl.DGLGraph, None] = None,
-            y: Union[float, None] = None,
-            extra: dict = {},
-            featurizer: callable = functools.partial(
-                smiles_to_bigraph,
-                node_featurizer=CanonicalAtomFeaturizer(atom_data_field='h')
-            ),
-        ) -> None:
+        self,
+        smiles: str,
+        g: Union[dgl.DGLGraph, None] = None,
+        y: Union[float, None] = None,
+        extra: dict = {},
+        featurizer: callable = functools.partial(
+            smiles_to_bigraph,
+            node_featurizer=CanonicalAtomFeaturizer(atom_data_field="h"),
+        ),
+    ) -> None:
         self.smiles = smiles
         self.g = g
         self.y = y
@@ -49,7 +51,7 @@ class Point(object):
         self.featurizer = featurizer
 
     def featurize(self):
-        """ Featurize the SMILES string to get the graph.
+        """Featurize the SMILES string to get the graph.
 
         Returns
         -------
@@ -66,4 +68,4 @@ class Point(object):
         return self
 
     def is_featurized(self):
-        return (self.g is not None)
+        return self.g is not None

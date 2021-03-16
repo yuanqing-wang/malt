@@ -1,23 +1,36 @@
 import pytest
 
+
 def test_import():
     from malt.models import supervised_model
+
 
 def test_construct():
     import torch
     import malt
+
     net = malt.models.supervised_model.SimpleSupervisedModel(
-        representation=malt.models.representation.DGLRepresentation(out_features=128),
-        regressor=malt.models.regressor.NeuralNetworkRegressor(in_features=128, out_features=1),
+        representation=malt.models.representation.DGLRepresentation(
+            out_features=128
+        ),
+        regressor=malt.models.regressor.NeuralNetworkRegressor(
+            in_features=128, out_features=1
+        ),
         likelihood=malt.models.likelihood.HomoschedasticGaussianLikelihood(),
     )
+
 
 def test_forward():
     import torch
     import malt
+
     net = malt.models.supervised_model.SimpleSupervisedModel(
-        representation=malt.models.representation.DGLRepresentation(out_features=128),
-        regressor=malt.models.regressor.NeuralNetworkRegressor(in_features=128, out_features=1),
+        representation=malt.models.representation.DGLRepresentation(
+            out_features=128
+        ),
+        regressor=malt.models.regressor.NeuralNetworkRegressor(
+            in_features=128, out_features=1
+        ),
         likelihood=malt.models.likelihood.HomoschedasticGaussianLikelihood(),
     )
 

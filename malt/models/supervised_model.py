@@ -12,12 +12,13 @@ from .likelihood import Likelihood, SimpleLikelihood
 # =============================================================================
 class SupervisedModel(torch.nn.Module, abc.ABC):
     """ A supervised model. """
+
     def __init__(
-            self,
-            representation: Representation,
-            regressor: Regressor,
-            likelihood: Likelihood,
-        ) -> None:
+        self,
+        representation: Representation,
+        regressor: Regressor,
+        likelihood: Likelihood,
+    ) -> None:
         super(SupervisedModel, self).__init__()
 
         assert representation.out_features == regressor.in_features
@@ -37,13 +38,15 @@ class SupervisedModel(torch.nn.Module, abc.ABC):
         """ Compute loss. """
         raise NotImplementedError
 
+
 class SimpleSupervisedModel(SupervisedModel):
     """ A supervised model that only takes graph. """
+
     def __init__(
-            self,
-            representation: Representation,
-            regressor: Regressor,
-            likelihood: SimpleLikelihood,
+        self,
+        representation: Representation,
+        regressor: Regressor,
+        likelihood: SimpleLikelihood,
     ):
         super(SimpleSupervisedModel, self).__init__(
             representation=representation,

@@ -9,6 +9,7 @@ import torch
 # =============================================================================
 class Likelihood(torch.nn.Module, abc.ABC):
     """ Base class for likelihood. """
+
     def __init__(self, in_features: int) -> None:
         super(Likelihood, self).__init__()
         self.in_features = in_features
@@ -22,20 +23,24 @@ class Likelihood(torch.nn.Module, abc.ABC):
     def loss(self, *args, **kwargs) -> torch.Tensor:
         raise NotImplementedError
 
+
 class SimpleLikelihood(Likelihood):
     """ Likelihood with only parameter input. """
+
     def __init__(self, in_features: int) -> None:
         super(SimpleLikelihood, self).__init__(in_features=in_features)
 
-    def loss(self, theta:torch.Tensor, y:torch.Tensor) -> torch.Tensor:
+    def loss(self, theta: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
         distribution = self.condition(theta)
         return -distribution.log_prob(y).mean()
+
 
 # =============================================================================
 # MODULE CLASSES
 # =============================================================================
 class HomoschedasticGaussianLikelihood(SimpleLikelihood):
     """ A Gaussian likelihood with homoschedastic noise model. """
+
     def __init__(self, log_sigma=0.0) -> None:
         super(HomoschedasticGaussianLikelihood, self).__init__(
             in_features=1,
@@ -43,9 +48,9 @@ class HomoschedasticGaussianLikelihood(SimpleLikelihood):
         self.log_sigma = torch.tensor(log_sigma)
 
     def condition(
-            self,
-            theta: torch.Tensor,
-        ) -> torch.distributions.Distribution:
+        self,
+        theta: torch.Tensor,
+    ) -> torch.distributions.Distribution:
         # decompose theta
         assert theta.dim() == 2
         assert theta.shape[1] == 1
@@ -55,17 +60,18 @@ class HomoschedasticGaussianLikelihood(SimpleLikelihood):
             scale=self.log_sigma.exp(),
         )
 
+
 class HeteroschedasticGaussianLikelihood(SimpleLikelihood):
     """ A Gaussian likelihood with homoschedastic noise model. """
+
     def __init__(self) -> None:
         super(HeteroschedasticGaussianLikelihood, self).__init__(
             in_features=2,
         )
 
     def condition(
-            self,
-            theta: torch.Tensor
-        ) -> torch.distributions.Distribution:
+        self, theta: torch.Tensor
+    ) -> torch.distributions.Distribution:
         # decompose theta
         assert theta.dim() == 2
         assert theta.shape[1] == 2

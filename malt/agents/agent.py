@@ -9,6 +9,7 @@ import abc
 class Agent(abc.ABC):
     cache = {}
     """ Base class for agent. """
+
     def __init__(self, center=None, name=None):
         self.center = center
         if name is None:

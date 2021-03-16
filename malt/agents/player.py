@@ -15,7 +15,7 @@ from ..point import Point
 # BASE CLASSES
 # =============================================================================
 class Player(Agent):
-    """ Base classes for player.
+    """Base classes for player.
 
     Methods
     -------
@@ -41,11 +41,11 @@ class Player(Agent):
     portfolio = Dataset([])
 
     def __init__(
-            self,
-            center=None,
-            name: str = "",
-            quote_review_function: Callable=(lambda x: True),
-        ):
+        self,
+        center=None,
+        name: str = "",
+        quote_review_function: Callable = (lambda x: True),
+    ):
         super(Player, self).__init__()
         self.center = center
         self.name = name
@@ -68,9 +68,7 @@ class Player(Agent):
             receipt=query_receipt,
         )
 
-    def order(
-        self, quote: Quote
-    ) -> OrderReceipt:
+    def order(self, quote: Quote) -> OrderReceipt:
         return self.center.order(quote=quote)
 
     def append(self, points) -> None:
@@ -79,11 +77,12 @@ class Player(Agent):
         elif isinstance(points, Dataset) or isinstance(points, List):
             self.portfolio += points
 
+
 # =============================================================================
 # MODULE CLASSES
 # =============================================================================
 class AutonomousPlayer(Player):
-    """ A player that explores the chemical space with a model and a policy.
+    """A player that explores the chemical space with a model and a policy.
 
     Parameters
     ----------
@@ -106,6 +105,7 @@ class AutonomousPlayer(Player):
 
 
     """
+
     def __init__(
         self,
         name: str,
@@ -115,7 +115,8 @@ class AutonomousPlayer(Player):
         trainer: Callable,
     ) -> None:
         super(AutonomousPlayer, self).__init__(
-            name=name, center=center,
+            name=name,
+            center=center,
         )
         self.model = model
         self.policy = policy
