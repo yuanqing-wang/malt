@@ -56,7 +56,7 @@ class FakeMerchant(Merchant):
     def _check_order(self, order_receipt: OrderReceipt):
         return True
 
-    def catalouge(self):
+    def catalogue(self):
         return lambda: self.dataset
 
 class FakeAssayer(Assayer):
