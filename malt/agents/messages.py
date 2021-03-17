@@ -32,6 +32,7 @@ class Message(abc.ABC):
         id: str = None,
         extra={},
     ):
+        print([point.smiles for point in points.points])
         self.points = points
         if id is None:
             import time
@@ -39,6 +40,8 @@ class Message(abc.ABC):
             id = int(time.time() * 100000)
         self.id = id
         self.extra = extra
+        self.to = to
+        self.fro = fro
 
 
 # =============================================================================
@@ -70,7 +73,6 @@ class MerchantToAssayerNote(Message):
 
     def __init__(self, *args, **kwargs):
         super(MerchantToAssayerNote, self).__init__(*args, **kwargs)
-
 
 class Report(Message):
     """ Report. """

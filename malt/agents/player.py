@@ -59,12 +59,11 @@ class Player(Agent):
             points=points,
             player=self,
             merchant=merchant,
-            assayer=List[Assayer],
+            assayers=assayers,
         )
 
     def check(self, query_receipt: QueryReceipt) -> Union[None, Quote]:
         return self.center.check(
-            player=self,
             receipt=query_receipt,
         )
 
@@ -103,7 +102,6 @@ class AutonomousPlayer(Player):
     train()
         Train the model with some training_kwargs as speicification.
 
-
     """
 
     def __init__(
@@ -127,6 +125,11 @@ class AutonomousPlayer(Player):
         return self.model
 
     def prioritize(self, points):
-        distribution = self.model.condition(points)
+        g = next(
+            iter(
+                points.view(collate_fn="batch_of_g", batch_size=len(points))
+            )
+        )
+        distribution = self.model.condition(g)
         idxs = self.policy(distribution)
         return points[idxs]

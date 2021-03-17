@@ -57,5 +57,6 @@ class Greedy(Policy):
         _, idxs = torch.topk(
             score,
             self.acquisition_size,
+            dim=0,
         )
         return idxs

@@ -25,6 +25,7 @@ class FakeMerchant(Merchant):
         assert all([point in self.dataset for point in points])
         quote = Quote(fro=self, to=self.center)
         quote.extra["price"] = 0.0
+        quote.points = points
 
         # generate receipt
         query_receipt = QueryReceipt(to=self.center, fro=self)
@@ -33,23 +34,13 @@ class FakeMerchant(Merchant):
         return query_receipt
 
     def order(self, quote):
-        # get assayers
-        assayers = quote.extra["assayer"]
-
-        # send letters to assayers
-        for assayer in assayers:
-            merchant_to_assayer_note = MerchantToAssayerNote(
-                to=assayer,
-                fro=self,
-            )
-
-            assayer.receive_note(merchant_to_assayer_note)
-
         # generate order receipt
         order_receipt = OrderReceipt(
             fro=self,
             to=self.center,
         )
+
+        print(len(order_receipt.points))
 
         return order_receipt
 
@@ -68,9 +59,10 @@ class FakeAssayer(Assayer):
 
     def __init__(self, dataset, *args, **kwargs):
         super(FakeAssayer, self).__init__()
+        self.dataset = dataset
 
     def query(self, points):
-        assert all([point in self.dataset for point in points])
+        assert all([point.smiles in self.dataset.lookup for point in points])
 
         quote = Quote(fro=self, to=self.center)
         quote.extra["price"] = 0.0
@@ -97,7 +89,7 @@ class FakeAssayer(Assayer):
 
     def _check_order(self, order_receipt: OrderReceipt):
         points = order_receipt.points
-        assert all([point in self.dataset for point in points])
+        assert all([point.smiles in self.dataset.lookup for point in points])
 
         report = Report(
             fro=self,
@@ -105,4 +97,5 @@ class FakeAssayer(Assayer):
         )
 
         for point in points:
-            report.points.append(self.dataset[point.dataset])
+            report.points.append(self.dataset[point.smiles])
+        return report

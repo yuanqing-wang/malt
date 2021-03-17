@@ -1,5 +1,6 @@
-import pytest
-
+# import pytest
+import faulthandler
+faulthandler.enable()
 
 def test_full_loop():
     import torch
@@ -36,20 +37,27 @@ def test_full_loop():
         trainer=trainer,
     )
 
-    while len(player.portfolio) < len(merchant.catalogue()):
-        points_to_acquire = player.prioritize(merchant.catalogue())
+    center.register(merchant)
+    center.register(assayer)
+    center.register(player)
+
+    catalogue = merchant.catalogue()()
+
+    while len(player.portfolio) < len(catalogue):
+        points_to_acquire = player.prioritize(catalogue-player.portfolio)
+        print(len(points_to_acquire))
         query_receipt = player.query(
             points_to_acquire,
             merchant=merchant,
             assayers=[assayer],
         )
+
         assert query_receipt is not None
-        # waiting
         quote = player.check(query_receipt)
         order_receipt = player.order(quote)
         assert order_receipt is not None
-
-        # waiting
-        report = player.check(order_receipt)
+        report = player.check(order_receipt)[0]
         player.portfolio += report.points
-        player.train()
+        print("------")
+
+test_full_loop()

@@ -26,12 +26,24 @@ class Dataset(torch.utils.data.Dataset):
         Generate a torch.utils.data.DataLoader from this Dataset.
 
     """
+    _lookup = None
 
     def __init__(self, points: Union[None, List[Point]] = None) -> None:
         self.points = points
 
     def _construct_lookup(self):
-        self.lookup = {point.smiles: point for point in self.points}
+        self._lookup = {point.smiles: point for point in self.points}
+
+    @property
+    def lookup(self):
+        if self._lookup is None:
+            self._construct_lookup()
+        return self._lookup
+
+    def equal(self, points):
+        if not isinstance(points, self.__class__):
+            return False
+        return self.points == points.points
 
     def __len__(self):
         if self.points is None:
@@ -44,11 +56,17 @@ class Dataset(torch.utils.data.Dataset):
         if isinstance(idx, int):
             return self.points[idx]
         elif isinstance(idx, str):
-            if self.lookup is None:
-                self._construct_lookup()
             return self.lookup[idx]
-        else:
-            return self.__class__(points=self.points[idx])
+        elif isinstance(idx, torch.Tensor):
+            idx = idx.detach().flatten().cpu().numpy().tolist()
+
+        if isinstance(idx, list):
+            print(idx)
+            return self.__class__(points=[
+                self.points[_idx] for _idx in idx
+            ])
+
+        return self.__class__(points=self.points[idx])
 
     def __add__(self, points):
         """ Combine two datasets. """
@@ -60,6 +78,16 @@ class Dataset(torch.utils.data.Dataset):
 
         else:
             raise RuntimeError("Addition only supports list and Dataset.")
+
+    def __sub__(self, points):
+        if isinstance(points, list):
+            points = self.__class__(points)
+        return self.__class__(
+            [
+                point
+                for point in self.points if point.smiles not in points.lookup
+            ]
+        )
 
     def __iter__(self):
         return iter(self.points)

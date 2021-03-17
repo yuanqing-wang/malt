@@ -8,7 +8,7 @@ from .fake_agents import FakeAssayer, FakeMerchant
 
 def count_carbons():
     dataset = Dataset(
-        [Point("C" * idx) for idx in range(10)]
+        [Point("C" * idx) for idx in range(1, 100)]
     )
 
     import copy
@@ -17,4 +17,4 @@ def count_carbons():
         point.y = len(point.smiles)
     fake_assayer = FakeAssayer(dataset=annotated_dataset)
     fake_merchant = FakeMerchant(dataset=dataset)
-    return fake_assayer, fake_merchant
+    return fake_merchant, fake_assayer

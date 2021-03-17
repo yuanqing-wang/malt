@@ -199,6 +199,7 @@ class NaiveCenter(Center):
 
         # order
         merchant_order_receipt = merchant_quote.fro.order(merchant_quote)
+
         assayer_order_receipts = [
             assayer_quote.fro.order(assayer_quote)
             for assayer_quote in assayer_quotes
@@ -218,7 +219,7 @@ class NaiveCenter(Center):
         # grab cache
         _cache = self.cache[order_receipt.id]
         merchant_order_receipt = _cache["merchant_order_receipt"]
-        assayer_order_receipts = _cache["assayer_query_receipts"]
+        assayer_order_receipts = _cache["assayer_order_receipts"]
 
         if (
             merchant_order_receipt.fro.check(merchant_order_receipt)
