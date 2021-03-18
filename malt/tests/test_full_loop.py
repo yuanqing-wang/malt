@@ -56,6 +56,6 @@ def test_full_loop():
         assert order_receipt is not None
         report = player.check(order_receipt)[0]
         player.portfolio += report.points
-        print("------")
+        player.train()
 
 test_full_loop()

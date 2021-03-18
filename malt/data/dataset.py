@@ -62,7 +62,6 @@ class Dataset(torch.utils.data.Dataset):
             idx = idx.detach().flatten().cpu().numpy().tolist()
 
         if isinstance(idx, list):
-            print(idx)
             return self.__class__(points=[
                 self.points[_idx] for _idx in idx
             ])
