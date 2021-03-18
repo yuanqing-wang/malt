@@ -62,4 +62,6 @@ def test_full_loop():
         player.portfolio += report.points
         player.train()
 
+    print([len(point.smiles) for point in player.portfolio])
+
 test_full_loop()
