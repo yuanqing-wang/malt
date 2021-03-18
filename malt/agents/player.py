@@ -5,7 +5,7 @@ from typing import Union, List, Callable
 from .agent import Agent
 from .merchant import Merchant
 from .assayer import Assayer
-from .messages import QueryReceipt, OrderReceipt, Quote, Report
+from .messages import QueryReceipt, OrderReceipt, Quote, Report, Message
 from ..data.dataset import Dataset
 from ..policy import Policy
 from ..models.supervised_model import SupervisedModel
@@ -62,9 +62,9 @@ class Player(Agent):
             assayers=assayers,
         )
 
-    def check(self, query_receipt: QueryReceipt) -> Union[None, Quote]:
+    def check(self, receipt: Message) -> Union[None, Quote]:
         return self.center.check(
-            receipt=query_receipt,
+            receipt=receipt,
         )
 
     def order(self, quote: Quote) -> OrderReceipt:

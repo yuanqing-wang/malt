@@ -2,6 +2,7 @@
 # IMPORTS
 # =============================================================================
 import abc
+from typing import Union
 from .agent import Agent
 from ..data.dataset import Dataset
 
@@ -28,11 +29,14 @@ class Message(abc.ABC):
         self,
         to: Agent,
         fro: Agent,
-        points: Dataset = Dataset([]),
+        points: Union[None, Dataset]=None,
         id: str = None,
         extra={},
     ):
-        print([point.smiles for point in points.points])
+        super(Message, self).__init__()
+        if points is None:
+            points = Dataset([])
+
         self.points = points
         if id is None:
             import time
@@ -59,7 +63,6 @@ class OrderReceipt(Message):
 
     def __init__(self, *args, **kwargs):
         super(OrderReceipt, self).__init__(*args, **kwargs)
-
 
 class Quote(Message):
     """ Receipt for quote. """

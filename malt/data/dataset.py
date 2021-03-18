@@ -28,7 +28,8 @@ class Dataset(torch.utils.data.Dataset):
     """
     _lookup = None
 
-    def __init__(self, points: Union[None, List[Point]] = None) -> None:
+    def __init__(self, points) -> None:
+        super(Dataset, self).__init__()
         self.points = points
 
     def _construct_lookup(self):

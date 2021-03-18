@@ -45,13 +45,11 @@ def test_full_loop():
 
     while len(player.portfolio) < len(catalogue):
         points_to_acquire = player.prioritize(catalogue-player.portfolio)
-        print(len(points_to_acquire))
         query_receipt = player.query(
             points_to_acquire,
             merchant=merchant,
             assayers=[assayer],
         )
-
         assert query_receipt is not None
         quote = player.check(query_receipt)
         order_receipt = player.order(quote)

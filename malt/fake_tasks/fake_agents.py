@@ -7,6 +7,7 @@ from ..agents.merchant import Merchant
 from ..agents.assayer import Assayer
 from ..agents.messages import (
     Quote,
+    Message,
     MerchantToAssayerNote,
     OrderReceipt,
     QueryReceipt,
@@ -35,12 +36,11 @@ class FakeMerchant(Merchant):
 
     def order(self, quote):
         # generate order receipt
+
         order_receipt = OrderReceipt(
             fro=self,
             to=self.center,
         )
-
-        print(len(order_receipt.points))
 
         return order_receipt
 
