@@ -50,6 +50,9 @@ class Point(object):
         self.extra = extra
         self.featurizer = featurizer
 
+    def __repr__(self):
+        return self.smiles
+
     def featurize(self):
         """Featurize the SMILES string to get the graph.
 

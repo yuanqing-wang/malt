@@ -32,6 +32,9 @@ class Dataset(torch.utils.data.Dataset):
         super(Dataset, self).__init__()
         self.points = points
 
+    def __repr__(self):
+        return "%s with %s points" % (self.__class__.__name__, len(self))
+
     def _construct_lookup(self):
         self._lookup = {point.smiles: point for point in self.points}
 

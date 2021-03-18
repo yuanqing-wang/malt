@@ -30,7 +30,6 @@ class Message(abc.ABC):
         to: Agent,
         fro: Agent,
         points: Union[None, Dataset]=None,
-        id: str = None,
         extra={},
     ):
         super(Message, self).__init__()
@@ -38,15 +37,13 @@ class Message(abc.ABC):
             points = Dataset([])
 
         self.points = points
-        if id is None:
-            import time
-
-            id = int(time.time() * 100000)
-        self.id = id
+        self.id = id(self)
         self.extra = extra
         self.to = to
         self.fro = fro
 
+    def __repr__(self):
+        return self.__class__.__name__
 
 # =============================================================================
 # MODULE CLASSES

@@ -2,6 +2,10 @@
 import faulthandler
 faulthandler.enable()
 
+import logging
+logging.basicConfig(level="DEBUG")
+
+
 def test_full_loop():
     import torch
     import malt

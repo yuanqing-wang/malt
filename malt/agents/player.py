@@ -10,6 +10,8 @@ from ..data.dataset import Dataset
 from ..policy import Policy
 from ..models.supervised_model import SupervisedModel
 from ..point import Point
+import logging
+_logger = logging.getLogger(__name__)
 
 # =============================================================================
 # BASE CLASSES
@@ -55,6 +57,13 @@ class Player(Agent):
     def query(
         self, points: List[Point], merchant: Merchant, assayers: List[Assayer]
     ) -> QueryReceipt:
+
+        _logger.debug(
+            "%s queries %s with %s and %s" % (
+                self, points, merchant, assayers
+            )
+        )
+
         return self.center.query(
             points=points,
             player=self,
@@ -68,6 +77,13 @@ class Player(Agent):
         )
 
     def order(self, quote: Quote) -> OrderReceipt:
+
+        _logger.debug(
+            "%s orders %s" % (
+                self, quote,
+            )
+        )
+
         return self.center.order(quote=quote)
 
     def append(self, points) -> None:
