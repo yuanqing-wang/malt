@@ -3,7 +3,7 @@
 # =============================================================================
 from ..point import Point
 from ..data.dataset import Dataset
-from .fake_agents import FakeAssayer, FakeMerchant
+from .fake_agents import FakeAssayer, FakeVendor
 
 
 def count_carbons():
@@ -16,5 +16,5 @@ def count_carbons():
     for point in annotated_dataset:
         point.y = len(point.smiles)
     fake_assayer = FakeAssayer(dataset=annotated_dataset)
-    fake_merchant = FakeMerchant(dataset=dataset)
-    return fake_merchant, fake_assayer
+    fake_vendor = FakeVendor(dataset=dataset)
+    return fake_vendor, fake_assayer

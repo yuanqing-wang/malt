@@ -7,7 +7,7 @@ from .messages import (
     QueryReceipt,
     OrderReceipt,
     Quote,
-    MerchantToAssayerNote,
+    VendorToAssayerNote,
     Dataset,
 )
 
@@ -46,7 +46,7 @@ class Assayer(Agent, abc.ABC):
 
     def receive_note(
         self,
-        merchant_to_assayer_note: MerchantToAssayerNote,
+        vendor_to_assayer_note: VendorToAssayerNote,
     ):
         pass
 

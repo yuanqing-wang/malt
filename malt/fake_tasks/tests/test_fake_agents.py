@@ -8,4 +8,4 @@ def test_import():
 def test_construct():
     import malt
 
-    assayer, merchant = malt.fake_tasks.collections.count_carbons()
+    assayer, vendor = malt.fake_tasks.collections.count_carbons()

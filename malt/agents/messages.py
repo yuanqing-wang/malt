@@ -10,7 +10,7 @@ from ..data.dataset import Dataset
 # BASE CLASS
 # =============================================================================
 class Message(abc.ABC):
-    """Base class for messages between merchant, assayer, and player.
+    """Base class for messages between vendor, assayer, and player.
 
     Parameters
     ----------
@@ -68,11 +68,11 @@ class Quote(Message):
         super(Quote, self).__init__(*args, **kwargs)
 
 
-class MerchantToAssayerNote(Message):
-    """ A note from merchant to assayer. """
+class VendorToAssayerNote(Message):
+    """ A note from vendor to assayer. """
 
     def __init__(self, *args, **kwargs):
-        super(MerchantToAssayerNote, self).__init__(*args, **kwargs)
+        super(VendorToAssayerNote, self).__init__(*args, **kwargs)
 
 class Report(Message):
     """ Report. """

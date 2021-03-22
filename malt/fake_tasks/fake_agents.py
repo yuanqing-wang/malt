@@ -3,12 +3,12 @@
 # =============================================================================
 from ..agents.center import Center
 from ..agents.player import Player
-from ..agents.merchant import Merchant
+from ..agents.vendor import Vendor
 from ..agents.assayer import Assayer
 from ..agents.messages import (
     Quote,
     Message,
-    MerchantToAssayerNote,
+    VendorToAssayerNote,
     OrderReceipt,
     QueryReceipt,
     Report,
@@ -17,9 +17,9 @@ from ..agents.messages import (
 # =============================================================================
 # MODULE CLASSES
 # =============================================================================
-class FakeMerchant(Merchant):
+class FakeVendor(Vendor):
     def __init__(self, dataset, *args, **kwargs):
-        super(FakeMerchant, self).__init__(*args, **kwargs)
+        super(FakeVendor, self).__init__(*args, **kwargs)
         self.dataset = dataset
 
     def query(self, points):

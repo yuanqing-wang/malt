@@ -31,7 +31,7 @@ def test_full_loop():
 
     trainer = malt.trainer.get_default_trainer()
     center = malt.agents.center.NaiveCenter(name="NaiveCenter")
-    merchant, assayer = malt.fake_tasks.collections.count_carbons()
+    vendor, assayer = malt.fake_tasks.collections.count_carbons()
 
     player = malt.agents.player.AutonomousPlayer(
         name="AutonomousPlayer",
@@ -41,17 +41,17 @@ def test_full_loop():
         trainer=trainer,
     )
 
-    center.register(merchant)
+    center.register(vendor)
     center.register(assayer)
     center.register(player)
 
-    catalogue = merchant.catalogue()()
+    catalogue = vendor.catalogue()()
 
     while len(player.portfolio) < len(catalogue):
         points_to_acquire = player.prioritize(catalogue-player.portfolio)
         query_receipt = player.query(
             points_to_acquire,
-            merchant=merchant,
+            vendor=vendor,
             assayers=[assayer],
         )
         assert query_receipt is not None

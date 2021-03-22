@@ -5,14 +5,14 @@ import abc
 from typing import Union, Callable
 from .agent import Agent
 from .assayer import Assayer
-from .messages import QueryReceipt, OrderReceipt, Quote, MerchantToAssayerNote
+from .messages import QueryReceipt, OrderReceipt, Quote, VendorToAssayerNote
 from ..data.dataset import Dataset
 
 # =============================================================================
 # BASE CLASSES
 # =============================================================================
-class Merchant(Agent):
-    """Base class for a merchant that sells small molecules.
+class Vendor(Agent):
+    """Base class for a vendor that sells small molecules.
 
     Methods
     -------
@@ -22,7 +22,7 @@ class Merchant(Agent):
     """
 
     def __init__(self, *args, **kwargs):
-        super(Merchant, self).__init__(*args, **kwargs)
+        super(Vendor, self).__init__(*args, **kwargs)
 
     @abc.abstractmethod
     def query(self, points: Dataset) -> Quote:
@@ -43,7 +43,7 @@ class Merchant(Agent):
     @abc.abstractmethod
     def order(
         self, quote: Quote, assayer: Assayer, *args, **kwargs
-    ) -> MerchantToAssayerNote:
+    ) -> VendorToAssayerNote:
         """Execute with a quote and a downstream assayer.
 
         Parameters
@@ -55,8 +55,8 @@ class Merchant(Agent):
 
         Returns
         -------
-        MerchantToAssayerNote
-            Note from merchant to assayer.
+        VendorToAssayerNote
+            Note from vendor to assayer.
 
         """
         raise NotImplementedError
@@ -79,7 +79,7 @@ class Merchant(Agent):
     @abc.abstractmethod
     def _check_order(
         self, order_receipt: OrderReceipt
-    ) -> Union[None, MerchantToAssayerNote]:
+    ) -> Union[None, VendorToAssayerNote]:
         raise NotImplementedError
 
     def check(self, receipt):

@@ -3,7 +3,7 @@
 # =============================================================================
 from typing import Union, List, Callable
 from .agent import Agent
-from .merchant import Merchant
+from .vendor import Vendor
 from .assayer import Assayer
 from .messages import QueryReceipt, OrderReceipt, Quote, Report, Message
 from ..data.dataset import Dataset
@@ -21,8 +21,8 @@ class Player(Agent):
 
     Methods
     -------
-    query(molecules, merchant, assayer)
-        Query about molecules with specific merchant and assayer.
+    query(molecules, vendor, assayer)
+        Query about molecules with specific vendor and assayer.
 
     check(receipt)
         Check the status of a query or an order.
@@ -55,19 +55,19 @@ class Player(Agent):
         self.quote_review_fuction = quote_review_function
 
     def query(
-        self, points: List[Point], merchant: Merchant, assayers: List[Assayer]
+        self, points: List[Point], vendor: Vendor, assayers: List[Assayer]
     ) -> QueryReceipt:
 
         _logger.debug(
             "%s queries %s with %s and %s" % (
-                self, points, merchant, assayers
+                self, points, vendor, assayers
             )
         )
 
         return self.center.query(
             points=points,
             player=self,
-            merchant=merchant,
+            vendor=vendor,
             assayers=assayers,
         )
 
