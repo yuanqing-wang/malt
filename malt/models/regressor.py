@@ -15,11 +15,6 @@ class Regressor(torch.nn.Module, abc.ABC):
         self.in_features = in_features
         self.out_features = out_features
 
-    @abc.abstractmethod
-    def forward(self, *args, **kwargs):
-        raise NotImplementedError
-
-
 # =============================================================================
 # KERNELS
 # =============================================================================
