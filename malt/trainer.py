@@ -16,6 +16,18 @@ def get_default_trainer(
         n_epochs=n_epochs,
         batch_size=batch_size,
     ):
+        # see if cuda is available
+        if torch.cuda.is_available():
+            device = torch.device("cuda:0")
+        else:
+            device = torch.device("cpu")
+
+        # get original device
+        original_device = player.model.device
+
+        # move model to cuda if available
+        player.device = player.device.to(device)
+
         # consider the case of one batch
         if batch_size == -1:
             batch_size = len(player.portfolio)
@@ -32,11 +44,13 @@ def get_default_trainer(
         # train
         for _ in range(n_epochs):  # loop through the epochs
             for x in ds:  # loop through the dataset
+                x = [_x.to(device) for _x in x]
                 optimizer.zero_grad()
                 loss = player.model.loss(*x).mean()  # average just in case
                 loss.backward()
                 optimizer.step()
 
+        player.model = player.model.to(original_device)
         return player.model
 
     return _default_trainer
