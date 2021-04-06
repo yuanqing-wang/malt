@@ -23,10 +23,10 @@ def get_default_trainer(
             device = torch.device("cpu")
 
         # get original device
-        original_device = player.model.device
+        original_device = next(player.model.parameters()).device
 
         # move model to cuda if available
-        player.device = player.device.to(device)
+        player.model = player.model.to(device)
 
         # consider the case of one batch
         if batch_size == -1:

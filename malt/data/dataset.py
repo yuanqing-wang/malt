@@ -130,7 +130,7 @@ class Dataset(torch.utils.data.Dataset):
             ys.append(point.y)
 
         g = dgl.batch(gs)
-        y = torch.tensor(ys)[:, None]
+        y = torch.tensor(ys, dtype=torch.float32)[:, None]
         return g, y
 
     @staticmethod
@@ -146,6 +146,12 @@ class Dataset(torch.utils.data.Dataset):
 
         g = dgl.batch(gs)
         return g
+
+    def erase_annotation(self):
+        for point in self.points:
+            point.erase_annotation()
+        return self
+
 
     def view(
         self,

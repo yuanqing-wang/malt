@@ -72,3 +72,7 @@ class Point(object):
 
     def is_featurized(self):
         return self.g is not None
+
+    def erase_annotation(self):
+        self.y = None
+        return self
