@@ -103,6 +103,8 @@ class NeuralNetworkRegressor(Regressor):
 
 
 class ExactGaussianProcessRegressor(Regressor):
+    epsilon = 1e-7
+    
     def __init__(
         self,
         in_features: int=128,
@@ -230,3 +232,60 @@ class ExactGaussianProcessRegressor(Regressor):
         )
 
         return distribution
+
+    def _perturb(self, k):
+        """Add small noise `epsilon` to the diagonal of covariant matrix.
+        Parameters
+        ----------
+        k : `torch.Tensor`, `shape=(n_data_points, n_data_points)`
+            Covariant matrix.
+        Returns
+        -------
+        k : `torch.Tensor`, `shape=(n_data_points, n_data_points)`
+            Preturbed covariant matrix.
+        """
+        # introduce noise along the diagonal
+        noise = self.epsilon * torch.eye(*k.shape, device=k.device)
+
+        return k + noise
+
+    def loss(self, x_tr, y_tr, *args, **kwargs):
+        r""" Compute the loss.
+        Note
+        ----
+        Defined to be negative Gaussian likelihood.
+        Parameters
+        ----------
+        x_tr : `torch.Tensor`, `shape=(n_training_data, hidden_dimension)`
+            Input of training data.
+        y_tr : `torch.Tensor`, `shape=(n_training_data, 1)`
+            Target of training data.
+        Returns
+        -------
+        nll : `torch.Tensor`, `shape=(,)`
+            Negative log likelihood.
+        """
+        # point data to object
+        self._x_tr = x_tr
+        self._y_tr = y_tr
+
+        # get the parameters
+        (
+            k_tr_tr,
+            k_te_te,
+            k_te_tr,
+            k_tr_te,
+            l_low,
+            alpha,
+        ) = self._get_kernel_and_auxiliary_variables(x_tr, y_tr)
+
+        import math
+
+        # we return the exact nll with constant
+        nll = (
+            0.5 * (y_tr.t() @ alpha)
+            + torch.trace(l_low)
+            + 0.5 * y_tr.shape[0] * math.log(2.0 * math.pi)
+        )
+
+        return nll

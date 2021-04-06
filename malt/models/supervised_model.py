@@ -94,8 +94,8 @@ class GaussianProcessSupervisedModel(SupervisedModel):
 
     def _blind_condition(self, g):
         return torch.distributions.Normal(
-            torch.zeros(g.batch_size, self.likelihood.out_features),
-            torch.ones(g.batch_size, self.likelihood.out_features)
+            torch.zeros(g.batch_size, self.regressor.out_features),
+            torch.ones(g.batch_size, self.regressor.out_features)
         )
 
     def condition(self, g):
