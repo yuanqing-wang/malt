@@ -9,7 +9,6 @@ def test_construct_gp():
         out_features=2,
     )
 
-
 def test_blind_condition():
     import torch
     import dgl
