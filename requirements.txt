@@ -3,4 +3,4 @@ torch
 matplotlib
 pandas
 numpy
-versioneer
+
