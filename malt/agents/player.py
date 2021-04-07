@@ -146,6 +146,14 @@ class AutonomousPlayer(Player):
                 points.view(collate_fn="batch_of_g", batch_size=len(points))
             )
         )
+
+        original_device = next(self.model.parameters()).device
+        import torch
+        if torch.cuda.is_available():
+            g = g.to("cuda:0")
+            self.model = self.model.to("cuda:0")
+
         distribution = self.model.condition(g)
-        idxs = self.policy(distribution)
+        idxs = self.policy(distribution).cpu()
+        self.model = self.model.to(original_device)
         return points[idxs]

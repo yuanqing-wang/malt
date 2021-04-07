@@ -10,10 +10,14 @@ from ..point import Point
 # HELPER FUNCTIONS
 # =============================================================================
 def _dataset_from_dgllife(dgllife_dataset):
-    return Dataset(
+    ds = Dataset(
         [Point(smiles, g, y.item()) for smiles, g, y in dgllife_dataset]
     )
 
+    for idx, point in enumerate(ds.points):
+        point.extra["idx"] = idx
+
+    return ds
 
 # =============================================================================
 # MODULE FUNCTIONS
