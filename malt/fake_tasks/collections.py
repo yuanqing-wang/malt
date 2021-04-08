@@ -34,6 +34,6 @@ def _dataset_to_task(dataset):
     return fake_vendor, fake_assayer
 
 for collection in COLLECTIONS:
-    globals()[collection.lower()] = lambda: _dataset_to_task(
+    vars()[collection.lower()] = lambda: _dataset_to_task(
         getattr(collections, collection.lower())(),
     )

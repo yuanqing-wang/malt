@@ -5,17 +5,21 @@ import dgllife
 from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
 from .dataset import Dataset
 from ..point import Point
+import copy
 
 # =============================================================================
 # HELPER FUNCTIONS
 # =============================================================================
 def _dataset_from_dgllife(dgllife_dataset):
-    ds = Dataset(
-        [Point(smiles, g, y.item()) for smiles, g, y in dgllife_dataset]
-    )
 
-    for idx, point in enumerate(ds.points):
-        point.extra["idx"] = idx
+    idx = 0
+    ds = []
+    for smiles, g, y in dgllife_dataset:
+        point = Point(smiles, g, y.item(), extra={"idx": idx})
+        idx += 1
+        ds.append(point)
+    
+    ds = Dataset(ds)
 
     return ds
 
