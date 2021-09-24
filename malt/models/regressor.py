@@ -15,11 +15,12 @@ class Regressor(torch.nn.Module, abc.ABC):
         self.in_features = in_features
         self.out_features = out_features
 
+
 # =============================================================================
 # KERNELS
 # =============================================================================
 class RBF(torch.nn.Module):
-    r""" A Gaussian Process Kernel that hosts parameters.
+    r"""A Gaussian Process Kernel that hosts parameters.
 
     Note
     ----
@@ -104,17 +105,18 @@ class NeuralNetworkRegressor(Regressor):
 
 class ExactGaussianProcessRegressor(Regressor):
     epsilon = 1e-7
-    
+
     def __init__(
         self,
-        in_features: int=128,
-        out_features: int=2,
+        in_features: int = 128,
+        out_features: int = 2,
         kernel_factory: torch.nn.Module = RBF,
-        log_sigma: float=-3.0,
+        log_sigma: float = -3.0,
     ):
         assert out_features == 2
         super(ExactGaussianProcessRegressor, self).__init__(
-            in_features=in_features, out_features=out_features,
+            in_features=in_features,
+            out_features=out_features,
         )
 
         # construct kernel
@@ -127,9 +129,11 @@ class ExactGaussianProcessRegressor(Regressor):
             torch.tensor(log_sigma),
         )
 
-
     def _get_kernel_and_auxiliary_variables(
-        self, x_tr, y_tr, x_te=None,
+        self,
+        x_tr,
+        y_tr,
+        x_te=None,
     ):
         """ Get kernel and auxiliary variables for forward pass. """
 
@@ -167,7 +171,7 @@ class ExactGaussianProcessRegressor(Regressor):
         return k_tr_tr, k_te_te, k_te_tr, k_tr_te, l_low, alpha
 
     def condition(self, x_te, *args, x_tr=None, y_tr=None, **kwargs):
-        r""" Calculate the predictive distribution given `x_te`.
+        r"""Calculate the predictive distribution given `x_te`.
 
         Note
         ----
@@ -227,8 +231,10 @@ class ExactGaussianProcessRegressor(Regressor):
         #         device=variance.device)
 
         # construct noise predictive distribution
-        distribution = torch.distributions.multivariate_normal.MultivariateNormal(
-            mean.flatten(), variance
+        distribution = (
+            torch.distributions.multivariate_normal.MultivariateNormal(
+                mean.flatten(), variance
+            )
         )
 
         return distribution
@@ -250,7 +256,7 @@ class ExactGaussianProcessRegressor(Regressor):
         return k + noise
 
     def loss(self, x_tr, y_tr, *args, **kwargs):
-        r""" Compute the loss.
+        r"""Compute the loss.
         Note
         ----
         Defined to be negative Gaussian likelihood.

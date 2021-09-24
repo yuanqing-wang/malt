@@ -1,5 +1,6 @@
 import pytest
 
+
 def test_construct_gp():
     import torch
     import malt
@@ -8,6 +9,7 @@ def test_construct_gp():
         in_features=128,
         out_features=2,
     )
+
 
 def test_blind_condition():
     import torch
@@ -19,7 +21,8 @@ def test_blind_condition():
             out_features=128
         ),
         regressor=malt.models.regressor.ExactGaussianProcessRegressor(
-            in_features=128, out_features=2,
+            in_features=128,
+            out_features=2,
         ),
         likelihood=malt.models.likelihood.HeteroschedasticGaussianLikelihood(),
     )
@@ -41,7 +44,8 @@ def test_gp_train():
             out_features=128
         ),
         regressor=malt.models.regressor.ExactGaussianProcessRegressor(
-            in_features=128, out_features=2,
+            in_features=128,
+            out_features=2,
         ),
         likelihood=malt.models.likelihood.HeteroschedasticGaussianLikelihood(),
     )

@@ -18,10 +18,11 @@ def _dataset_from_dgllife(dgllife_dataset):
         point = Point(smiles, g, y.item(), extra={"idx": idx})
         idx += 1
         ds.append(point)
-    
+
     ds = Dataset(ds)
 
     return ds
+
 
 # =============================================================================
 # MODULE FUNCTIONS

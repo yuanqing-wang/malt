@@ -26,6 +26,7 @@ class Dataset(torch.utils.data.Dataset):
         Generate a torch.utils.data.DataLoader from this Dataset.
 
     """
+
     _lookup = None
 
     def __init__(self, points) -> None:
@@ -65,9 +66,7 @@ class Dataset(torch.utils.data.Dataset):
             idx = idx.detach().flatten().cpu().numpy().tolist()
 
         if isinstance(idx, list):
-            return self.__class__(points=[
-                self.points[_idx] for _idx in idx
-            ])
+            return self.__class__(points=[self.points[_idx] for _idx in idx])
 
         return self.__class__(points=self.points[idx])
 
@@ -88,7 +87,8 @@ class Dataset(torch.utils.data.Dataset):
         return self.__class__(
             [
                 point
-                for point in self.points if point.smiles not in points.lookup
+                for point in self.points
+                if point.smiles not in points.lookup
             ]
         )
 
@@ -151,7 +151,6 @@ class Dataset(torch.utils.data.Dataset):
         for point in self.points:
             point.erase_annotation()
         return self
-
 
     def view(
         self,
