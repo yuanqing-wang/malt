@@ -1,0 +1,26 @@
+name: test
+channels:
+  - conda-forge
+  - dglteam
+  - openeye
+  - defaults
+dependencies:
+  # Base dependencies
+  - python
+  - pip
+  # 3rd party
+  - numpy
+  - matplotlib
+  - scipy
+  - rdkit
+  # Pytorch
+  - pytorch
+  - dgl
+  # Testing
+  - pytest
+  - pytest-cov
+  - codecov
+  - nose
+  - nose-timer
+  - coverage
+  - qcportal
