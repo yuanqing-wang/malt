@@ -133,3 +133,6 @@ dmypy.json
 
 # pytorch model
 .th
+
+# mac
+.DS_Store
