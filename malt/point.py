@@ -16,12 +16,16 @@ class Point(object):
     ----------
     smiles : str
         SMILES of the molecule.
+
     g : dgl.DGLGraph or None, default=None
         The DGL graph of the molecule.
+
     y : float or None, default=None
         The measurement.
+
     extra : dict, default={}
         The extra data.
+        
     featurizer : callable, default=CanonicalAtomFeaturizer(
         atom_data_field='feat')
         The function which maps the SMILES string to a DGL graph.
