@@ -1,2 +1,2 @@
-from . import agents, data, models, point, trainer, fake_tasks
+from . import data, models, point, trainer
 from .point import Point

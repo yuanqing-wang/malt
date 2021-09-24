@@ -10,7 +10,7 @@ from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
 # MODULE CLASSES
 # =============================================================================
 class Point(object):
-    """Models a datapoint.
+    """ Models a datapoint.
 
     Parameters
     ----------
