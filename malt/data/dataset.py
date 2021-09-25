@@ -84,6 +84,7 @@ class Dataset(torch.utils.data.Dataset):
     def __sub__(self, points):
         if isinstance(points, list):
             points = self.__class__(points)
+
         return self.__class__(
             [
                 point
@@ -152,6 +153,10 @@ class Dataset(torch.utils.data.Dataset):
             point.erase_annotation()
         return self
 
+    def clone(self):
+        """ Return a copy of self. """
+        return self.__class__(self.points)
+
     def view(
         self,
         collate_fn: Union[callable, str] = "batch_of_g_and_y",
@@ -176,7 +181,7 @@ class Dataset(torch.utils.data.Dataset):
             collate_fn = getattr(self, collate_fn)
 
         return torch.utils.data.DataLoader(
-            dataset=self,
+            dataset=self.points,
             collate_fn=collate_fn,
             *args,
             **kwargs,
