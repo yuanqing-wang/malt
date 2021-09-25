@@ -52,6 +52,7 @@ extensions = [
     'sphinx.ext.extlinks',
     'sphinx.ext.coverage',
     'numpydoc',
+    'sphinx.ext.githubpages'
 ]
 
 autosummary_generate = True
