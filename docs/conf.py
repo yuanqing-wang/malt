@@ -16,9 +16,10 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../malt'))
 
 import malt
+from malt import agents, data, models, point, policy, trainer, utility_functions
 
 # -- Project information -----------------------------------------------------
 
@@ -49,6 +50,8 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx',
     'sphinx.ext.extlinks',
+    'sphinx.ext.coverage',
+    'numpydoc',
 ]
 
 autosummary_generate = True

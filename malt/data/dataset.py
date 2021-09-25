@@ -4,7 +4,7 @@
 import torch
 import dgl
 from typing import Union, List
-from ..point import Point
+from malt.point import Point
 
 # =============================================================================
 # MODULE CLASSES

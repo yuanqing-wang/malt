@@ -3,8 +3,8 @@
 # =============================================================================
 import dgllife
 from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
-from .dataset import Dataset
-from ..point import Point
+from malt.data.dataset import Dataset
+from malt.point import Point
 import copy
 
 # =============================================================================
