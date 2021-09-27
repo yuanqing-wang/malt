@@ -45,7 +45,10 @@ class Dataset(torch.utils.data.Dataset):
             self._construct_lookup()
         return self._lookup
 
-    def equal(self, points):
+    def __contains__(self, point):
+        return point.smiles in self.lookup
+
+    def __eq__(self, points):
         if not isinstance(points, self.__class__):
             return False
         return self.points == points.points
@@ -62,6 +65,8 @@ class Dataset(torch.utils.data.Dataset):
             return self.points[idx]
         elif isinstance(idx, str):
             return self.lookup[idx]
+        elif isinstance(idx, Point):
+            return self.lookup(idx.smiles)
         elif isinstance(idx, torch.Tensor):
             idx = idx.detach().flatten().cpu().numpy().tolist()
 

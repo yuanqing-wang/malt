@@ -23,7 +23,7 @@ class Merchant(Agent):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def order(self, *args, **kwargs):
+    def merchandize(self, *args, **kwargs):
         raise NotImplementedError
 
 class DatasetMerchant(Merchant):
@@ -44,7 +44,7 @@ class DatasetMerchant(Merchant):
     def catalogue(self):
         return self.dataset
 
-    def order(self, dataset):
+    def merchandize(self, dataset):
         """ Order molecules in subset.
 
         Parameters
