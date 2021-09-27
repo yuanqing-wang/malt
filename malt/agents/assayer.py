@@ -3,7 +3,8 @@ from .agent import Agent
 from malt.data.dataset import Dataset
 
 class Assayer(Agent):
-    """ Assayer.
+    """Assayer. Takes a point and annotates `y` field as well as (optionally)
+    extra.
 
     Methods
     -------
@@ -26,7 +27,14 @@ class DatasetAssayer(Assayer):
         self.dataset = dataset
 
     def assay(self, dataset):
-        """ Assay based on a given dataset. """
+        """ Assay based on a given dataset.
+
+        Parameters
+        ----------
+        dataset : Dataset
+            Dataset to assay.
+        
+        """
         for point in dataset:
             assert point in self.dataset
             point.y = self.dataset[point].y
