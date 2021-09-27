@@ -53,6 +53,13 @@ class ModelBasedPlayer(Player):
         Function to train a model.
 
     merchant : Merchant
+        Merchant that merchandizes candidates.
+
+    assayer : Assayer
+        Assayer that assays the candidates.
+
+    portfolio : Dataset
+        Inititial knowledge about data points.
 
     """
     def __init__(
@@ -62,7 +69,7 @@ class ModelBasedPlayer(Player):
             trainer: Callable,
             merchant: Merchant,
             assayer: Assayer,
-            knowledge: Union[Dataset, None]=None,
+            portfolio: Union[Dataset, None]=None,
         ):
         super(ModelBasedPlayer, self).__init__()
         self.model = model
@@ -70,8 +77,8 @@ class ModelBasedPlayer(Player):
         self.trainer = trainer
         self.merchant = merchant
         self.assayer = assayer
-        if knowledge is None:
-            knowledge = Dataset([])
+        if portfolio is None:
+            portfolio = Dataset([])
 
     def merchandize(
         self,
