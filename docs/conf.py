@@ -18,8 +18,8 @@ import sys
 
 sys.path.insert(0, os.path.abspath('../malt'))
 
-import malt
-from malt import agents, data, models, point, policy, trainer, utility_functions
+# import malt
+# from malt import agents, data, models, point, policy, trainer, utility_functions
 
 # -- Project information -----------------------------------------------------
 
