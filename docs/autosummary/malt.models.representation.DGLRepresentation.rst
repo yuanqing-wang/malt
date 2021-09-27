@@ -1,4 +1,4 @@
-malt.models.representation.DGLRepresentation
+﻿malt.models.representation.DGLRepresentation
 ============================================
 
 .. currentmodule:: malt.models.representation
@@ -60,6 +60,5 @@ malt.models.representation.DGLRepresentation
    
       ~DGLRepresentation.T_destination
       ~DGLRepresentation.dump_patches
-      ~DGLRepresentation.training
    
    

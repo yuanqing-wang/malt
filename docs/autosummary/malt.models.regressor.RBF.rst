@@ -1,4 +1,4 @@
-malt.models.regressor.RBF
+﻿malt.models.regressor.RBF
 =========================
 
 .. currentmodule:: malt.models.regressor
@@ -61,6 +61,5 @@ malt.models.regressor.RBF
    
       ~RBF.T_destination
       ~RBF.dump_patches
-      ~RBF.training
    
    

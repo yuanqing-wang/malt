@@ -1,4 +1,4 @@
-malt.models.representation.Representation
+﻿malt.models.representation.Representation
 =========================================
 
 .. currentmodule:: malt.models.representation
@@ -60,6 +60,5 @@ malt.models.representation.Representation
    
       ~Representation.T_destination
       ~Representation.dump_patches
-      ~Representation.training
    
    

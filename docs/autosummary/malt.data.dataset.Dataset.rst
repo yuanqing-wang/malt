@@ -1,4 +1,4 @@
-malt.data.dataset.Dataset
+﻿malt.data.dataset.Dataset
 =========================
 
 .. currentmodule:: malt.data.dataset
@@ -21,7 +21,6 @@ malt.data.dataset.Dataset
       ~Dataset.batch_of_g
       ~Dataset.batch_of_g_and_y
       ~Dataset.clone
-      ~Dataset.equal
       ~Dataset.erase_annotation
       ~Dataset.featurize_all
       ~Dataset.view

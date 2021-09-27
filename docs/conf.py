@@ -15,11 +15,12 @@
 # Incase the project was not installed
 import os
 import sys
+import sphinx_rtd_theme
 
 sys.path.insert(0, os.path.abspath('..'))
 
-# import malt
-# from malt import agents, data, models, point, policy, trainer, utility_functions
+import malt
+from malt import agents, data, models, point, policy, trainer, utility_functions
 
 # -- Project information -----------------------------------------------------
 
@@ -51,7 +52,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.extlinks',
     'sphinx.ext.coverage',
-    'numpydoc',
+    # 'numpydoc',
 ]
 
 autosummary_generate = True

@@ -1,4 +1,4 @@
-malt.models.supervised\_model.GaussianProcessSupervisedModel
+﻿malt.models.supervised\_model.GaussianProcessSupervisedModel
 ============================================================
 
 .. currentmodule:: malt.models.supervised_model
@@ -64,6 +64,5 @@ malt.models.supervised\_model.GaussianProcessSupervisedModel
       ~GaussianProcessSupervisedModel.dump_patches
       ~GaussianProcessSupervisedModel.x_tr
       ~GaussianProcessSupervisedModel.y_tr
-      ~GaussianProcessSupervisedModel.training
    
    

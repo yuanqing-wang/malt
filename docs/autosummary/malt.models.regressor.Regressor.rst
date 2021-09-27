@@ -1,4 +1,4 @@
-malt.models.regressor.Regressor
+﻿malt.models.regressor.Regressor
 ===============================
 
 .. currentmodule:: malt.models.regressor
@@ -60,6 +60,5 @@ malt.models.regressor.Regressor
    
       ~Regressor.T_destination
       ~Regressor.dump_patches
-      ~Regressor.training
    
    

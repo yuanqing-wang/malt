@@ -1,4 +1,4 @@
-malt.models.likelihood.SimpleLikelihood
+﻿malt.models.likelihood.SimpleLikelihood
 =======================================
 
 .. currentmodule:: malt.models.likelihood
@@ -62,6 +62,5 @@ malt.models.likelihood.SimpleLikelihood
    
       ~SimpleLikelihood.T_destination
       ~SimpleLikelihood.dump_patches
-      ~SimpleLikelihood.training
    
    

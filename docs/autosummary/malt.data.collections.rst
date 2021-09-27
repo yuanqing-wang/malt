@@ -1,4 +1,4 @@
-malt.data.collections
+﻿malt.data.collections
 =====================
 
 .. automodule:: malt.data.collections
@@ -16,6 +16,7 @@ malt.data.collections
    
       esol
       freesolv
+      linear_alkanes
       lipophilicity
    
    

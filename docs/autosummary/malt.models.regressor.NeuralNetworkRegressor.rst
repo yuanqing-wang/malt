@@ -1,4 +1,4 @@
-malt.models.regressor.NeuralNetworkRegressor
+﻿malt.models.regressor.NeuralNetworkRegressor
 ============================================
 
 .. currentmodule:: malt.models.regressor
@@ -60,6 +60,5 @@ malt.models.regressor.NeuralNetworkRegressor
    
       ~NeuralNetworkRegressor.T_destination
       ~NeuralNetworkRegressor.dump_patches
-      ~NeuralNetworkRegressor.training
    
    

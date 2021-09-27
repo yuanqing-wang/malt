@@ -1,4 +1,4 @@
-malt.models.likelihood.HomoschedasticGaussianLikelihood
+﻿malt.models.likelihood.HomoschedasticGaussianLikelihood
 =======================================================
 
 .. currentmodule:: malt.models.likelihood
@@ -62,6 +62,5 @@ malt.models.likelihood.HomoschedasticGaussianLikelihood
    
       ~HomoschedasticGaussianLikelihood.T_destination
       ~HomoschedasticGaussianLikelihood.dump_patches
-      ~HomoschedasticGaussianLikelihood.training
    
    

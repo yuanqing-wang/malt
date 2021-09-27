@@ -1,4 +1,4 @@
-malt.models.likelihood.HeteroschedasticGaussianLikelihood
+﻿malt.models.likelihood.HeteroschedasticGaussianLikelihood
 =========================================================
 
 .. currentmodule:: malt.models.likelihood
@@ -62,6 +62,5 @@ malt.models.likelihood.HeteroschedasticGaussianLikelihood
    
       ~HeteroschedasticGaussianLikelihood.T_destination
       ~HeteroschedasticGaussianLikelihood.dump_patches
-      ~HeteroschedasticGaussianLikelihood.training
    
    

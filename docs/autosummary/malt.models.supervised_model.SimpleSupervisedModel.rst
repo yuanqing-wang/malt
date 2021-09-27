@@ -1,4 +1,4 @@
-malt.models.supervised\_model.SimpleSupervisedModel
+﻿malt.models.supervised\_model.SimpleSupervisedModel
 ===================================================
 
 .. currentmodule:: malt.models.supervised_model
@@ -62,6 +62,5 @@ malt.models.supervised\_model.SimpleSupervisedModel
    
       ~SimpleSupervisedModel.T_destination
       ~SimpleSupervisedModel.dump_patches
-      ~SimpleSupervisedModel.training
    
    

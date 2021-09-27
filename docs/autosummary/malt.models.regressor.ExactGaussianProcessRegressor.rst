@@ -1,4 +1,4 @@
-malt.models.regressor.ExactGaussianProcessRegressor
+﻿malt.models.regressor.ExactGaussianProcessRegressor
 ===================================================
 
 .. currentmodule:: malt.models.regressor
@@ -63,6 +63,5 @@ malt.models.regressor.ExactGaussianProcessRegressor
       ~ExactGaussianProcessRegressor.T_destination
       ~ExactGaussianProcessRegressor.dump_patches
       ~ExactGaussianProcessRegressor.epsilon
-      ~ExactGaussianProcessRegressor.training
    
    
