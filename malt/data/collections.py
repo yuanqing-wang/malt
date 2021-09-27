@@ -2,7 +2,6 @@
 # IMPORTS
 # =============================================================================
 import dgllife
-from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
 from malt.data.dataset import Dataset
 from malt.point import Point
 import copy
@@ -11,7 +10,6 @@ import copy
 # HELPER FUNCTIONS
 # =============================================================================
 def _dataset_from_dgllife(dgllife_dataset):
-
     idx = 0
     ds = []
     for smiles, g, y in dgllife_dataset:
@@ -36,6 +34,7 @@ COLLECTIONS = [
 for collection in COLLECTIONS:
 
     def _get_collection():
+        from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
         ds = getattr(dgllife.data, collection)(
             smiles_to_bigraph, CanonicalAtomFeaturizer()
         )
