@@ -15,7 +15,26 @@ from .likelihood import (
 # BASE CLASSES
 # =============================================================================
 class SupervisedModel(torch.nn.Module, abc.ABC):
-    """ A supervised model. """
+    """A supervised model.
+
+    Parameters
+    ----------
+    representation : Representation
+        Module to project small molecule graph to latent embeddings.
+
+    regressor : Regressor
+        Module to convert latent embeddings to likelihood parameters.
+
+    likelihood : Likelihood
+        Module to convert likelihood parameters and data to probabilities.
+
+    Methods
+    -------
+    condition
+
+    loss
+
+    """
 
     def __init__(
         self,

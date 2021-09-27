@@ -28,9 +28,10 @@ class DatasetAssayer(Assayer):
 
     Examples
     --------
+    >>> import malt
     >>> dataset = malt.data.collections.linear_alkanes(5)
-    >>> dataset_assayer = DatasetAssayer(dataset)
-    
+    >>> dataset_assayer = malt.agents.assayer.DatasetAssayer(dataset)
+
     """
 
     def __init__(self, dataset: Dataset):

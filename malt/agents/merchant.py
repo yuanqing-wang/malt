@@ -33,6 +33,13 @@ class DatasetMerchant(Merchant):
     ----------
     dataset : Dataset
         A dataset of Points.
+
+    Examples
+    --------
+    >>> import malt
+    >>> dataset = malt.data.collections.linear_alkanes(5)
+    >>> dataset_merchant = malt.agents.merchant.DatasetAssayer(dataset)
+
     """
     def __init__(
         self,

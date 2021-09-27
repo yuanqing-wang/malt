@@ -44,6 +44,15 @@ class ModelBasedPlayer(Player):
     Parameters
     ----------
     model : SupervisedModel
+        Model to predict properties based on structure.
+
+    policy : Callable
+        Policy to rank candidates.
+
+    trainer: Callable
+        Function to train a model.
+
+    merchant : Merchant
 
     """
     def __init__(
