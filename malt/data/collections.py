@@ -62,4 +62,4 @@ def linear_alkanes(max_carbon=10):
 
     """
 
-    return Dataset([Point(idx * "C") for idx in range(1, max_carbon)])
+    return Dataset([Point(idx * "C") for idx in range(1, max_carbon+1)])

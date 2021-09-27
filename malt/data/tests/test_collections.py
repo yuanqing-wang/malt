@@ -7,6 +7,8 @@ def test_import():
 def test_linear_alkane():
     import malt
     dataset = malt.data.collections.linear_alkanes(5)
+    for point in dataset:
+        print(point)
     assert len(dataset) == 5
 
 def test_esol():
