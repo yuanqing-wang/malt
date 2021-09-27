@@ -42,3 +42,25 @@ for collection in COLLECTIONS:
         return _dataset_from_dgllife(ds)
 
     globals()[collection.lower()] = _get_collection
+
+def linear_alkanes(max_carbon=10):
+    """A toy dataset with linear alkanes from 1 to `max_carbon` carbons.
+
+    Parameters
+    ----------
+    max_carbon : int
+        Maximum number of carbons in the molecules generated.
+
+    Returns
+    -------
+    Dataset
+        A dataset containing alanes.
+
+    Examples
+    --------
+    dataset = count_carbons(10)
+
+
+    """
+
+    return Dataset([Point(idx * "C") for idx in range(1, max_carbon)])
