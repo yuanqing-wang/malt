@@ -4,6 +4,10 @@ import pytest
 def test_import():
     from malt.data import collections
 
+def test_linear_alkane():
+    import malt
+    dataset = malt.data.collections.linear_alkanes(5)
+    assert len(dataset) == 5
 
 def test_esol():
     import torch
