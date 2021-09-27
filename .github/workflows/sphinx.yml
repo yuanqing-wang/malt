@@ -1,10 +1,12 @@
-on: [push]
+name: "Pull Request Docs Check"
+on: 
+- pull_request
+
 jobs:
-  build:
-    name: Push Sphinx Pages
+  docs:
     runs-on: ubuntu-latest
     steps:
-    - uses: seanzhengw/sphinx-pages@master
+    - uses: actions/checkout@v1
+    - uses: ammaraskar/sphinx-action@master
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        create_readme: true
+        docs-folder: "docs/"
