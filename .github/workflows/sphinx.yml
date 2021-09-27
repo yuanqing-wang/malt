@@ -16,6 +16,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install flake8 pytest versioneer sphinx
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install rdkit-pypi
         python setup.py install
         cd docs && make html      
 #     - uses: actions/checkout@v1
