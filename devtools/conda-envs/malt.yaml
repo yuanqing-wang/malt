@@ -4,6 +4,7 @@ channels:
   - dglteam
   - openeye
   - defaults
+  - rdkit
 dependencies:
   # Base dependencies
   - python
