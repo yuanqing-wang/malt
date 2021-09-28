@@ -18,8 +18,9 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         pip install rdkit-pypi
         python setup.py install
-        # cd docs && make html      
-    - uses: actions/checkout@v1
-    - uses: ammaraskar/sphinx-action@master
+        cd docs && make html      
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
       with:
-        docs-folder: "docs/"
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: docs/_build
