@@ -1,4 +1,4 @@
-﻿malt.models.supervised\_model.GaussianProcessSupervisedModel
+malt.models.supervised\_model.GaussianProcessSupervisedModel
 ============================================================
 
 .. currentmodule:: malt.models.supervised_model

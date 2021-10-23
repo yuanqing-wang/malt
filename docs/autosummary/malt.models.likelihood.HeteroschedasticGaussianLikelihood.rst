@@ -1,4 +1,4 @@
-﻿malt.models.likelihood.HeteroschedasticGaussianLikelihood
+malt.models.likelihood.HeteroschedasticGaussianLikelihood
 =========================================================
 
 .. currentmodule:: malt.models.likelihood

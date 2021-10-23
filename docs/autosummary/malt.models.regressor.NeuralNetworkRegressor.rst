@@ -1,4 +1,4 @@
-﻿malt.models.regressor.NeuralNetworkRegressor
+malt.models.regressor.NeuralNetworkRegressor
 ============================================
 
 .. currentmodule:: malt.models.regressor

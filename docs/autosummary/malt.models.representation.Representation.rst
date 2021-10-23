@@ -1,4 +1,4 @@
-﻿malt.models.representation.Representation
+malt.models.representation.Representation
 =========================================
 
 .. currentmodule:: malt.models.representation

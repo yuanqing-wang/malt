@@ -1,4 +1,4 @@
-﻿malt.models.regressor.Regressor
+malt.models.regressor.Regressor
 ===============================
 
 .. currentmodule:: malt.models.regressor

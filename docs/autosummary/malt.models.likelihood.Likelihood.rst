@@ -1,4 +1,4 @@
-﻿malt.models.likelihood.Likelihood
+malt.models.likelihood.Likelihood
 =================================
 
 .. currentmodule:: malt.models.likelihood

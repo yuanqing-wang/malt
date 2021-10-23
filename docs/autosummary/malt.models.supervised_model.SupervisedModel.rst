@@ -1,4 +1,4 @@
-﻿malt.models.supervised\_model.SupervisedModel
+malt.models.supervised\_model.SupervisedModel
 =============================================
 
 .. currentmodule:: malt.models.supervised_model

@@ -1,4 +1,4 @@
-﻿malt.data.dataset.Dataset
+malt.data.dataset.Dataset
 =========================
 
 .. currentmodule:: malt.data.dataset

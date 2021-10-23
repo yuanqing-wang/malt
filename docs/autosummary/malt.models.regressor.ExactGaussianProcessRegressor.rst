@@ -1,4 +1,4 @@
-﻿malt.models.regressor.ExactGaussianProcessRegressor
+malt.models.regressor.ExactGaussianProcessRegressor
 ===================================================
 
 .. currentmodule:: malt.models.regressor

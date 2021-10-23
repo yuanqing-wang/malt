@@ -1,4 +1,4 @@
-﻿malt.models.representation.DGLRepresentation
+malt.models.representation.DGLRepresentation
 ============================================
 
 .. currentmodule:: malt.models.representation
