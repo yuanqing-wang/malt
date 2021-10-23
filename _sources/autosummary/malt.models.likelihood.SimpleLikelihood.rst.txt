@@ -31,6 +31,7 @@
       ~SimpleLikelihood.float
       ~SimpleLikelihood.forward
       ~SimpleLikelihood.get_buffer
+      ~SimpleLikelihood.get_extra_state
       ~SimpleLikelihood.get_parameter
       ~SimpleLikelihood.get_submodule
       ~SimpleLikelihood.half
@@ -49,6 +50,7 @@
       ~SimpleLikelihood.register_full_backward_hook
       ~SimpleLikelihood.register_parameter
       ~SimpleLikelihood.requires_grad_
+      ~SimpleLikelihood.set_extra_state
       ~SimpleLikelihood.share_memory
       ~SimpleLikelihood.state_dict
       ~SimpleLikelihood.to

@@ -31,6 +31,7 @@
       ~GaussianProcessSupervisedModel.float
       ~GaussianProcessSupervisedModel.forward
       ~GaussianProcessSupervisedModel.get_buffer
+      ~GaussianProcessSupervisedModel.get_extra_state
       ~GaussianProcessSupervisedModel.get_parameter
       ~GaussianProcessSupervisedModel.get_submodule
       ~GaussianProcessSupervisedModel.half
@@ -49,6 +50,7 @@
       ~GaussianProcessSupervisedModel.register_full_backward_hook
       ~GaussianProcessSupervisedModel.register_parameter
       ~GaussianProcessSupervisedModel.requires_grad_
+      ~GaussianProcessSupervisedModel.set_extra_state
       ~GaussianProcessSupervisedModel.share_memory
       ~GaussianProcessSupervisedModel.state_dict
       ~GaussianProcessSupervisedModel.to

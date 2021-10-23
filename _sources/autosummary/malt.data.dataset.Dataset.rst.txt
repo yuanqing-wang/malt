@@ -23,6 +23,8 @@
       ~Dataset.clone
       ~Dataset.erase_annotation
       ~Dataset.featurize_all
+      ~Dataset.register_datapipe_as_function
+      ~Dataset.register_function
       ~Dataset.view
    
    
@@ -33,6 +35,7 @@
 
    .. autosummary::
    
+      ~Dataset.functions
       ~Dataset.lookup
    
    

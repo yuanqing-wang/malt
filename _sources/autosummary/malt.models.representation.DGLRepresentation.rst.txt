@@ -30,6 +30,7 @@
       ~DGLRepresentation.float
       ~DGLRepresentation.forward
       ~DGLRepresentation.get_buffer
+      ~DGLRepresentation.get_extra_state
       ~DGLRepresentation.get_parameter
       ~DGLRepresentation.get_submodule
       ~DGLRepresentation.half
@@ -47,6 +48,7 @@
       ~DGLRepresentation.register_full_backward_hook
       ~DGLRepresentation.register_parameter
       ~DGLRepresentation.requires_grad_
+      ~DGLRepresentation.set_extra_state
       ~DGLRepresentation.share_memory
       ~DGLRepresentation.state_dict
       ~DGLRepresentation.to

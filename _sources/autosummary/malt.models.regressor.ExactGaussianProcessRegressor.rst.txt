@@ -31,6 +31,7 @@
       ~ExactGaussianProcessRegressor.float
       ~ExactGaussianProcessRegressor.forward
       ~ExactGaussianProcessRegressor.get_buffer
+      ~ExactGaussianProcessRegressor.get_extra_state
       ~ExactGaussianProcessRegressor.get_parameter
       ~ExactGaussianProcessRegressor.get_submodule
       ~ExactGaussianProcessRegressor.half
@@ -49,6 +50,7 @@
       ~ExactGaussianProcessRegressor.register_full_backward_hook
       ~ExactGaussianProcessRegressor.register_parameter
       ~ExactGaussianProcessRegressor.requires_grad_
+      ~ExactGaussianProcessRegressor.set_extra_state
       ~ExactGaussianProcessRegressor.share_memory
       ~ExactGaussianProcessRegressor.state_dict
       ~ExactGaussianProcessRegressor.to

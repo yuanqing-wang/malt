@@ -31,6 +31,7 @@
       ~SupervisedModel.float
       ~SupervisedModel.forward
       ~SupervisedModel.get_buffer
+      ~SupervisedModel.get_extra_state
       ~SupervisedModel.get_parameter
       ~SupervisedModel.get_submodule
       ~SupervisedModel.half
@@ -49,6 +50,7 @@
       ~SupervisedModel.register_full_backward_hook
       ~SupervisedModel.register_parameter
       ~SupervisedModel.requires_grad_
+      ~SupervisedModel.set_extra_state
       ~SupervisedModel.share_memory
       ~SupervisedModel.state_dict
       ~SupervisedModel.to

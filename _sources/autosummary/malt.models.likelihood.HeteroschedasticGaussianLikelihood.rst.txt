@@ -31,6 +31,7 @@
       ~HeteroschedasticGaussianLikelihood.float
       ~HeteroschedasticGaussianLikelihood.forward
       ~HeteroschedasticGaussianLikelihood.get_buffer
+      ~HeteroschedasticGaussianLikelihood.get_extra_state
       ~HeteroschedasticGaussianLikelihood.get_parameter
       ~HeteroschedasticGaussianLikelihood.get_submodule
       ~HeteroschedasticGaussianLikelihood.half
@@ -49,6 +50,7 @@
       ~HeteroschedasticGaussianLikelihood.register_full_backward_hook
       ~HeteroschedasticGaussianLikelihood.register_parameter
       ~HeteroschedasticGaussianLikelihood.requires_grad_
+      ~HeteroschedasticGaussianLikelihood.set_extra_state
       ~HeteroschedasticGaussianLikelihood.share_memory
       ~HeteroschedasticGaussianLikelihood.state_dict
       ~HeteroschedasticGaussianLikelihood.to

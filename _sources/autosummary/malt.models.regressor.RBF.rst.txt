@@ -31,6 +31,7 @@
       ~RBF.float
       ~RBF.forward
       ~RBF.get_buffer
+      ~RBF.get_extra_state
       ~RBF.get_parameter
       ~RBF.get_submodule
       ~RBF.half
@@ -48,6 +49,7 @@
       ~RBF.register_full_backward_hook
       ~RBF.register_parameter
       ~RBF.requires_grad_
+      ~RBF.set_extra_state
       ~RBF.share_memory
       ~RBF.state_dict
       ~RBF.to

@@ -31,6 +31,7 @@
       ~Likelihood.float
       ~Likelihood.forward
       ~Likelihood.get_buffer
+      ~Likelihood.get_extra_state
       ~Likelihood.get_parameter
       ~Likelihood.get_submodule
       ~Likelihood.half
@@ -49,6 +50,7 @@
       ~Likelihood.register_full_backward_hook
       ~Likelihood.register_parameter
       ~Likelihood.requires_grad_
+      ~Likelihood.set_extra_state
       ~Likelihood.share_memory
       ~Likelihood.state_dict
       ~Likelihood.to

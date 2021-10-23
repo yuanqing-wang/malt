@@ -30,6 +30,7 @@
       ~Representation.float
       ~Representation.forward
       ~Representation.get_buffer
+      ~Representation.get_extra_state
       ~Representation.get_parameter
       ~Representation.get_submodule
       ~Representation.half
@@ -47,6 +48,7 @@
       ~Representation.register_full_backward_hook
       ~Representation.register_parameter
       ~Representation.requires_grad_
+      ~Representation.set_extra_state
       ~Representation.share_memory
       ~Representation.state_dict
       ~Representation.to

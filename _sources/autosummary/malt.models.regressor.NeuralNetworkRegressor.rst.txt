@@ -30,6 +30,7 @@
       ~NeuralNetworkRegressor.float
       ~NeuralNetworkRegressor.forward
       ~NeuralNetworkRegressor.get_buffer
+      ~NeuralNetworkRegressor.get_extra_state
       ~NeuralNetworkRegressor.get_parameter
       ~NeuralNetworkRegressor.get_submodule
       ~NeuralNetworkRegressor.half
@@ -47,6 +48,7 @@
       ~NeuralNetworkRegressor.register_full_backward_hook
       ~NeuralNetworkRegressor.register_parameter
       ~NeuralNetworkRegressor.requires_grad_
+      ~NeuralNetworkRegressor.set_extra_state
       ~NeuralNetworkRegressor.share_memory
       ~NeuralNetworkRegressor.state_dict
       ~NeuralNetworkRegressor.to
