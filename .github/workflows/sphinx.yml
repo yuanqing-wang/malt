@@ -19,7 +19,7 @@ jobs:
         pip install rdkit-pypi
         pip install -e git+https://github.com/pytorch/pytorch_sphinx_theme.git#egg=pytorch_sphinx_theme
         python setup.py install
-        cd docs && make html      
+        cd docs && make html && cd _build/html && echo 'malt.wangyq.net' > CNAME
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3
       with:
