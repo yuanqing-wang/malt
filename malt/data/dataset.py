@@ -153,6 +153,16 @@ class Dataset(torch.utils.data.Dataset):
         g = dgl.batch(gs)
         return g
 
+    def get_batch_of_all_g(self):
+        return next(
+            iter(
+                self.view(
+                    "batch_of_g",
+                    batch_size=len(self)
+                )
+            )
+        )
+
     def erase_annotation(self):
         for point in self.points:
             point.erase_annotation()

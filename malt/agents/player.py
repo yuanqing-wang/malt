@@ -114,10 +114,10 @@ class ModelBasedPlayer(Player):
         if len(self.merchant.catalogue()) == 0:
             return None
         posterior = self.model.condition(
-            next(iter(self.merchant.catalogue().view("batch_of_g")))
+            self.merchant.catalogue().get_batch_of_all_g(),
         )
-        score = self.policy(posterior)
-        return self.merchant.catalogue()[int(score.argmax().item())]
+        best = int(self.policy(posterior).item())
+        return self.merchant.catalogue()[best]
 
 class SequentialModelBasedPlayer(ModelBasedPlayer):
     """Model based player with step size equal one.

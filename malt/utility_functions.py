@@ -23,6 +23,7 @@ def expected_improvement(
     improvement = torch.nn.functional.relu(
         distribution.sample((n_samples,)) - y_best
     )
+
     return improvement.mean(axis=0)
 
 
