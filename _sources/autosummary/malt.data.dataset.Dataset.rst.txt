@@ -23,6 +23,7 @@
       ~Dataset.clone
       ~Dataset.erase_annotation
       ~Dataset.featurize_all
+      ~Dataset.get_batch_of_all_g
       ~Dataset.register_datapipe_as_function
       ~Dataset.register_function
       ~Dataset.view
