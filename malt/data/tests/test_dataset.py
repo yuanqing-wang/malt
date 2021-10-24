@@ -15,6 +15,16 @@ def test_build_dataset():
     assert len(ds) == 2
     assert ds[0] == p1
 
+def test_dataset_subtraction():
+    from malt.data.dataset import Dataset
+    from malt.point import Point
+
+    p0 = Point("C")
+    p1 = Point("CC")
+
+    dataset0 = Dataset([p0])
+    dataset1 = Dataset([p0, p1])
+    assert len(dataset1 - dataset0) == 1
 
 def test_dataset_view():
     import torch

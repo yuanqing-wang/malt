@@ -20,17 +20,24 @@ class Assayer(Agent):
         raise NotImplementedError
 
 class DatasetAssayer(Assayer):
-    """ Assayer based on dataset.
+    """Simulated assayer based on dataset.
 
     Parameters
     ----------
     dataset : Dataset
+
+    Methods
+    -------
+    assay(dataset)
+        Assay a dataset (persumably without `y`).
 
     Examples
     --------
     >>> import malt
     >>> dataset = malt.data.collections.linear_alkanes(5)
     >>> dataset_assayer = malt.agents.assayer.DatasetAssayer(dataset)
+    >>> assayed_dataset = dataset_assayer.assay(dataset)
+    >>> assert assayed_dataset == dataset
 
     """
 
@@ -45,6 +52,11 @@ class DatasetAssayer(Assayer):
         ----------
         dataset : Dataset
             Dataset to assay.
+
+        Returns
+        -------
+        dataset : Dataset
+            Assayed dataset, with all `y` annotated.
 
         """
         for point in dataset:

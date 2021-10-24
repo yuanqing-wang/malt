@@ -66,7 +66,7 @@ class Dataset(torch.utils.data.Dataset):
         elif isinstance(idx, str):
             return self.lookup[idx]
         elif isinstance(idx, Point):
-            return self.lookup(idx.smiles)
+            return self.lookup[idx.smiles]
         elif isinstance(idx, torch.Tensor):
             idx = idx.detach().flatten().cpu().numpy().tolist()
 
@@ -166,7 +166,7 @@ class Dataset(torch.utils.data.Dataset):
         self,
         collate_fn: Union[callable, str] = "batch_of_g_and_y",
         *args,
-        **kwargs
+        **kwargs,
     ):
         """Provide a data loader from portfolio.
 

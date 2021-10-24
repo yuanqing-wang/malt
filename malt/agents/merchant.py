@@ -10,7 +10,7 @@ class Merchant(Agent):
     catalogue (*args, **kwargs):
         Return an iterator over the catalogue of the merchant.
 
-    order (*args, **kwargs):
+    merchandize (*args, **kwargs):
         Place an order from the merchant.
 
     """
@@ -38,7 +38,13 @@ class DatasetMerchant(Merchant):
     --------
     >>> import malt
     >>> dataset = malt.data.collections.linear_alkanes(5)
-    >>> dataset_merchant = malt.agents.merchant.DatasetAssayer(dataset)
+    >>> dataset_merchant = malt.agents.merchant.DatasetMerchant(dataset)
+    >>> catalogue = dataset_merchant.catalogue()
+    >>> assert catalogue == dataset.clone().erase_annotation()
+    >>> dataset_with_the_first_point = Dataset([dataset[0]])
+    >>> dataset_merchant.merchandize(dataset_with_the_first_point)
+    Dataset with 1 points
+    >>> assert len(dataset_merchant.dataset) == len(dataset) - 1
 
     """
     def __init__(
@@ -57,8 +63,8 @@ class DatasetMerchant(Merchant):
         Parameters
         ----------
         dataset : malt.Dataset
-            A
-        """
+            A dataset to be merchandized.
 
+        """
         self.dataset -= dataset
         return dataset

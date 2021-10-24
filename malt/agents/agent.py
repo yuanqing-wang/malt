@@ -8,4 +8,4 @@ class Agent(abc.ABC):
     Add identifiers.
     """
     def __init__(self):
-        super(self, Agent).__init__()
+        super(Agent, self).__init__()
