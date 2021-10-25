@@ -161,4 +161,5 @@ class SequentialModelBasedPlayer(ModelBasedPlayer):
         best = Dataset([best])
         best = self.merchandize(best)
         best = self.assay(best)
+        self.train()
         return best

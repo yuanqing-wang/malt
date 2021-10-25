@@ -31,6 +31,7 @@ class Dataset(torch.utils.data.Dataset):
 
     def __init__(self, points) -> None:
         super(Dataset, self).__init__()
+        assert all(isinstance(point, Point) for point in points)
         self.points = points
 
     def __repr__(self):
@@ -47,6 +48,10 @@ class Dataset(torch.utils.data.Dataset):
 
     def __contains__(self, point):
         return point.smiles in self.lookup
+
+    def apply(self, function):
+        self.points = [function(point) for point in self.points]
+        return self
 
     def __eq__(self, points):
         if not isinstance(points, self.__class__):
@@ -170,7 +175,8 @@ class Dataset(torch.utils.data.Dataset):
 
     def clone(self):
         """ Return a copy of self. """
-        return self.__class__(self.points)
+        import copy
+        return self.__class__(copy.deepcopy(self.points))
 
     def view(
         self,

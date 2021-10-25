@@ -62,4 +62,9 @@ def linear_alkanes(max_carbon=10):
 
     """
 
-    return Dataset([Point(idx * "C") for idx in range(1, max_carbon+1)])
+    dataset =  Dataset([Point(idx * "C") for idx in range(1, max_carbon+1)])
+    def annotate(point):
+        point.y = len(point.smiles)
+        return point
+    dataset = dataset.apply(annotate)
+    return dataset
