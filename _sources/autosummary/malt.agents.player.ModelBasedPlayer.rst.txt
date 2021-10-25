@@ -1,0 +1,30 @@
+malt.agents.player.ModelBasedPlayer
+===================================
+
+.. currentmodule:: malt.agents.player
+
+.. autoclass:: ModelBasedPlayer
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ModelBasedPlayer.__init__
+      ~ModelBasedPlayer.assay
+      ~ModelBasedPlayer.merchandize
+      ~ModelBasedPlayer.prioritize
+      ~ModelBasedPlayer.step
+      ~ModelBasedPlayer.train
+   
+   
+
+   
+   
+   

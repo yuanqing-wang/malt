@@ -1,0 +1,27 @@
+malt.agents.merchant.Merchant
+=============================
+
+.. currentmodule:: malt.agents.merchant
+
+.. autoclass:: Merchant
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Merchant.__init__
+      ~Merchant.catalogue
+      ~Merchant.merchandize
+   
+   
+
+   
+   
+   

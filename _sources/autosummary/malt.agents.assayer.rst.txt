@@ -1,0 +1,32 @@
+malt.agents.assayer
+===================
+
+.. automodule:: malt.agents.assayer
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      Assayer
+      DatasetAssayer
+   
+   
+
+   
+   
+   
+
+
+

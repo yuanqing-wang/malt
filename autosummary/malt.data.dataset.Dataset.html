@@ -41,6 +41,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="malt.agents.html">malt.agents</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="malt.data.html">malt.data</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="malt.data.collections.html">malt.data.collections</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="malt.data.dataset.html">malt.data.dataset</a><ul class="current">
@@ -127,31 +128,34 @@ training and optimization.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#malt.data.dataset.Dataset.append" title="malt.data.dataset.Dataset.append"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append</span></code></a>(point)</p></td>
 <td><p>Append a point to the dataset.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">batch_of_g</span></code>(points)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply</span></code>(function)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">batch_of_g_and_y</span></code>(points)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">batch_of_g</span></code>(points)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#malt.data.dataset.Dataset.clone" title="malt.data.dataset.Dataset.clone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clone</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">batch_of_g_and_y</span></code>(points)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#malt.data.dataset.Dataset.clone" title="malt.data.dataset.Dataset.clone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clone</span></code></a>()</p></td>
 <td><p>Return a copy of self.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">erase_annotation</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">erase_annotation</span></code>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#malt.data.dataset.Dataset.featurize_all" title="malt.data.dataset.Dataset.featurize_all"><code class="xref py py-obj docutils literal notranslate"><span class="pre">featurize_all</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#malt.data.dataset.Dataset.featurize_all" title="malt.data.dataset.Dataset.featurize_all"><code class="xref py py-obj docutils literal notranslate"><span class="pre">featurize_all</span></code></a>()</p></td>
 <td><p>Featurize all points in dataset.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_batch_of_all_g</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_batch_of_all_g</span></code>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_datapipe_as_function</span></code>(function_name, ...)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_datapipe_as_function</span></code>(function_name, ...)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_function</span></code>(function_name, function)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_function</span></code>(function_name, function)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#id0" title="malt.data.dataset.Dataset.view"><code class="xref py py-obj docutils literal notranslate"><span class="pre">view</span></code></a>([collate_fn])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#id0" title="malt.data.dataset.Dataset.view"><code class="xref py py-obj docutils literal notranslate"><span class="pre">view</span></code></a>([collate_fn])</p></td>
 <td><p>Provide a data loader from portfolio.</p></td>
 </tr>
 </tbody>

@@ -1,0 +1,36 @@
+﻿malt.agents
+===========
+
+.. automodule:: malt.agents
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+
+   malt.agents.agent
+   malt.agents.assayer
+   malt.agents.merchant
+   malt.agents.player
+

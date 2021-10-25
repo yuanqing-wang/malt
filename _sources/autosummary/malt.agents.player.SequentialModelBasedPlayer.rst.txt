@@ -1,0 +1,30 @@
+malt.agents.player.SequentialModelBasedPlayer
+=============================================
+
+.. currentmodule:: malt.agents.player
+
+.. autoclass:: SequentialModelBasedPlayer
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SequentialModelBasedPlayer.__init__
+      ~SequentialModelBasedPlayer.assay
+      ~SequentialModelBasedPlayer.merchandize
+      ~SequentialModelBasedPlayer.prioritize
+      ~SequentialModelBasedPlayer.step
+      ~SequentialModelBasedPlayer.train
+   
+   
+
+   
+   
+   

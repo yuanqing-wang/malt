@@ -18,6 +18,7 @@
    
       ~Dataset.__init__
       ~Dataset.append
+      ~Dataset.apply
       ~Dataset.batch_of_g
       ~Dataset.batch_of_g_and_y
       ~Dataset.clone

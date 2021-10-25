@@ -1,0 +1,28 @@
+malt.agents.player.Player
+=========================
+
+.. currentmodule:: malt.agents.player
+
+.. autoclass:: Player
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Player.__init__
+      ~Player.assay
+      ~Player.merchandize
+      ~Player.step
+   
+   
+
+   
+   
+   
