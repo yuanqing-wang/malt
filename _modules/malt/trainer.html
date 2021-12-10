@@ -74,8 +74,41 @@
 <span class="c1"># MODULE FUNCTIONS</span>
 <span class="c1"># =============================================================================</span>
 <div class="viewcode-block" id="get_default_trainer"><a class="viewcode-back" href="../../autosummary/malt.trainer.get_default_trainer.html#malt.trainer.get_default_trainer">[docs]</a><span class="k">def</span> <span class="nf">get_default_trainer</span><span class="p">(</span>
-    <span class="n">optimizer</span><span class="o">=</span><span class="s2">&quot;Adam&quot;</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">n_epochs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=-</span><span class="mi">1</span>
+    <span class="n">optimizer</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s2">&quot;Adam&quot;</span><span class="p">,</span>
+    <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
+    <span class="n">n_epochs</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">validation_split</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">reduce_factor</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">warmup</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
 <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Get the default training scheme for models.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    optimizer : str</span>
+<span class="sd">        Name of the optimizer. Must be an attribute of `torch.optim`</span>
+
+<span class="sd">    learning_rate : float</span>
+<span class="sd">        Initial learning rate.</span>
+
+<span class="sd">    n_epochs : int</span>
+<span class="sd">        Maximum epochs.</span>
+
+<span class="sd">    batch_size : int</span>
+<span class="sd">        Batch size.</span>
+
+<span class="sd">    validation_split : float</span>
+<span class="sd">        Proportion of validation set.</span>
+
+<span class="sd">    reduce_factor : float</span>
+<span class="sd">        Rate of learning rate reduction.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Callable : Trainer function.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">_default_trainer</span><span class="p">(</span>
         <span class="n">player</span><span class="p">,</span>
         <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
@@ -99,8 +132,20 @@
         <span class="k">if</span> <span class="n">batch_size</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">player</span><span class="o">.</span><span class="n">portfolio</span><span class="p">)</span>
 
+        <span class="c1"># get whole dataset</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">player</span><span class="o">.</span><span class="n">portfolio</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">warmup</span><span class="p">:</span>
+            <span class="c1"># split into training and validation</span>
+            <span class="n">ds_tr</span><span class="p">,</span> <span class="n">ds_vl</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">split</span><span class="p">([</span><span class="mf">1.0</span><span class="o">-</span><span class="n">validation_split</span><span class="p">,</span> <span class="n">validation_split</span><span class="p">])</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ds_tr</span> <span class="o">=</span> <span class="n">ds</span>
+            <span class="n">ds_vl</span> <span class="o">=</span> <span class="n">ds</span>
+
         <span class="c1"># put data into loader</span>
-        <span class="n">ds</span> <span class="o">=</span> <span class="n">player</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span>
+        <span class="n">ds_tr</span> <span class="o">=</span> <span class="n">ds_tr</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">pin_memory</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">ds_vl</span> <span class="o">=</span> <span class="n">ds_vl</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">ds_vl</span><span class="p">),</span> <span class="n">pin_memory</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="c1"># get optimizer object</span>
         <span class="n">optimizer</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,)(</span>
@@ -108,14 +153,25 @@
             <span class="n">learning_rate</span><span class="p">,</span>
         <span class="p">)</span>
 
+        <span class="c1"># get scheduler</span>
+        <span class="n">scheduler</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="o">.</span><span class="n">ReduceLROnPlateau</span><span class="p">(</span>
+            <span class="n">optimizer</span><span class="p">,</span>
+            <span class="n">factor</span><span class="o">=</span><span class="n">reduce_factor</span><span class="p">,</span>
+        <span class="p">)</span>
+
         <span class="c1"># train</span>
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_epochs</span><span class="p">):</span>  <span class="c1"># loop through the epochs</span>
-            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">:</span>  <span class="c1"># loop through the dataset</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ds_tr</span><span class="p">:</span>  <span class="c1"># loop through the dataset</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="n">_x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span> <span class="k">for</span> <span class="n">_x</span> <span class="ow">in</span> <span class="n">x</span><span class="p">]</span>
                 <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
                 <span class="n">loss</span> <span class="o">=</span> <span class="n">player</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">loss</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>  <span class="c1"># average just in case</span>
                 <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
                 <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+            <span class="n">x</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">ds_vl</span><span class="p">))</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="n">_x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span> <span class="k">for</span> <span class="n">_x</span> <span class="ow">in</span> <span class="n">x</span><span class="p">]</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">player</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">loss</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
 
         <span class="n">player</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">player</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">original_device</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">player</span><span class="o">.</span><span class="n">model</span>

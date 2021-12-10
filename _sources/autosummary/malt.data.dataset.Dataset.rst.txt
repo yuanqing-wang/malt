@@ -27,6 +27,7 @@
       ~Dataset.get_batch_of_all_g
       ~Dataset.register_datapipe_as_function
       ~Dataset.register_function
+      ~Dataset.split
       ~Dataset.view
    
    
