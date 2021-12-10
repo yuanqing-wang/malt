@@ -57,6 +57,9 @@ class Point(object):
     def __repr__(self):
         return self.smiles
 
+    def __eq__(self, other):
+        return self.g == other.g and self.y == other.y and self.extra == other.extra
+
     def featurize(self):
         """Featurize the SMILES string to get the graph.
 

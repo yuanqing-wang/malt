@@ -78,7 +78,29 @@ class Dataset(torch.utils.data.Dataset):
         if isinstance(idx, list):
             return self.__class__(points=[self.points[_idx] for _idx in idx])
 
+        elif isinstance(idx, slice):
+            return self.__class__(points=self.points[idx])
+
+        else:
+            raise RuntimeError("The slice is not recognized.")
+
         return self.__class__(points=self.points[idx])
+
+    def split(self, partition):
+        """Split the dataset according to some partition.
+        Parameters
+        ----------
+        partition : sequence of integers or floats
+        """
+        n_data = len(self)
+        partition = [int(n_data * x / sum(partition)) for x in partition]
+        ds = []
+        idx = 0
+        for p_size in partition:
+            ds.append(self[idx : idx + p_size])
+            idx += p_size
+
+        return ds
 
     def __add__(self, points):
         """ Combine two datasets. """

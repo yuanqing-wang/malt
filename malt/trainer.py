@@ -7,8 +7,41 @@ import torch
 # MODULE FUNCTIONS
 # =============================================================================
 def get_default_trainer(
-    optimizer="Adam", learning_rate=1e-3, n_epochs=10, batch_size=-1
+    optimizer: str="Adam",
+    learning_rate: float=1e-3,
+    n_epochs: int=10,
+    batch_size: int=-1,
+    validation_split: float=0.1,
+    reduce_factor: float=0.5,
+    warmup: int=50,
 ):
+    """ Get the default training scheme for models.
+
+    Parameters
+    ----------
+    optimizer : str
+        Name of the optimizer. Must be an attribute of `torch.optim`
+
+    learning_rate : float
+        Initial learning rate.
+
+    n_epochs : int
+        Maximum epochs.
+
+    batch_size : int
+        Batch size.
+
+    validation_split : float
+        Proportion of validation set.
+
+    reduce_factor : float
+        Rate of learning rate reduction.
+
+    Returns
+    -------
+    Callable : Trainer function.
+
+    """
     def _default_trainer(
         player,
         optimizer=optimizer,
@@ -32,8 +65,20 @@ def get_default_trainer(
         if batch_size == -1:
             batch_size = len(player.portfolio)
 
+        # get whole dataset
+        ds = player.portfolio
+
+        if len(ds) > warmup:
+            # split into training and validation
+            ds_tr, ds_vl = ds.split([1.0-validation_split, validation_split])
+
+        else:
+            ds_tr = ds
+            ds_vl = ds
+
         # put data into loader
-        ds = player.portfolio.view(batch_size=batch_size)
+        ds_tr = ds_tr.view(batch_size=batch_size, pin_memory=True)
+        ds_vl = ds_vl.view(batch_size=len(ds_vl), pin_memory=True)
 
         # get optimizer object
         optimizer = getattr(torch.optim, optimizer,)(
@@ -41,14 +86,25 @@ def get_default_trainer(
             learning_rate,
         )
 
+        # get scheduler
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer,
+            factor=reduce_factor,
+        )
+
         # train
         for _ in range(n_epochs):  # loop through the epochs
-            for x in ds:  # loop through the dataset
+            for x in ds_tr:  # loop through the dataset
                 x = [_x.to(device) for _x in x]
                 optimizer.zero_grad()
                 loss = player.model.loss(*x).mean()  # average just in case
                 loss.backward()
                 optimizer.step()
+
+            x = next(iter(ds_vl))
+            x = [_x.to(device) for _x in x]
+            loss = player.model.loss(*x).mean()
+            scheduler.step(loss)
 
         player.model = player.model.to(original_device)
         return player.model

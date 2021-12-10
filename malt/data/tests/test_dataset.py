@@ -15,6 +15,17 @@ def test_build_dataset():
     assert len(ds) == 2
     assert ds[0] == p1
 
+def test_split_dataset():
+    from malt.data.dataset import Dataset
+    from malt.point import Point
+
+    p1 = Point("C")
+    p2 = Point("CC")
+    ds = Dataset([p1, p2])
+    ds0, ds1 = ds.split([0.5, 0.5])
+    assert len(ds0) == 1
+    assert len(ds1) == 1
+
 def test_dataset_subtraction():
     from malt.data.dataset import Dataset
     from malt.point import Point
