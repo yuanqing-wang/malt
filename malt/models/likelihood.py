@@ -45,7 +45,7 @@ class HomoschedasticGaussianLikelihood(SimpleLikelihood):
         super(HomoschedasticGaussianLikelihood, self).__init__(
             in_features=1,
         )
-        self.log_sigma = torch.tensor(log_sigma)
+        self.register_buffer("log_sigma", torch.tensor(log_sigma))
 
     def condition(
         self,
