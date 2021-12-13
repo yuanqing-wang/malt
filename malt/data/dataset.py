@@ -147,6 +147,10 @@ class Dataset(torch.utils.data.Dataset):
 
         return self
 
+    @property
+    def y(self):
+        return [point.y for point in self.points]
+
     @staticmethod
     def batch_of_g_and_y(points):
         # initialize results
