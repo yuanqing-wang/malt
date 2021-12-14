@@ -14,6 +14,8 @@ def get_default_trainer(
     validation_split: float=0.1,
     reduce_factor: float=0.5,
     warmup: int=50,
+    without_player: bool=False,
+    min_learning_rate: float=1e-6,
 ):
     """ Get the default training scheme for models.
 
@@ -42,12 +44,14 @@ def get_default_trainer(
     Callable : Trainer function.
 
     """
-    def _default_trainer(
-        player,
+    def _default_trainer_without_player(
+        ds,
+        model,
         optimizer=optimizer,
         learning_rate=learning_rate,
         n_epochs=n_epochs,
         batch_size=batch_size,
+        min_learning_rate=min_learning_rate,
     ):
         # see if cuda is available
         if torch.cuda.is_available():
@@ -56,17 +60,10 @@ def get_default_trainer(
             device = torch.device("cpu")
 
         # get original device
-        original_device = next(player.model.parameters()).device
+        original_device = next(model.parameters()).device
 
         # move model to cuda if available
-        player.model = player.model.to(device)
-
-        # consider the case of one batch
-        if batch_size == -1:
-            batch_size = len(player.portfolio)
-
-        # get whole dataset
-        ds = player.portfolio
+        model = model.to(device)
 
         if len(ds) > warmup:
             # split into training and validation
@@ -76,13 +73,17 @@ def get_default_trainer(
             ds_tr = ds
             ds_vl = ds
 
+        # consider the case of one batch
+        if batch_size == -1:
+            batch_size = len(ds)
+
         # put data into loader
         ds_tr = ds_tr.view(batch_size=batch_size, pin_memory=True)
         ds_vl = ds_vl.view(batch_size=len(ds_vl), pin_memory=True)
 
         # get optimizer object
         optimizer = getattr(torch.optim, optimizer,)(
-            player.model.parameters(),
+            model.parameters(),
             learning_rate,
         )
 
@@ -97,16 +98,31 @@ def get_default_trainer(
             for x in ds_tr:  # loop through the dataset
                 x = [_x.to(device) for _x in x]
                 optimizer.zero_grad()
-                loss = player.model.loss(*x).mean()  # average just in case
+                loss = model.loss(*x).mean()  # average just in case
                 loss.backward()
                 optimizer.step()
 
             x = next(iter(ds_vl))
             x = [_x.to(device) for _x in x]
-            loss = player.model.loss(*x).mean()
+            loss = model.loss(*x).mean()
             scheduler.step(loss)
+            if optimizer.param_groups[0]['lr'] < min_learning_rate:
+                break
 
-        player.model = player.model.to(original_device)
-        return player.model
+        model = model.to(original_device)
+        return model
 
-    return _default_trainer
+    def _default_trainer(
+        player,
+        *args, **kwargs
+    ):
+        return _default_trainer_without_player(
+            player.portfolio,
+            player.model,
+            *args, **kwargs,
+        )
+
+    if without_player is True:
+        return _default_trainer_without_player
+    else:
+        return _default_trainer
