@@ -130,8 +130,10 @@ class GaussianProcessSupervisedModel(SupervisedModel):
 
         # graph -> latent representation
         h = self.representation(g)
-        return self.regressor.condition(h)
+        return self.regressor.condition(h, x_tr=self.x_tr, y_tr=self.y_tr)
 
     def loss(self, g, y):
         h = self.representation(g)
+        self.x_tr = h
+        self.y_tr = y
         return self.regressor.loss(h, y)

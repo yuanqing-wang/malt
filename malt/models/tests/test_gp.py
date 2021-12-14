@@ -32,7 +32,7 @@ def test_blind_condition():
     graph = dgl.batch([point.g])
 
     y = net.condition(graph)
-    print(y)
+    assert y.mean.item() == 0.0
 
 def test_gp_train():
     import torch
@@ -54,8 +54,11 @@ def test_gp_train():
     point.featurize()
     graph = dgl.batch([point.g])
 
-    y = net.loss(graph, torch.tensor([[0.0]]))
+    y = net.loss(graph, torch.tensor([[5.0]]))
     y.backward()
+
+    y = net.condition(graph)
+    assert y.mean.item() != 0.0
 
 
 def test_gp_integrate():
