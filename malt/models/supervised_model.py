@@ -134,6 +134,6 @@ class GaussianProcessSupervisedModel(SupervisedModel):
 
     def loss(self, g, y):
         h = self.representation(g)
-        self.x_tr = h
-        self.y_tr = y
+        self.register_buffer("x_tr", h)
+        self.register_buffer("y_tr", y)
         return self.regressor.loss(h, y)

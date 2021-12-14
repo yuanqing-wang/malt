@@ -52,6 +52,7 @@ def get_default_trainer(
         n_epochs=n_epochs,
         batch_size=batch_size,
         min_learning_rate=min_learning_rate,
+        warmup=warmup,
     ):
         # see if cuda is available
         if torch.cuda.is_available():
@@ -94,7 +95,7 @@ def get_default_trainer(
         )
 
         # train
-        for _ in range(n_epochs):  # loop through the epochs
+        for idx_epoch in range(n_epochs):  # loop through the epochs
             for x in ds_tr:  # loop through the dataset
                 x = [_x.to(device) for _x in x]
                 optimizer.zero_grad()
@@ -105,9 +106,11 @@ def get_default_trainer(
             x = next(iter(ds_vl))
             x = [_x.to(device) for _x in x]
             loss = model.loss(*x).mean()
-            scheduler.step(loss)
-            if optimizer.param_groups[0]['lr'] < min_learning_rate:
-                break
+
+            if idx_epoch > warmup:
+                scheduler.step(loss)
+                if optimizer.param_groups[0]['lr'] < min_learning_rate:
+                    break
 
         model = model.to(original_device)
         return model
