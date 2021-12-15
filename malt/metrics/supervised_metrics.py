@@ -10,7 +10,7 @@ class SupervisedMetrics(abc.ABC):
     def __call__(self, model, ds_te):
         ds_te_loader = ds_te.view(batch_size=len(ds_te))
         g, y = next(iter(ds_te_loader))
-        y_hat = model.condition(y).mean        
+        y_hat = model.condition(g).mean
         return getattr(malt.metrics.base_metrics, self.base_metric)(y_hat, y)
 
 class MSE(SupervisedMetrics):

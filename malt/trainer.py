@@ -45,8 +45,8 @@ def get_default_trainer(
 
     """
     def _default_trainer_without_player(
-        ds,
         model,
+        ds,
         optimizer=optimizer,
         learning_rate=learning_rate,
         n_epochs=n_epochs,
@@ -120,8 +120,8 @@ def get_default_trainer(
         *args, **kwargs
     ):
         return _default_trainer_without_player(
-            player.portfolio,
             player.model,
+            player.portfolio,
             *args, **kwargs,
         )
 
