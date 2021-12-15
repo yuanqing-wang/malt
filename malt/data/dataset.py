@@ -29,7 +29,7 @@ class Dataset(torch.utils.data.Dataset):
 
     _lookup = None
 
-    def __init__(self, points) -> None:
+    def __init__(self, points=[]) -> None:
         super(Dataset, self).__init__()
         assert all(isinstance(point, Point) for point in points)
         self.points = points
@@ -87,7 +87,7 @@ class Dataset(torch.utils.data.Dataset):
         return self.__class__(points=self.points[idx])
 
     def shuffle(self, seed=None):
-        import random 
+        import random
         if seed is not None:
             random.seed(seed)
         random.shuffle(self.points)
