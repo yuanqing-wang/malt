@@ -201,6 +201,8 @@
 
 <div class="viewcode-block" id="GaussianProcessSupervisedModel.loss"><a class="viewcode-back" href="../../../autosummary/malt.models.supervised_model.GaussianProcessSupervisedModel.html#malt.models.supervised_model.GaussianProcessSupervisedModel.loss">[docs]</a>    <span class="k">def</span> <span class="nf">loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">representation</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_tr</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_tr</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;x_tr&quot;</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;y_tr&quot;</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">loss</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div></div>
