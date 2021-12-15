@@ -86,6 +86,14 @@ class Dataset(torch.utils.data.Dataset):
 
         return self.__class__(points=self.points[idx])
 
+    def shuffle(self, seed=None):
+        import random 
+        if seed is not None:
+            random.seed(seed)
+        random.shuffle(self.points)
+        return self
+
+
     def split(self, partition):
         """Split the dataset according to some partition.
         Parameters

@@ -96,11 +96,13 @@ def get_default_trainer(
 
         # train
         for idx_epoch in range(n_epochs):  # loop through the epochs
+            print(idx_epoch)
             for x in ds_tr:  # loop through the dataset
                 x = [_x.to(device) for _x in x]
                 optimizer.zero_grad()
                 loss = model.loss(*x).mean()  # average just in case
                 loss.backward()
+                print(loss)
                 optimizer.step()
 
             x = next(iter(ds_vl))
