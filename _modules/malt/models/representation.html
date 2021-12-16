@@ -116,20 +116,28 @@
         <span class="n">hidden_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span>
         <span class="n">out_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
-        <span class="n">activation</span><span class="p">:</span> <span class="n">callable</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+        <span class="n">activation</span><span class="p">:</span> <span class="n">callable</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">SiLU</span><span class="p">(),</span>
         <span class="n">global_pool</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;sum&quot;</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">DGLRepresentation</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">out_features</span><span class="o">=</span><span class="n">out_features</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">embedding_in</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="p">,</span> <span class="n">hidden_features</span><span class="p">),</span>
+            <span class="n">activation</span><span class="p">,</span>
+        <span class="p">)</span>
 
-        <span class="n">_in_features</span> <span class="o">=</span> <span class="n">in_features</span>  <span class="c1"># first layer is input</span>
         <span class="c1"># construct model</span>
         <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">depth</span><span class="p">):</span>
             <span class="nb">setattr</span><span class="p">(</span>
                 <span class="bp">self</span><span class="p">,</span>
                 <span class="s2">&quot;gn</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">idx</span><span class="p">,</span>
-                <span class="n">layer</span><span class="p">(</span><span class="n">_in_features</span><span class="p">,</span> <span class="n">hidden_features</span><span class="p">),</span>
+                <span class="n">layer</span><span class="p">(</span><span class="n">hidden_features</span><span class="p">,</span> <span class="n">hidden_features</span><span class="p">),</span>
             <span class="p">)</span>
-            <span class="n">_in_features</span> <span class="o">=</span> <span class="n">hidden_features</span>  <span class="c1"># hidden feature as input</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">embedding_out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">hidden_features</span><span class="p">,</span> <span class="n">hidden_features</span><span class="p">),</span>
+            <span class="n">activation</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># output</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ff</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
@@ -154,11 +162,14 @@
         <span class="c1"># make local copy</span>
         <span class="n">g</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">local_var</span><span class="p">()</span>
         <span class="n">h</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_in</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
 
         <span class="c1"># loop through the depth</span>
         <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">depth</span><span class="p">):</span>
             <span class="n">h</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;gn</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">idx</span><span class="p">)(</span><span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
             <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+
+        <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_out</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
         <span class="n">g</span><span class="o">.</span><span class="n">ndata</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span>
 
         <span class="c1"># global pool</span>
