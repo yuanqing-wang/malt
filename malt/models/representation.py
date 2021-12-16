@@ -49,20 +49,28 @@ class DGLRepresentation(Representation):
         hidden_features: int = 128,
         out_features: int = 1,
         depth: int = 3,
-        activation: callable = torch.nn.ReLU(),
+        activation: callable = torch.nn.SiLU(),
         global_pool: str = "sum",
     ):
         super(DGLRepresentation, self).__init__(out_features=out_features)
+        
+        self.embedding_in = torch.nn.Sequential(
+            torch.nn.Linear(in_features, hidden_features),
+            activation,
+        )
 
-        _in_features = in_features  # first layer is input
         # construct model
         for idx in range(depth):
             setattr(
                 self,
                 "gn%s" % idx,
-                layer(_in_features, hidden_features),
+                layer(hidden_features, hidden_features),
             )
-            _in_features = hidden_features  # hidden feature as input
+
+        self.embedding_out = torch.nn.Sequential(
+            torch.nn.Linear(hidden_features, hidden_features),
+            activation,
+        )
 
         # output
         self.ff = torch.nn.Sequential(
@@ -87,11 +95,14 @@ class DGLRepresentation(Representation):
         # make local copy
         g = g.local_var()
         h = g.ndata[field]
+        h = self.embedding_in(h)
 
         # loop through the depth
         for idx in range(self.depth):
             h = getattr(self, "gn%s" % idx)(g, h)
             h = self.activation(h)
+
+        h = self.embedding_out(h)
         g.ndata[field] = h
 
         # global pool
