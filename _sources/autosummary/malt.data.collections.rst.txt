@@ -1,4 +1,4 @@
-malt.data.collections
+﻿malt.data.collections
 =====================
 
 .. automodule:: malt.data.collections
@@ -14,10 +14,7 @@ malt.data.collections
    .. autosummary::
       :toctree:
    
-      esol
-      freesolv
       linear_alkanes
-      lipophilicity
    
    
 
