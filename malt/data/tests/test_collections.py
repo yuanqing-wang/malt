@@ -16,8 +16,14 @@ def test_esol():
     import dgl
     from malt.data import collections
 
-    esol = collections.esol()
-    assert len(esol) == 4200
-    point = esol[0]
+    ds = collections.esol()
+    assert len(ds) == 1128
+    point = ds[0]
+    assert isinstance(point.g, dgl.DGLGraph)
+    assert isinstance(point.y, float)
+
+    ds = collections.lipophilicity()
+    assert len(ds) == 4200
+    point = ds[0]
     assert isinstance(point.g, dgl.DGLGraph)
     assert isinstance(point.y, float)

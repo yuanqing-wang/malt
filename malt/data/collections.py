@@ -31,16 +31,17 @@ COLLECTIONS = [
     "Lipophilicity",
 ]
 
+def _get_collection(collection):
+    from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
+    ds = getattr(dgllife.data, collection)(
+        smiles_to_bigraph, CanonicalAtomFeaturizer()
+    )
+    return _dataset_from_dgllife(ds)
+
+from functools import partial
+
 for collection in COLLECTIONS:
-
-    def _get_collection():
-        from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
-        ds = getattr(dgllife.data, collection)(
-            smiles_to_bigraph, CanonicalAtomFeaturizer()
-        )
-        return _dataset_from_dgllife(ds)
-
-    globals()[collection.lower()] = _get_collection
+    globals()[collection.lower()] = partial(_get_collection, collection=collection)
 
 def linear_alkanes(max_carbon=10):
     """A toy dataset with linear alkanes from 1 to `max_carbon` carbons.
