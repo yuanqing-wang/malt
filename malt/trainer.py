@@ -60,6 +60,7 @@ def get_default_trainer(
         else:
             device = torch.device("cpu")
 
+        print(model) 
         # get original device
         original_device = next(model.parameters()).device
 
@@ -92,6 +93,7 @@ def get_default_trainer(
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer,
             factor=reduce_factor,
+            patience=100,
         )
 
         # train
@@ -101,6 +103,7 @@ def get_default_trainer(
                 optimizer.zero_grad()
                 loss = model.loss(*x).mean()  # average just in case
                 loss.backward()
+                print(loss)
                 optimizer.step()
 
             x = next(iter(ds_vl))

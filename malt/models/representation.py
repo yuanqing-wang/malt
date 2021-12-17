@@ -49,7 +49,7 @@ class DGLRepresentation(Representation):
         hidden_features: int = 128,
         out_features: int = 1,
         depth: int = 3,
-        activation: callable = torch.nn.SiLU(),
+        activation: callable = torch.nn.ReLU(),
         global_pool: str = "sum",
     ):
         super(DGLRepresentation, self).__init__(out_features=out_features)
@@ -69,13 +69,13 @@ class DGLRepresentation(Representation):
 
         self.embedding_out = torch.nn.Sequential(
             torch.nn.Linear(hidden_features, hidden_features),
-            activation,
+            # activation,
         )
 
         # output
         self.ff = torch.nn.Sequential(
-            torch.nn.Linear(hidden_features, hidden_features),
-            activation,
+            # torch.nn.Linear(hidden_features, hidden_features),
+            # activation,
             torch.nn.Linear(hidden_features, out_features),
         )
 

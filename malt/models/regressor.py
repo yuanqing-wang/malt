@@ -104,7 +104,7 @@ class NeuralNetworkRegressor(Regressor):
 
 
 class ExactGaussianProcessRegressor(Regressor):
-    epsilon = 1e-5
+    epsilon = 1e-7
 
     def __init__(
         self,
