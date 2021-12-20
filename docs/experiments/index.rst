@@ -3,3 +3,4 @@
    :caption: Contents:
 
    supervised
+   sequential
