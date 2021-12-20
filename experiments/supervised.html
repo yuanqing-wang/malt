@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supervised learning demo &mdash; malt  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Sequential acquisition demo" href="sequential.html" />
+    <link rel="prev" title="&lt;no title&gt;" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> malt
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Supervised learning demo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#intallation-and-imports">Intallation and imports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#grab-data">Grab data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#model-definition">Model definition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#train-the-model">Train the model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#characterization">Characterization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequential.html">Sequential acquisition demo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequential.html#intallation-and-imports">Intallation and imports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequential.html#grab-data">Grab data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequential.html#define-model">Define model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequential.html#define-agents">Define agents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequential.html#define-player">Define player</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequential.html#run-the-experiment">Run the experiment</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">malt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">&lt;no title&gt;</a> &raquo;</li>
+      <li>Supervised learning demo</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/experiments/supervised.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="supervised-learning-demo">
+<h1>Supervised learning demo<a class="headerlink" href="#supervised-learning-demo" title="Permalink to this headline"></a></h1>
+<p>Open in Colab: <a class="reference external" href="http://data.wangyq.net/malt_notebooks/supervised.ipynb">http://data.wangyq.net/malt_notebooks/supervised.ipynb</a></p>
+<p>Here we demonstrate how to use MALT for a simple supervised learning
+experiment.</p>
+</section>
+<section id="intallation-and-imports">
+<h1>Intallation and imports<a class="headerlink" href="#intallation-and-imports" title="Permalink to this headline"></a></h1>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span># install conda
+! pip install -q condacolab
+import condacolab
+condacolab.install()
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>⏬ Downloading https://github.com/jaimergp/miniforge/releases/latest/download/Mambaforge-colab-Linux-x86_64.sh...
+📦 Installing...
+📌 Adjusting configuration...
+🩹 Patching environment...
+⏲ Done in 0:00:34
+🔁 Restarting kernel...
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>%%capture
+! mamba install rdkit
+! rm -rf malt
+! git clone https://github.com/yuanqing-wang/malt.git
+! pip install dgl-cu101 dgllife
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;/content/malt&quot;</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">malt</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DGL</span> <span class="n">backend</span> <span class="ow">not</span> <span class="n">selected</span> <span class="ow">or</span> <span class="n">invalid</span><span class="o">.</span>  <span class="n">Assuming</span> <span class="n">PyTorch</span> <span class="k">for</span> <span class="n">now</span><span class="o">.</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Setting</span> <span class="n">the</span> <span class="n">default</span> <span class="n">backend</span> <span class="n">to</span> <span class="s2">&quot;pytorch&quot;</span><span class="o">.</span> <span class="n">You</span> <span class="n">can</span> <span class="n">change</span> <span class="n">it</span> <span class="ow">in</span> <span class="n">the</span> <span class="o">~/.</span><span class="n">dgl</span><span class="o">/</span><span class="n">config</span><span class="o">.</span><span class="n">json</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">export</span> <span class="n">the</span> <span class="n">DGLBACKEND</span> <span class="n">environment</span> <span class="n">variable</span><span class="o">.</span>  <span class="n">Valid</span> <span class="n">options</span> <span class="n">are</span><span class="p">:</span> <span class="n">pytorch</span><span class="p">,</span> <span class="n">mxnet</span><span class="p">,</span> <span class="n">tensorflow</span> <span class="p">(</span><span class="nb">all</span> <span class="n">lowercase</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Using</span> <span class="n">backend</span><span class="p">:</span> <span class="n">pytorch</span>
+</pre></div>
+</div>
+</section>
+<section id="grab-data">
+<h1>Grab data<a class="headerlink" href="#grab-data" title="Permalink to this headline"></a></h1>
+<p>We download the ESOL dataset
+(<a class="reference external" href="https://pubs.acs.org/doi/10.1021/ci034243x">https://pubs.acs.org/doi/10.1021/ci034243x</a>), randomly shuffle it and
+partition into training, validation, and test (80:10:10).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">malt</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">esol</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Processing</span> <span class="n">dgl</span> <span class="n">graphs</span> <span class="kn">from</span> <span class="nn">scratch...</span>
+<span class="n">Processing</span> <span class="n">molecule</span> <span class="mi">1000</span><span class="o">/</span><span class="mi">1128</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ds_tr</span><span class="p">,</span> <span class="n">ds_vl</span><span class="p">,</span> <span class="n">ds_te</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">([</span><span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+</section>
+<section id="model-definition">
+<h1>Model definition<a class="headerlink" href="#model-definition" title="Permalink to this headline"></a></h1>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">malt</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">supervised_model</span><span class="o">.</span><span class="n">GaussianProcessSupervisedModel</span><span class="p">(</span>
+    <span class="n">representation</span><span class="o">=</span><span class="n">malt</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">representation</span><span class="o">.</span><span class="n">DGLRepresentation</span><span class="p">(</span>
+        <span class="n">out_features</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">regressor</span><span class="o">=</span><span class="n">malt</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">ExactGaussianProcessRegressor</span><span class="p">(</span>
+        <span class="n">in_features</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">likelihood</span><span class="o">=</span><span class="n">malt</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">likelihood</span><span class="o">.</span><span class="n">HeteroschedasticGaussianLikelihood</span><span class="p">(),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="train-the-model">
+<h1>Train the model<a class="headerlink" href="#train-the-model" title="Permalink to this headline"></a></h1>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">trainer</span> <span class="o">=</span> <span class="n">malt</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">get_default_trainer</span><span class="p">(</span><span class="n">without_player</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_epochs</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">trainer</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds_tr</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GaussianProcessSupervisedModel</span><span class="p">(</span>
+  <span class="p">(</span><span class="n">representation</span><span class="p">):</span> <span class="n">DGLRepresentation</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">embedding_in</span><span class="p">):</span> <span class="n">Sequential</span><span class="p">(</span>
+      <span class="p">(</span><span class="mi">0</span><span class="p">):</span> <span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="mi">74</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+      <span class="p">(</span><span class="mi">1</span><span class="p">):</span> <span class="n">ReLU</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="p">(</span><span class="n">gn0</span><span class="p">):</span> <span class="n">GraphConv</span><span class="p">(</span><span class="ow">in</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="n">both</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">gn1</span><span class="p">):</span> <span class="n">GraphConv</span><span class="p">(</span><span class="ow">in</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="n">both</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">gn2</span><span class="p">):</span> <span class="n">GraphConv</span><span class="p">(</span><span class="ow">in</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="n">both</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">embedding_out</span><span class="p">):</span> <span class="n">Sequential</span><span class="p">(</span>
+      <span class="p">(</span><span class="mi">0</span><span class="p">):</span> <span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="p">(</span><span class="n">ff</span><span class="p">):</span> <span class="n">Sequential</span><span class="p">(</span>
+      <span class="p">(</span><span class="mi">0</span><span class="p">):</span> <span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="p">(</span><span class="n">activation</span><span class="p">):</span> <span class="n">ReLU</span><span class="p">()</span>
+  <span class="p">)</span>
+  <span class="p">(</span><span class="n">regressor</span><span class="p">):</span> <span class="n">ExactGaussianProcessRegressor</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">kernel</span><span class="p">):</span> <span class="n">RBF</span><span class="p">()</span>
+  <span class="p">)</span>
+  <span class="p">(</span><span class="n">likelihood</span><span class="p">):</span> <span class="n">HeteroschedasticGaussianLikelihood</span><span class="p">()</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="characterization">
+<h1>Characterization<a class="headerlink" href="#characterization" title="Permalink to this headline"></a></h1>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">r2</span> <span class="o">=</span> <span class="n">malt</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">supervised_metrics</span><span class="o">.</span><span class="n">R2</span><span class="p">()(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds_te</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">r2</span><span class="p">)</span>
+
+<span class="n">rmse</span> <span class="o">=</span> <span class="n">malt</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">supervised_metrics</span><span class="o">.</span><span class="n">RMSE</span><span class="p">()(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds_te</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rmse</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.8875</span><span class="p">,</span> <span class="n">grad_fn</span><span class="o">=&lt;</span><span class="n">RsubBackward1</span><span class="o">&gt;</span><span class="p">)</span>
+<span class="n">tensor</span><span class="p">(</span><span class="mf">2.7404</span><span class="p">,</span> <span class="n">grad_fn</span><span class="o">=&lt;</span><span class="n">SqrtBackward0</span><span class="o">&gt;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">content</span><span class="o">/</span><span class="n">malt</span><span class="o">/</span><span class="n">malt</span><span class="o">/</span><span class="n">metrics</span><span class="o">/</span><span class="n">base_metrics</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span> <span class="ne">UserWarning</span><span class="p">:</span> <span class="n">Using</span> <span class="n">a</span> <span class="n">target</span> <span class="n">size</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">112</span><span class="p">]))</span> <span class="n">that</span> <span class="ow">is</span> <span class="n">different</span> <span class="n">to</span> <span class="n">the</span> <span class="nb">input</span> <span class="n">size</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">112</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span><span class="o">.</span> <span class="n">This</span> <span class="n">will</span> <span class="n">likely</span> <span class="n">lead</span> <span class="n">to</span> <span class="n">incorrect</span> <span class="n">results</span> <span class="n">due</span> <span class="n">to</span> <span class="n">broadcasting</span><span class="o">.</span> <span class="n">Please</span> <span class="n">ensure</span> <span class="n">they</span> <span class="n">have</span> <span class="n">the</span> <span class="n">same</span> <span class="n">size</span><span class="o">.</span>
+  <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">mse_loss</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="nb">input</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">ds_te</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">ds_te</span><span class="p">))))</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">y_hat</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">condition</span><span class="p">(</span><span class="n">g</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">y_hat</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">PathCollection</span> <span class="n">at</span> <span class="mh">0x7f6fe06da910</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<img alt="experiments/supervised_files/supervised_17_1.png" src="experiments/supervised_files/supervised_17_1.png" />
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="&lt;no title&gt;" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sequential.html" class="btn btn-neutral float-right" title="Sequential acquisition demo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Yuanqing Wang @ choderalab // MSKCC..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
