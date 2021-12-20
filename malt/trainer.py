@@ -93,7 +93,7 @@ def get_default_trainer(
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer,
             factor=reduce_factor,
-            patience=100,
+            patience=10,
         )
 
         # train
@@ -103,18 +103,22 @@ def get_default_trainer(
                 optimizer.zero_grad()
                 loss = model.loss(*x).mean()  # average just in case
                 loss.backward()
-                print(loss)
                 optimizer.step()
 
-            x = next(iter(ds_vl))
-            x = [_x.to(device) for _x in x]
-            loss = model.loss(*x).mean()
 
-            if idx_epoch > warmup:
-                scheduler.step(loss)
-                if optimizer.param_groups[0]['lr'] < min_learning_rate:
-                    break
+            with torch.no_grad():
+                x = next(iter(ds_vl))
+                x = [_x.to(device) for _x in x]
+                loss = model.loss(*x).mean()
 
+                if idx_epoch > warmup:
+                    scheduler.step(loss)
+                    if optimizer.param_groups[0]['lr'] < min_learning_rate:
+                        break
+
+        x = next(iter(ds_tr))
+        x = [_x.to(device) for _x in x]
+        loss = model.loss(*x).mean()
         model = model.to(original_device)
         return model
 
