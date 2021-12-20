@@ -12,6 +12,7 @@ MALT: Molecular Active Learning Testbed
 
    getting_started
    api
+   experiments/index
 
 
 
