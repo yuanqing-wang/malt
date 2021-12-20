@@ -21,6 +21,9 @@ sys.path.insert(0, os.path.abspath('..'))
 import malt
 from malt import agents, data, models, point, policy, trainer, utility_functions
 
+import os
+os.system("bash download_experiments.sh")
+
 # -- Project information -----------------------------------------------------
 
 project = 'malt'
