@@ -60,7 +60,6 @@ def get_default_trainer(
         else:
             device = torch.device("cpu")
 
-        print(model) 
         # get original device
         original_device = next(model.parameters()).device
 
