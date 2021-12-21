@@ -49,7 +49,7 @@ class DGLRepresentation(Representation):
         hidden_features: int = 128,
         out_features: int = 1,
         depth: int = 3,
-        activation: callable = torch.nn.ReLU(),
+        activation: callable = torch.nn.SiLU(),
         global_pool: str = "sum",
     ):
         super(DGLRepresentation, self).__init__(out_features=out_features)
