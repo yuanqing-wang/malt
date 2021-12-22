@@ -1,6 +1,5 @@
 import os
 
-
 def vina_docking(smiles, protein):
     """ Dock a molecule against a protein.
 
