@@ -11,3 +11,4 @@ def test_caffeine_into_1x8y():
         "CN1C=NC2=C1C(=O)N(C(=O)N2C)C",
         "1X8Y",
     )
+    assert score > 0
