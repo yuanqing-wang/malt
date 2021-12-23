@@ -21,6 +21,7 @@ malt.agents.assayer
    
       Assayer
       DatasetAssayer
+      DockingAssayer
    
    
 
