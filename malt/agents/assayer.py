@@ -65,3 +65,30 @@ class DatasetAssayer(Assayer):
             point.extra = self.dataset[point].extra
 
         return dataset
+
+class DockingAssayer(Assayer):
+    """Simulated assayer based on docking score.
+
+    Parameters
+    ----------
+    protein : str
+        PDB or file name of a protein.
+
+    Methods
+    -------
+    assay(dataset)
+        Assay a dataset (persumably without `y`).
+
+    """
+    def __init__(self, protein: str):
+        super(DockingAssayer, self).__init__()
+        self.protein = protein
+
+    def dock(self, point):
+        from malt.utils.docking import vina_docking
+        return vina_docking(smiles=point.smiles, protein=self.protein)
+
+    def assay(self, dataset):
+        for point in dataset:
+            point.y = self.dock(point)
+        return dataset
