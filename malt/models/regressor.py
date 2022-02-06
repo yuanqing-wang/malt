@@ -155,7 +155,7 @@ class ExactGaussianProcessRegressor(Regressor):
         )
 
         # (batch_size_tr, batch_size_tr)
-        l_low = torch.cholesky(k_plus_sigma)
+        l_low = torch.linalg.cholesky(k_plus_sigma)
         l_up = l_low.t()
 
         # (batch_size_tr. 1)
