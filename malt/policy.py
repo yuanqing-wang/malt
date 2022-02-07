@@ -62,6 +62,29 @@ class Greedy(Policy):
         return idxs
 
 
+class Random(Policy):
+    """ Greedy policy. """
+
+    def __init__(
+        self,
+        acquisition_size: int = 1,
+    ):
+        super(Random, self).__init__()
+        self.acquisition_size = acquisition_size
+
+    def forward(
+        self, distribution: torch.distributions.Distribution
+    ) -> torch.Tensor:
+        
+        idxs = torch.randint(
+            high = distribution.batch_shape[0],
+            size = (self.acquisition_size,)
+        )
+
+        return idxs
+
+
+
 class ThompsonSampling(Policy):
     """ Thompson sampling policy. """
 
@@ -78,7 +101,7 @@ class ThompsonSampling(Policy):
 
         # sample f_X
         thetas = distribution.sample(
-            (acquisition_size, )
+            (self.acquisition_size, )
         )
 
         # find unique argmax f_X
@@ -87,7 +110,7 @@ class ThompsonSampling(Policy):
         num_idxs = len(idxs_ts)
 
         # if we didn't fill the round, select rest randomly
-        if num_idxs < acquisition_size:
+        if num_idxs < self.acquisition_size:
 
             # find unselected indices; mask indices
             mask = torch.zeros(len(data)).bool()
@@ -97,8 +120,12 @@ class ThompsonSampling(Policy):
             # shuffle unselected indices and select
             idx = torch.randperm(range_masked.nelement())
             range_masked = range_masked.view(-1)[idx].view(range_masked.size())
-            idx_rand = range_masked[:(acquisition_size - num_idxs)]
+            idx_rand = range_masked[:(self.acquisition_size - num_idxs)]
+            
+            # append random indices
+            idxs = torch.cat([idxs_ts, idx_rand])
 
-        idxs = torch.cat([idxs_ts, idx_rand])
+        else:
+            idxs = idxs_ts
 
         return idxs
