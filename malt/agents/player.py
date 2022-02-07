@@ -5,6 +5,7 @@ from .merchant import Merchant
 from .assayer import Assayer
 from malt.models.supervised_model import SupervisedModel
 from malt.data.dataset import Dataset
+import torch
 
 class Player(Agent):
     """ Base class for players.
@@ -72,7 +73,7 @@ class ModelBasedPlayer(Player):
 
     Note
     ----
-    1. Perfolio respects order and could be used to analyze acquisition
+    1. Portfolio respects order and could be used to analyze acquisition
         trajectory.
 
     """
@@ -188,7 +189,7 @@ class RandomPlayer(Player):
 
     Note
     ----
-    1. Perfolio respects order and could be used to analyze acquisition
+    1. Portfolio respects order and could be used to analyze acquisition
         trajectory.
 
     """
@@ -226,10 +227,11 @@ class RandomPlayer(Player):
         if catalogue_length == 0:
             return None
 
+        torch.manual_seed(self.seed)
         best = torch.randint(
             size = (1,),
-            high = (catalogue_length,),
-        )
+            high = catalogue_length,
+        ).item()
         return self.merchant.catalogue()[best]
 
 
@@ -255,7 +257,7 @@ class SequentialRandomPlayer(RandomPlayer):
     ...         break
     """
     def __init__(self, *args, **kwargs):
-        super(SequentialModelBasedPlayer, self).__init__(
+        super(SequentialRandomPlayer, self).__init__(
             *args, **kwargs
         )
 
