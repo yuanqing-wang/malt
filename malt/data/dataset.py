@@ -3,7 +3,7 @@
 # =============================================================================
 import torch
 import dgl
-from typing import Union, List
+from typing import Union, Iterable
 from malt.point import Point
 
 # =============================================================================
@@ -28,6 +28,7 @@ class Dataset(torch.utils.data.Dataset):
     """
 
     _lookup = None
+    _extra = None
 
     def __init__(self, points=[]) -> None:
         super(Dataset, self).__init__()
@@ -38,7 +39,11 @@ class Dataset(torch.utils.data.Dataset):
         return "%s with %s points" % (self.__class__.__name__, len(self))
 
     def _construct_lookup(self):
-        self._lookup = {point.smiles: point for point in self.points}
+        from collections import defaultdict
+        self._lookup = defaultdict(list)
+        for point in self.points:
+            self._lookup[point.smiles].append(point)
+        self._lookup = dict(self._lookup)
 
     @property
     def lookup(self):
@@ -69,7 +74,7 @@ class Dataset(torch.utils.data.Dataset):
         if isinstance(idx, int):
             return self.points[idx]
         elif isinstance(idx, str):
-            return self.lookup[idx]
+            return self.__class__(points=self.lookup[idx])
         elif isinstance(idx, Point):
             return self.lookup[idx.smiles]
         elif isinstance(idx, torch.Tensor):
@@ -159,44 +164,91 @@ class Dataset(torch.utils.data.Dataset):
     def y(self):
         return [point.y for point in self.points]
 
-    @staticmethod
-    def batch_of_g_and_y(points):
-        # initialize results
-        gs = []
-        ys = []
+    @property
+    def smiles(self):
+        return [point.smiles for point in self.points]
 
-        # loop through the points
+    def _construct_extra(self):
+        from collections import defaultdict
+        self._extra = defaultdict(list)
+        for point in self.points:
+            for key, value in point.extra.items():
+                self._extra[key].append(value)
+        self._extra = dict(self._extra)
+
+    @property
+    def extra(self):
+        if self._extra is None:
+            self._construct_extra()
+        return self._extra
+
+    def batch(self, points=None, by=['g', 'y']):
+        """Batches points by provided keys.
+
+        Parameters
+        ----------
+        points : list of Points
+            Defaults to all points in Dataset if none provided.
+        by : Union[Iterable, str]
+            Attributes of class on which to batch.
+
+        Returns
+        -------
+        ret : Union[tuple, dgl.Graph, torch.Tensor]
+            Batched data, in order of keys passed in `by` argument.
+
+        """
+        
+        from collections import defaultdict
+        ret = defaultdict(list)
+
+        if points is None:
+            points = self.points
+
+        # guarantee keys are a list
+        by = [by] if isinstance(by, str) else by
+
+        # loop through points
         for point in points:
-            if not point.is_featurized():  # featurize
-                point.featurize()
-            if point.y is None:
-                raise RuntimeError("No data associated with data. ")
-            gs.append(point.g)
-            ys.append(point.y)
+            for key in by:
+                if key is 'g':
+                    # featurize graphs
+                    if not point.is_featurized():
+                        point.featurize()
+                    ret['g'].append(point.g)
+                
+                elif key is 'y':
+                    if point.y is None:
+                        raise RuntimeError(
+                            'No targets associated with data.'
+                        )
+                    ret['y'].append(point.y)
+                
+                else:
+                    if key not in point.extra:
+                        raise RuntimeError(f'`{key}` not found in `extra`')
+                    ret[key].append(point.extra[key])
 
-        g = dgl.batch(gs)
-        y = torch.tensor(ys, dtype=torch.float32)[:, None]
-        return g, y
+        # collate batches
+        for key in by:
+            if key == 'g':
+                ret['g'] = dgl.batch(ret['g'])
+            else:
+                ret[key] = torch.tensor(ret[key])[:,None]
+        
+        # return batches
+        ret = (*ret.values(), )
+        if len(ret) < 2:
+            ret = ret[0]
+        
+        return ret
 
-    @staticmethod
-    def batch_of_g(points):
-        # initialize results
-        gs = []
 
-        # loop through the points
-        for point in points:
-            if not point.is_featurized():  # featurize
-                point.featurize()
-            gs.append(point.g)
-
-        g = dgl.batch(gs)
-        return g
-
-    def get_batch_of_all_g(self):
+    def batch_all_g(self):
         return next(
             iter(
                 self.view(
-                    "batch_of_g",
+                    by='g',
                     batch_size=len(self)
                 )
             )
@@ -214,7 +266,9 @@ class Dataset(torch.utils.data.Dataset):
 
     def view(
         self,
-        collate_fn: Union[callable, str] = "batch_of_g_and_y",
+        collate_fn: Union[callable, str] = batch,
+        group: Union[None, str] = None,
+        by: Union[Iterable, str] = ['g', 'y'],
         *args,
         **kwargs,
     ):
@@ -224,6 +278,10 @@ class Dataset(torch.utils.data.Dataset):
         ----------
         collate_fn : None or callable
             The function to gather data points.
+        group : Union[None, str]
+            If a group is provided (e.g., 'smiles'), batches data by SMILES groupings.
+        by : Union[Iterable, str]
+
 
         Returns
         -------
@@ -231,13 +289,30 @@ class Dataset(torch.utils.data.Dataset):
             Resulting data loader.
 
         """
+        from functools import partial
+        
+        def _get_smiles_batch_indices():
+            import numpy as np
+            cumul_data = np.cumsum([
+                len(v) for v in self.lookup.values()
+            ])
+            return np.split(
+                np.arange(len(self)),
+                indices_or_sections=cumul_data[:-1],
+            )
+
         # provide default collate function
-        if isinstance(collate_fn, str):
-            collate_fn = getattr(self, collate_fn)
+        collate_fn = self.batch
+
+        if group == 'smiles':
+            batch_sampler = _get_smiles_batch_indices()
+        elif group is None:
+            batch_sampler = None
 
         return torch.utils.data.DataLoader(
             dataset=self.points,
-            collate_fn=collate_fn,
+            collate_fn=partial(collate_fn, by=by),
+            batch_sampler=batch_sampler,
             *args,
             **kwargs,
         )
