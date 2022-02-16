@@ -70,17 +70,9 @@ class Molecule(object):
         return self.smiles
 
     def __eq__(self, other):
-        graphs_match = self.g == other.g
-        try:
             return (
-                graphs_match
+                self.g == other.g
                 and self.metadata == other.metadata
-            )
-
-        except RuntimeError:
-            return graphs_match and all(
-                torch.equal(v, other.metadata[k])
-                for k, v in self.metadata.items()
             )
     
     def __getattr__(self, name):
@@ -104,10 +96,7 @@ class Molecule(object):
                 else:
                     self.metadata[key] += other.metadata[key]
         return self
-    
-    def __len__(self):
-        return len(next(iter(self.metadata.values())))
-    
+        
     def __getitem__(self, idx):
         if not self.metadata:
             raise RuntimeError("No data associated with Molecule.")
@@ -147,8 +136,3 @@ class Molecule(object):
 
     def is_featurized(self):
         return self.g is not None
-
-    def erase_annotation(self):
-        if 'y' in self.metadata:
-            self.y = None
-        return sel

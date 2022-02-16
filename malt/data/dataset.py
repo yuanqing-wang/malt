@@ -10,7 +10,7 @@ from malt.point import Point
 # MODULE CLASSES
 # =============================================================================
 class Dataset(torch.utils.data.Dataset):
-    """A collection of Points with functionalities to be compatible with
+    """A collection of Molecules with functionalities to be compatible with
     training and optimization.
 
     Parameters
