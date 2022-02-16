@@ -63,18 +63,25 @@ class Molecule(object):
     ) -> None:
         self.smiles = smiles
         self.g = g
-        self.metadata = validate_metadata(metadata)
+        self.metadata = metadata
         self.featurizer = featurizer
 
     def __repr__(self):
         return self.smiles
 
     def __eq__(self, other):
-        return (
-            self.g == other.g
-            and self.y == other.y
-            and self.extra == other.extra
-        )
+        graphs_match = self.g == other.g
+        try:
+            return (
+                graphs_match
+                and self.metadata == other.metadata
+            )
+
+        except RuntimeError:
+            return graphs_match and all(
+                torch.equal(v, other.metadata[k])
+                for k, v in self.metadata.items()
+            )
     
     def __getattr__(self, name):
         if name not in self.metadata:
@@ -98,41 +105,28 @@ class Molecule(object):
                     self.metadata[key] += other.metadata[key]
         return self
     
-    # def __len__(self, 
-                
+    def __len__(self):
+        return len(next(iter(self.metadata.values())))
+    
     def __getitem__(self, idx):
         if not self.metadata:
             raise RuntimeError("No data associated with Molecule.")
-        if isinstance(idx, int):
-            return self.__class__(
-                smiles = self.smiles,
-                g = self.g,
-                metadata = {k: [v[idx]] for k, v in self.metadata.items()}
-            )
-        elif isinstance(idx, torch.Tensor):
+        if isinstance(idx, torch.Tensor):
             idx = idx.detach().flatten().cpu().numpy().tolist()
-        
         if isinstance(idx, list):
-            return self.__class__(
-                smiles = self.smiles,
-                g = self.g,
-                metadata = {
-                    k: list(map(v.__getitem__, idx))
-                    for k, v in self.metadata.items()
-                }
-            )
-
+            metadata = {k: list(map(v.__getitem__, idx))
+                        for k, v in self.metadata.items()}
+        if isinstance(idx, int):
+            metadata = {k: [v[idx]] for k, v in self.metadata.items()}        
         elif isinstance(idx, slice):
-            return self.__class__(
-                smiles = self.smiles,
-                g = self.g,
-                metadata = {k: v[idx] for k, v in self.metadata.items()}
-            )
-
+            metadata = {k: v[idx] for k, v in self.metadata.items()}
         else:
             raise RuntimeError("The slice is not recognized.")
-
-        return self.__class__(points=self.points[idx])
+        return self.__class__(
+                smiles = self.smiles,
+                g = self.g,
+                metadata = metadata
+        )
 
     def featurize(self):
         """Featurize the SMILES string to get the graph.
@@ -157,4 +151,4 @@ class Molecule(object):
     def erase_annotation(self):
         if 'y' in self.metadata:
             self.y = None
-        return self
+        return sel
