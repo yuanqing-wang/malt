@@ -1,10 +1,10 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import torch
 import dgl
+import malt
+import torch
 from typing import Union, Iterable
-from malt.molecule import Molecule
 
 # =============================================================================
 # MODULE CLASSES
@@ -15,8 +15,8 @@ class Dataset(torch.utils.data.Dataset):
 
     Parameters
     ----------
-    molecules : List[molecule]
-        A list of molecules.
+    molecules : List[malt.Molecule]
+        A list of Molecules.
 
     Methods
     -------
@@ -154,38 +154,23 @@ class Dataset(torch.utils.data.Dataset):
         return self
 
     @property
-    def y(self):
-        return [molecule.y for molecule in self.molecules]
-
-    @property
     def smiles(self):
         return [molecule.smiles for molecule in self.molecules]
 
-    def _construct_extra(self):
-        from collections import defaultdict
-        self._extra = defaultdict(list)
-        for molecule in self.molecules:
-            for key, value in molecule.extra.items():
-                self._extra[key].append(value)
-        self._extra = dict(self._extra)
-
-    @property
-    def extra(self):
-        if self._extra is None:
-            self._construct_extra()
-        return self._extra
-
-    def batch(self, molecules=None, assay=None, by=['g', 'y']):
-        """Batches molecules by provided keys.
+    def batch(
+        self, molecules=None, by=['g', 'y'], assay=None,
+        batch_metadata=malt.data.utils.batch_metadata
+    ):
+        """ Batches molecules by provided keys.
 
         Parameters
         ----------
         molecules : list of molecules
             Defaults to all molecules in Dataset if none provided.
         assay : Union[None, str]
-            Batch data from molecules using key provided to filter metadata.
+            Filter metadata using assay key.
         by : Union[Iterable, str]
-            Attributes of class on which to batch.
+            Attributes of molecule on which to batch.
 
         Returns
         -------
@@ -211,12 +196,10 @@ class Dataset(torch.utils.data.Dataset):
                     if not molecule.is_featurized():
                         molecule.featurize()
                     ret['g'].append(molecule.g)
-                                
+
                 else:
-                    for record in molecule[assay]:
-                        if key not in record:
-                            raise RuntimeError(f'`{key}` not found in `metadata`')
-                        ret[key].append(record[key])
+                    m = batch_metadata(molecule, assay, key)
+                    ret[key].extend(m)
 
         # collate batches
         for key in by:
