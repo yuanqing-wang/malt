@@ -8,22 +8,6 @@ import torch
 from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
 
 # =============================================================================
-# MODULE FUNCTIONS
-# =============================================================================
-
-def validate_metadata(metadata):
-    if not metadata:
-        return metadata
-    else:
-        metadata_values = iter(metadata.values())
-        length = len(next(metadata_values))
-        if all(len(v) == length for v in metadata_values):
-            return metadata
-        else:
-            raise RuntimeError('Length of values in `metadata` do not match.')
-
-
-# =============================================================================
 # MODULE CLASSES
 # =============================================================================
 class Molecule(object):
@@ -74,48 +58,6 @@ class Molecule(object):
                 self.g == other.g
                 and self.metadata == other.metadata
             )
-    
-    def __getattr__(self, name):
-        if name not in self.metadata:
-            raise RuntimeError(
-                f'`{name}` is not associated with this Molecule.'
-            )
-        return self.metadata[name]
-    
-    def __add__(self, other):
-        if self.smiles != other.smiles:
-            raise RuntimeError(
-                f'SMILES must match; `{other.smiles}` != `{self.smiles}`.'
-            )
-        else:
-            for key in other.metadata:
-                if key not in self.metadata:
-                    raise RuntimeError(
-                        f'All keys must match; `{key}` not associated with "{self.smiles}"'
-                    )
-                else:
-                    self.metadata[key] += other.metadata[key]
-        return self
-        
-    def __getitem__(self, idx):
-        if not self.metadata:
-            raise RuntimeError("No data associated with Molecule.")
-        if isinstance(idx, torch.Tensor):
-            idx = idx.detach().flatten().cpu().numpy().tolist()
-        if isinstance(idx, list):
-            metadata = {k: list(map(v.__getitem__, idx))
-                        for k, v in self.metadata.items()}
-        if isinstance(idx, int):
-            metadata = {k: [v[idx]] for k, v in self.metadata.items()}        
-        elif isinstance(idx, slice):
-            metadata = {k: v[idx] for k, v in self.metadata.items()}
-        else:
-            raise RuntimeError("The slice is not recognized.")
-        return self.__class__(
-                smiles = self.smiles,
-                g = self.g,
-                metadata = metadata
-        )
 
     def featurize(self):
         """Featurize the SMILES string to get the graph.
@@ -136,3 +78,31 @@ class Molecule(object):
 
     def is_featurized(self):
         return self.g is not None
+
+    def __getitem__(self, idx):
+        if not self.metadata:
+            raise RuntimeError("No data associated with Molecule.")
+        elif isinstance(idx, str):
+            return self.metadata[idx]
+        elif idx is None and len(self.metadata) == 1:
+            return list(self.metadata.values())[0]
+        else:
+            raise NotImplementedError
+
+    def __contains__(self, key):
+        if not self.metadata:
+            raise RuntimeError("No data associated with Molecule.")
+        return key in self.metadata
+
+    def __add__(self, other):
+        if self.smiles != other.smiles:
+            raise RuntimeError(
+                f'SMILES must match; `{other.smiles}` != `{self.smiles}`.'
+            )
+        else:
+            for key in other.metadata:
+                if key not in self.metadata:
+                    self.metadata[key] = other.metadata[key]
+                else:
+                    self.metadata[key] += other.metadata[key]
+        return self
