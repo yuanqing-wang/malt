@@ -64,27 +64,6 @@ class Dataset(torch.utils.data.Dataset):
             return 0
         return len(self.molecules)
 
-    # def __getitem__(self, idx):
-    #     if not self.metadata:
-    #         raise RuntimeError("No data associated with Molecule.")
-    #     if isinstance(idx, torch.Tensor):
-    #         idx = idx.detach().flatten().cpu().numpy().tolist()
-    #     if isinstance(idx, list):
-    #         metadata = {k: list(map(v.__getitem__, idx))
-    #                     for k, v in self.metadata.items()}
-    #     if isinstance(idx, int):
-    #         metadata = {k: [v[idx]] for k, v in self.metadata.items()}        
-    #     elif isinstance(idx, slice):
-    #         metadata = {k: v[idx] for k, v in self.metadata.items()}
-    #     else:
-    #         raise RuntimeError("The slice is not recognized.")
-    #     return self.__class__(
-    #             smiles = self.smiles,
-    #             g = self.g,
-    #             metadata = metadata
-    #     )
-
-
     def __getitem__(self, idx):
         if self.molecules is None:
             raise RuntimeError("Empty Portfolio.")
