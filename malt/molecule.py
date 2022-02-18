@@ -4,6 +4,7 @@
 from typing import Union, Any
 import functools
 import dgl
+import copy
 import torch
 from dgllife.utils import smiles_to_bigraph, CanonicalAtomFeaturizer
 
@@ -78,7 +79,7 @@ class Molecule(object):
 
 
 class AssayedMolecule(Molecule):
-    """ Models information associated with a molecule.
+    """ Models assay information associated with a molecule.
 
     Parameters
     ----------
@@ -147,12 +148,13 @@ class AssayedMolecule(Molecule):
                 f'SMILES must match; `{other.smiles}` != `{self.smiles}`.'
             )
         else:
+            mol_temp = copy.deepcopy(self)
             for key in other.metadata:
-                if key not in self.metadata:
-                    self.metadata[key] = other.metadata[key]
+                if key not in mol_temp:
+                    mol_temp.metadata[key] = other.metadata[key]
                 else:
-                    self.metadata[key] += other.metadata[key]
-        return self
+                    mol_temp.metadata[key] += other.metadata[key]
+        return mol_temp
 
     def erase_annotation(self):
         self.metadata = {}

@@ -4,6 +4,8 @@
 import dgl
 import malt
 import torch
+from malt.molecule import Molecule
+from malt.data.utils import collate_metadata, collate_metadata_assays
 from typing import Union, Iterable
 
 # =============================================================================
@@ -39,7 +41,7 @@ class Dataset(torch.utils.data.Dataset):
         return "%s with %s molecules" % (self.__class__.__name__, len(self))
 
     def _construct_lookup(self):
-        self._lookup = {mol.smiles: mol for mol in molecules}
+        self._lookup = {mol.smiles: mol for mol in self.molecules}
 
     @property
     def lookup(self):
@@ -157,9 +159,10 @@ class Dataset(torch.utils.data.Dataset):
     def smiles(self):
         return [molecule.smiles for molecule in self.molecules]
 
-    def batch(
-        self, molecules=None, by=['g', 'y'], assay=None,
-        batch_metadata=malt.data.utils.batch_metadata
+    @staticmethod
+    def _batch(
+        molecules=None, by=['g', 'y'], assay=None,
+        batch_meta=collate_metadata
     ):
         """ Batches molecules by provided keys.
 
@@ -181,9 +184,6 @@ class Dataset(torch.utils.data.Dataset):
         from collections import defaultdict
         ret = defaultdict(list)
 
-        if molecules is None:
-            molecules = self.molecules
-
         # guarantee keys are a list
         by = [by] if isinstance(by, str) else by
 
@@ -198,7 +198,7 @@ class Dataset(torch.utils.data.Dataset):
                     ret['g'].append(molecule.g)
 
                 else:
-                    m = batch_metadata(molecule, assay, key)
+                    m = batch_meta(molecule, key, assay=assay)
                     ret[key].extend(m)
 
         # collate batches
@@ -216,14 +216,14 @@ class Dataset(torch.utils.data.Dataset):
         return ret
 
 
+    def batch(self, **kwargs):
+        return self._batch(molecules=self.molecules, **kwargs)
+
+
     def batch_all_g(self):
-        return next(
-            iter(
-                self.view(
-                    by='g',
-                    batch_size=len(self)
-                )
-            )
+        return self.batch(
+            by='g',
+            batch_size=len(self)
         )
 
     def erase_annotation(self):
@@ -241,6 +241,7 @@ class Dataset(torch.utils.data.Dataset):
         collate_fn: Union[callable, str] = batch,
         assay: Union[None, str] = None,
         by: Union[Iterable, str] = ['g', 'y'],
+        batch_meta: callable = collate_metadata,
         *args,
         **kwargs,
     ):
@@ -264,11 +265,16 @@ class Dataset(torch.utils.data.Dataset):
         from functools import partial
         
         # provide default collate function
-        collate_fn = self.batch
+        collate_fn = self._batch
 
         return torch.utils.data.DataLoader(
             dataset=self.molecules,
-            collate_fn=partial(collate_fn, by=by, assay=assay),
+            collate_fn=partial(
+                collate_fn,
+                by=by,
+                assay=assay,
+                batch_meta=batch_meta
+            ),
             *args,
             **kwargs,
         )
