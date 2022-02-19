@@ -3,7 +3,7 @@
 # =============================================================================
 import dgllife
 from malt.data.dataset import Dataset
-from malt.molecule import Molecule
+from malt.molecule import AssayedMolecule
 import copy
 
 # =============================================================================
@@ -13,9 +13,9 @@ def _dataset_from_dgllife(dgllife_dataset):
     idx = 0
     ds = []
     for smiles, g, y in dgllife_dataset:
-        point = Point(smiles, g, y.item(), extra={"idx": idx})
+        molecule = AssayedMolecule(smiles, g, metadata={'idx': idx, 'y': y.item()})
         idx += 1
-        ds.append(point)
+        ds.append(molecule)
 
     ds = Dataset(ds)
 
@@ -63,9 +63,9 @@ def linear_alkanes(max_carbon=10):
 
     """
 
-    dataset =  Dataset([Point(idx * "C") for idx in range(1, max_carbon+1)])
-    def annotate(point):
-        point.y = len(point.smiles)
-        return point
+    dataset =  Dataset([Molecule(idx * "C") for idx in range(1, max_carbon+1)])
+    def annotate(molecule):
+        molecule.y = len(molecule.smiles)
+        return molecule
     dataset = dataset.apply(annotate)
     return dataset
