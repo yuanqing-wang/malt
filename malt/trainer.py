@@ -79,8 +79,8 @@ def get_default_trainer(
             batch_size = len(ds)
 
         # put data into loader
-        ds_tr = ds_tr.view(batch_size=batch_size, pin_memory=False)
-        ds_vl = ds_vl.view(batch_size=len(ds_vl), pin_memory=False)
+        ds_tr = ds_tr.view(batch_size=batch_size, pin_memory=True)
+        ds_vl = ds_vl.view(batch_size=len(ds_vl), pin_memory=True)
 
         # get optimizer object
         optimizer = getattr(torch.optim, optimizer,)(
