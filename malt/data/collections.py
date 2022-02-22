@@ -3,7 +3,7 @@
 # =============================================================================
 import dgllife
 from malt.data.dataset import Dataset
-from malt.molecule import AssayedMolecule
+from malt.molecule import Molecule, AssayedMolecule
 import copy
 
 # =============================================================================
@@ -13,7 +13,7 @@ def _dataset_from_dgllife(dgllife_dataset):
     idx = 0
     ds = []
     for smiles, g, y in dgllife_dataset:
-        molecule = AssayedMolecule(smiles, g, metadata={'idx': idx, 'y': y.item()})
+        molecule = Molecule(smiles, g, metadata={'idx': idx, 'y': y.item()})
         idx += 1
         ds.append(molecule)
 
