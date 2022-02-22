@@ -23,6 +23,17 @@ def collate_metadata(molecule, key, **kwargs):
     meta : list
         Elements are metadata from assay.
     """
+    from malt import AssayedMolecule
+
+    if isinstance(molecule, AssayedMolecule):
+        return _collate_assayedmolecule_metadata(molecule, key, **kwargs)
+    else:
+        return _collate_molecule_metadata(molecule, key)
+
+
+def _collate_molecule_metadata(
+        molecule, key
+    ):
     if key not in molecule.metadata:
         raise RuntimeError(f'`{key}` not found in `metadata`')
 
@@ -31,8 +42,9 @@ def collate_metadata(molecule, key, **kwargs):
         return meta
     else:
         return [meta]
+    
 
-def collate_metadata_assays(molecule, key, assay: Union[None, str] = None):
+def _collate_assayedmolecule_metadata(molecule, key, assay: Union[None, str] = None):
     """ Batches metadata from AssayedMolecule.
 
     Parameters

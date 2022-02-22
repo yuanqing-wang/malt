@@ -5,7 +5,7 @@ import dgl
 import malt
 import torch
 from malt.molecule import Molecule
-from malt.data.utils import collate_metadata, collate_metadata_assays
+from malt.data.utils import collate_metadata
 from typing import Union, Iterable
 
 # =============================================================================
@@ -191,7 +191,7 @@ class Dataset(torch.utils.data.Dataset):
         for molecule in molecules:
             
             for key in by:
-                if key is 'g':
+                if key == 'g':
                     # featurize graphs
                     if not molecule.is_featurized():
                         molecule.featurize()
@@ -207,6 +207,8 @@ class Dataset(torch.utils.data.Dataset):
                 ret['g'] = dgl.batch(ret['g'])
             else:
                 ret[key] = torch.tensor(ret[key])[:,None]
+            if torch.cuda.is_available():
+                ret[key] = ret[key].to(torch.cuda.current_device())
         
         # return batches
         ret = (*ret.values(), )
