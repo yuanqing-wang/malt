@@ -62,7 +62,7 @@ class HomoschedasticGaussianLikelihood(SimpleLikelihood):
 
 
 class HeteroschedasticGaussianLikelihood(SimpleLikelihood):
-    """ A Gaussian likelihood with homoschedastic noise model. """
+    """ A Gaussian likelihood with heteroschedastic noise model. """
 
     def __init__(self) -> None:
         super(HeteroschedasticGaussianLikelihood, self).__init__(

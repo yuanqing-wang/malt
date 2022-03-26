@@ -32,8 +32,10 @@ def collate_metadata(molecule, key, **kwargs):
 def _collate_molecule_metadata(
         molecule, key
     ):
+
     if not molecule.metadata:
         raise RuntimeError(f'No `metadata` associated with `{molecule.smiles}`')
+
     if key not in molecule.metadata:
         raise RuntimeError(f'`{key}` not found in `metadata`')
 

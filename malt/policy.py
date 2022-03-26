@@ -60,3 +60,72 @@ class Greedy(Policy):
             dim=0,
         )
         return idxs
+
+
+class Random(Policy):
+    """ Greedy policy. """
+
+    def __init__(
+        self,
+        acquisition_size: int = 1,
+    ):
+        super(Random, self).__init__()
+        self.acquisition_size = acquisition_size
+
+    def forward(
+        self, distribution: torch.distributions.Distribution
+    ) -> torch.Tensor:
+        
+        idxs = torch.randint(
+            high = distribution.batch_shape[0],
+            size = (self.acquisition_size,)
+        )
+
+        return idxs
+
+
+
+class ThompsonSampling(Policy):
+    """ Thompson sampling policy. """
+
+    def __init__(
+        self,
+        acquisition_size: int = 1,
+    ):
+        super(ThompsonSampling, self).__init__()
+        self.acquisition_size = acquisition_size
+
+    def forward(
+        self, distribution: torch.distributions.Distribution
+    ) -> torch.Tensor:
+
+        # sample f_X
+        thetas = distribution.sample(
+            (self.acquisition_size, )
+        )
+
+        # find unique argmax f_X
+        idxs_dups = torch.argmax(thetas, axis=1).ravel()
+        idxs_ts = torch.unique(idxs_dups)
+        num_idxs = len(idxs_ts)
+
+        # if we didn't fill the round, select rest randomly
+        if num_idxs < self.acquisition_size:
+
+            # find unselected indices; mask indices
+            mask = torch.zeros(len(data)).bool()
+            mask[idxs_ts] = 1
+            range_masked = torch.arange(len(data))[~mask]
+
+            # shuffle unselected indices and select
+            idx = torch.randperm(range_masked.nelement())
+            range_masked = range_masked.view(-1)[idx].view(range_masked.size())
+            idx_rand = range_masked[:(self.acquisition_size - num_idxs)]
+            
+            # append random indices
+            idxs = torch.cat([idxs_ts, idx_rand])
+
+        else:
+            idxs = idxs_ts
+
+        return idxs

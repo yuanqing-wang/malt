@@ -29,6 +29,7 @@ COLLECTIONS = [
     "ESOL",
     "FreeSolv",
     "Lipophilicity",
+    "",
 ]
 
 def _get_collection(collection):
