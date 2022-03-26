@@ -65,7 +65,7 @@ def linear_alkanes(max_carbon=10):
 
     dataset =  Dataset([Molecule(idx * "C") for idx in range(1, max_carbon+1)])
     def annotate(molecule):
-        molecule.y = len(molecule.smiles)
+        molecule.metadata = {'y': float(len(molecule.smiles))}
         return molecule
     dataset = dataset.apply(annotate)
     return dataset

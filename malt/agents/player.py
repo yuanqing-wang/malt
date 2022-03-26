@@ -1,4 +1,5 @@
 import abc
+import torch
 from typing import Union, Callable
 from .agent import Agent
 from .merchant import Merchant
@@ -114,7 +115,7 @@ class ModelBasedPlayer(Player):
         if len(self.merchant.catalogue()) == 0:
             return None
         posterior = self.model.condition(
-            self.merchant.catalogue().get_batch_of_all_g(),
+            self.merchant.catalogue().batch(by=['g']),
         )
 
         best = int(self.policy(posterior).item())

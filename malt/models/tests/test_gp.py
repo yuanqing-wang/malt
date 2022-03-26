@@ -27,7 +27,7 @@ def test_blind_condition():
         likelihood=malt.models.likelihood.HeteroschedasticGaussianLikelihood(),
     )
 
-    point = malt.Point("C")
+    point = malt.Molecule("C")
     point.featurize()
     graph = dgl.batch([point.g])
 
@@ -50,7 +50,7 @@ def test_gp_train():
         likelihood=malt.models.likelihood.HeteroschedasticGaussianLikelihood(),
     )
 
-    point = malt.Point("C")
+    point = malt.Molecule("C")
     point.featurize()
     graph = dgl.batch([point.g])
 
@@ -77,9 +77,13 @@ def test_gp_shape():
         likelihood=malt.models.likelihood.HeteroschedasticGaussianLikelihood(),
     )
 
+    if torch.cuda.is_available():
+        net.cuda()
+
     dataset = malt.data.collections.linear_alkanes(10)
     dataset_loader = dataset.view(batch_size=len(dataset))
     g, y = next(iter(dataset_loader))
+
     loss = net.loss(g, y)
 
     y_hat = net.condition(g)
@@ -88,19 +92,24 @@ def test_gp_shape():
 
 def test_gp_integrate():
     import malt
+    import torch
     from malt.agents.player import SequentialModelBasedPlayer
+
     dataset = malt.data.collections.linear_alkanes(10)
+    model = malt.models.supervised_model.GaussianProcessSupervisedModel(
+       representation=malt.models.representation.DGLRepresentation(
+           out_features=128
+       ),
+       regressor=malt.models.regressor.ExactGaussianProcessRegressor(
+           in_features=128, out_features=2,
+       ),
+       likelihood=malt.models.likelihood.HeteroschedasticGaussianLikelihood(),
+    )
+    if torch.cuda.is_available():
+        model.cuda()
 
     player = SequentialModelBasedPlayer(
-       model = malt.models.supervised_model.GaussianProcessSupervisedModel(
-           representation=malt.models.representation.DGLRepresentation(
-               out_features=128
-           ),
-           regressor=malt.models.regressor.ExactGaussianProcessRegressor(
-               in_features=128, out_features=2,
-           ),
-           likelihood=malt.models.likelihood.HeteroschedasticGaussianLikelihood(),
-       ),
+       model = model,
        policy=malt.policy.Greedy(),
        trainer=malt.trainer.get_default_trainer(),
        merchant=malt.agents.merchant.DatasetMerchant(dataset),

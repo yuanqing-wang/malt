@@ -34,9 +34,9 @@ def test_forward():
         likelihood=malt.models.likelihood.HomoschedasticGaussianLikelihood(),
     )
 
-    point = malt.Point(smiles="C").featurize()
+    point = malt.Molecule(smiles="C").featurize()
     distribution = net.condition(point.g)
     assert isinstance(distribution, torch.distributions.Distribution)
     assert distribution.batch_shape == torch.Size([1, 1])
 
-    net.loss(point.g, 0.0).backward()
+    net.loss(point.g, torch.Tensor([0.0])).backward()

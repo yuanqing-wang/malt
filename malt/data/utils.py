@@ -9,7 +9,6 @@ from typing import Union, Iterable
 
 def collate_metadata(molecule, key, **kwargs):
     """ Batches metadata from Molecule.
-
     Parameters
     ----------
     molecule : malt.Molecule
@@ -17,12 +16,24 @@ def collate_metadata(molecule, key, **kwargs):
         Filter metadata using assay key.
     key : str
         Attribute of class on which to batch.
-
     Returns
     -------
     meta : list
         Elements are metadata from assay.
     """
+    from malt import AssayedMolecule
+
+    if isinstance(molecule, AssayedMolecule):
+        return _collate_assayedmolecule_metadata(molecule, key, **kwargs)
+    else:
+        return _collate_molecule_metadata(molecule, key)
+
+
+def _collate_molecule_metadata(
+        molecule, key
+    ):
+    if not molecule.metadata:
+        raise RuntimeError(f'No `metadata` associated with `{molecule.smiles}`')
     if key not in molecule.metadata:
         raise RuntimeError(f'`{key}` not found in `metadata`')
 
@@ -31,10 +42,10 @@ def collate_metadata(molecule, key, **kwargs):
         return meta
     else:
         return [meta]
+    
 
-def collate_metadata_assays(molecule, key, assay: Union[None, str] = None):
+def _collate_assayedmolecule_metadata(molecule, key, assay: Union[None, str] = None):
     """ Batches metadata from AssayedMolecule.
-
     Parameters
     ----------
     molecule : malt.Molecule
@@ -42,7 +53,6 @@ def collate_metadata_assays(molecule, key, assay: Union[None, str] = None):
         Filter metadata using assay key.
     key : str
         Attribute of class on which to batch.
-
     Returns
     -------
     meta : list

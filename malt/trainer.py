@@ -79,8 +79,8 @@ def get_default_trainer(
             batch_size = len(ds)
 
         # put data into loader
-        ds_tr = ds_tr.view(batch_size=batch_size, pin_memory=True)
-        ds_vl = ds_vl.view(batch_size=len(ds_vl), pin_memory=True)
+        ds_tr = ds_tr.view(batch_size=batch_size)
+        ds_vl = ds_vl.view(batch_size=len(ds_vl))
 
         # get optimizer object
         optimizer = getattr(torch.optim, optimizer,)(
@@ -96,6 +96,7 @@ def get_default_trainer(
         )
 
         # train
+        model.train()
         for idx_epoch in range(n_epochs):  # loop through the epochs
             for x in ds_tr:  # loop through the dataset
                 x = [_x.to(device) for _x in x]

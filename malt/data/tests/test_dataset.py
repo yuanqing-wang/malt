@@ -74,7 +74,7 @@ def test_dataset_view_batch_of_g():
 def test_dataset_with_assayed_molecule_view():
     import torch
     import dgl
-    from malt.data.utils import collate_metadata_assays
+    from malt.data.utils import collate_metadata
     from malt.data.dataset import Dataset
     from malt.molecule import AssayedMolecule
 
@@ -85,7 +85,7 @@ def test_dataset_with_assayed_molecule_view():
         batch_size=2,
         assay='assay',
         by=['g', 'y'],
-        batch_meta=collate_metadata_assays
+        batch_meta=collate_metadata
     )
     assert isinstance(_ds, torch.utils.data.DataLoader)
     g, y = next(iter(_ds))

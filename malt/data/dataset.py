@@ -5,7 +5,7 @@ import dgl
 import malt
 import torch
 from malt.molecule import Molecule
-from malt.data.utils import collate_metadata, collate_metadata_assays
+from malt.data.utils import collate_metadata
 from typing import Union, Iterable
 
 # =============================================================================
@@ -14,19 +14,16 @@ from typing import Union, Iterable
 class Dataset(torch.utils.data.Dataset):
     """A collection of Molecules with functionalities to be compatible with
     training and optimization.
-
     Parameters
     ----------
     molecules : List[malt.Molecule]
         A list of Molecules.
-
     Methods
     -------
     featurize(molecules)
         Featurize all molecules in the dataset.
     view()
         Generate a torch.utils.data.DataLoader from this Dataset.
-
     """
 
     _lookup = None
@@ -138,7 +135,6 @@ class Dataset(torch.utils.data.Dataset):
 
     def append(self, molecule):
         """Append a molecule to the dataset.
-
         Parameters
         ----------
         molecule : molecule
@@ -162,10 +158,10 @@ class Dataset(torch.utils.data.Dataset):
     @staticmethod
     def _batch(
         molecules=None, by=['g', 'y'], assay=None,
-        batch_meta=collate_metadata
+        batch_meta=collate_metadata,
+        **kwargs
     ):
         """ Batches molecules by provided keys.
-
         Parameters
         ----------
         molecules : list of molecules
@@ -174,12 +170,10 @@ class Dataset(torch.utils.data.Dataset):
             Filter metadata using assay key.
         by : Union[Iterable, str]
             Attributes of molecule on which to batch.
-
         Returns
         -------
         ret : Union[tuple, dgl.Graph, torch.Tensor]
             Batched data, in order of keys passed in `by` argument.
-
         """
         from collections import defaultdict
         ret = defaultdict(list)
@@ -191,7 +185,7 @@ class Dataset(torch.utils.data.Dataset):
         for molecule in molecules:
             
             for key in by:
-                if key is 'g':
+                if key == 'g':
                     # featurize graphs
                     if not molecule.is_featurized():
                         molecule.featurize()
@@ -207,6 +201,8 @@ class Dataset(torch.utils.data.Dataset):
                 ret['g'] = dgl.batch(ret['g'])
             else:
                 ret[key] = torch.tensor(ret[key])[:,None]
+            if torch.cuda.is_available():
+                ret[key] = ret[key].to(torch.cuda.current_device())
         
         # return batches
         ret = (*ret.values(), )
@@ -218,13 +214,6 @@ class Dataset(torch.utils.data.Dataset):
 
     def batch(self, **kwargs):
         return self._batch(molecules=self.molecules, **kwargs)
-
-
-    def batch_all_g(self):
-        return self.batch(
-            by='g',
-            batch_size=len(self)
-        )
 
     def erase_annotation(self):
         for molecule in self.molecules:
@@ -246,7 +235,6 @@ class Dataset(torch.utils.data.Dataset):
         **kwargs,
     ):
         """Provide a data loader from portfolio.
-
         Parameters
         ----------
         collate_fn : None or callable
@@ -254,13 +242,10 @@ class Dataset(torch.utils.data.Dataset):
         assay : Union[None, str]
             Batch data from molecules using key provided to filter metadata.
         by : Union[Iterable, str]
-
-
         Returns
         -------
         torch.utils.data.DataLoader
             Resulting data loader.
-
         """
         from functools import partial
         

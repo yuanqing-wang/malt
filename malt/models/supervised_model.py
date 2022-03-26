@@ -3,6 +3,7 @@
 # =============================================================================
 import abc
 import torch
+from typing import Any
 from .regressor import Regressor
 from .representation import Representation
 from .likelihood import (
@@ -106,12 +107,9 @@ class GaussianProcessSupervisedModel(SupervisedModel):
         self,
         representation: Representation,
         regressor: Regressor,
-        likelihood: SimpleLikelihood,
+        likelihood: Any = HeteroschedasticGaussianLikelihood,
     ):
-        assert isinstance(
-            likelihood,
-            HeteroschedasticGaussianLikelihood,
-        )
+
         super(GaussianProcessSupervisedModel, self).__init__(
             representation=representation,
             regressor=regressor,

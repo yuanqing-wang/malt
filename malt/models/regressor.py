@@ -3,6 +3,7 @@
 # =============================================================================
 import abc
 import torch
+import gpytorch
 
 # =============================================================================
 # BASE CLASSES
@@ -11,7 +12,7 @@ class Regressor(torch.nn.Module, abc.ABC):
     """Base class for a regressor."""
 
     def __init__(self, in_features, out_features, *args, **kwargs):
-        super(Regressor, self).__init__()
+        super(Regressor, self).__init__(*args, **kwargs)
         self.in_features = in_features
         self.out_features = out_features
 
@@ -155,7 +156,7 @@ class ExactGaussianProcessRegressor(Regressor):
         )
 
         # (batch_size_tr, batch_size_tr)
-        l_low = torch.cholesky(k_plus_sigma)
+        l_low = torch.torch.linalg.cholesky(k_plus_sigma)
         l_up = l_low.t()
 
         # (batch_size_tr. 1)
@@ -295,3 +296,85 @@ class ExactGaussianProcessRegressor(Regressor):
         )
 
         return nll
+
+
+class GPyTorchExactRegressor(Regressor, gpytorch.models.ExactGP):
+    
+    train_inputs = torch.ones(1)
+    train_targets = torch.ones(1)
+    
+    def __init__(
+        self,
+        in_features: int = 32,
+        out_features: int = 2,
+        *args
+    ):
+
+        # it always has to be a Gaussian likelihood anyway
+        likelihood = gpytorch.likelihoods.GaussianLikelihood()
+        super(GPyTorchExactRegressor, self).__init__(
+            in_features,
+            out_features,
+            self.train_inputs,
+            self.train_targets,
+            likelihood,
+        )
+
+        self.mean_module = gpytorch.means.ConstantMean()
+        self.covar_module = gpytorch.kernels.ScaleKernel(
+            gpytorch.kernels.RBFKernel(ard_num_dims=in_features)
+        )
+
+
+    def forward(self, x, *args, **kwargs):
+        r"""Calculate the predictive distribution given `x_te`.
+
+        Parameters
+        ----------
+        x_te : `torch.Tensor`, `shape=(n_te, hidden_dimension)`
+            Test input.
+
+        x_tr : `torch.Tensor`, `shape=(n_tr, hidden_dimension)`
+            (Default value = None)
+            Training input.
+
+        y_tr : `torch.Tensor`, `shape=(n_tr, 1)`
+            (Default value = None)
+            Test input.
+
+        sampler : `torch.optim.Optimizer` or `pinot.Sampler`
+            (Default value = None)
+            Sampler.
+
+        Returns
+        -------
+        distribution : `torch.distributions.Distribution`
+            Predictive distribution.
+        """
+        mean_x = self.mean_module(x)
+        covar_x = self.covar_module(x)
+        return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
+
+    # alias forward
+    condition = forward
+
+    def loss(self, x_tr, y_tr, *args, **kwargs):
+        r"""Compute the loss.
+        Note
+        ----
+        Defined to be negative Gaussian likelihood.
+        Parameters
+        ----------
+        x_tr : `torch.Tensor`, `shape=(n_training_data, hidden_dimension)`
+            Input of training data.
+        y_tr : `torch.Tensor`, `shape=(n_training_data, 1)`
+            Target of training data.
+        Returns
+        -------
+        nll : `torch.Tensor`, `shape=(,)`
+            Negative log likelihood.
+        """
+        self.set_train_data(x_tr, y_tr.ravel(), strict=False)
+        mll = gpytorch.mlls.ExactMarginalLogLikelihood(self.likelihood, self)
+        y_pred = self(x_tr)
+        return -mll(y_pred, y_tr)
