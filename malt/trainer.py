@@ -47,6 +47,7 @@ def get_default_trainer(
     def _default_trainer_without_player(
         model,
         ds,
+        marginal_likelihood,
         optimizer=optimizer,
         learning_rate=learning_rate,
         n_epochs=n_epochs,
@@ -96,29 +97,32 @@ def get_default_trainer(
         )
 
         # train
-        model.train()
         for idx_epoch in range(n_epochs):  # loop through the epochs
+
+            model.train()
             for x in ds_tr:  # loop through the dataset
                 x = [_x.to(device) for _x in x]
+                inputs, targets = x
                 optimizer.zero_grad()
-                loss = model.loss(*x).mean()  # average just in case
+                output = model(inputs)
+                loss = -marginal_likelihood(output, targets).mean()
                 loss.backward()
                 optimizer.step()
 
+            # model.eval()
+            # with torch.no_grad():
+            #     x = next(iter(ds_vl))
+            #     x = [_x.to(device) for _x in x]
+            #     inputs, targets = x
+            #     output = model(inputs)
+            #     print(model.regressor.mll_vars[0].shape)
+            #     loss = -marginal_likelihood(output, targets).mean()
 
-            with torch.no_grad():
-                x = next(iter(ds_vl))
-                x = [_x.to(device) for _x in x]
-                loss = model.loss(*x).mean()
+            #     if idx_epoch > warmup:
+            #         scheduler.step(loss)
+            #         if optimizer.param_groups[0]['lr'] < min_learning_rate:
+            #             break
 
-                if idx_epoch > warmup:
-                    scheduler.step(loss)
-                    if optimizer.param_groups[0]['lr'] < min_learning_rate:
-                        break
-
-        x = next(iter(ds_tr))
-        x = [_x.to(device) for _x in x]
-        loss = model.loss(*x).mean()
         model = model.to(original_device)
         return model
 

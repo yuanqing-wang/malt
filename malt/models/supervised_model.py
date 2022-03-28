@@ -3,6 +3,7 @@
 # =============================================================================
 import abc
 import torch
+import gpytorch
 from typing import Any
 from .regressor import Regressor
 from .representation import Representation
@@ -53,13 +54,8 @@ class SupervisedModel(torch.nn.Module, abc.ABC):
         self.likelihood = likelihood
 
     @abc.abstractmethod
-    def condition(self, *args, **kwargs):
+    def forward(self, *args, **kwargs):
         """ Make predictive posterior. """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def loss(self, *args, **kwargs):
-        """ Compute loss. """
         raise NotImplementedError
 
 
@@ -78,7 +74,7 @@ class SimpleSupervisedModel(SupervisedModel):
             likelihood=likelihood,
         )
 
-    def condition(self, g):
+    def forward(self, g):
         # graph -> latent representation
         h = self.representation(g)
 
@@ -90,18 +86,9 @@ class SimpleSupervisedModel(SupervisedModel):
 
         return distribution
 
-    def loss(self, g, y):
-        # get predictive posterior distribution
-        distribution = self.condition(g)
 
-        return -distribution.log_prob(y).mean()
-
-
-class GaussianProcessSupervisedModel(SupervisedModel):
+class GaussianProcessSupervisedModel(SupervisedModel, gpytorch.models.GP):
     """ A supervised model that only takes graph. """
-
-    x_tr = None
-    y_tr = None
 
     def __init__(
         self,
@@ -122,20 +109,12 @@ class GaussianProcessSupervisedModel(SupervisedModel):
             torch.ones(g.batch_size, 1),
         )
 
-    def condition(self, g):
-        if self.x_tr is None or self.y_tr is None:
-            return self._blind_condition(g)
-
+    def forward(self, g):
+        
         # graph -> latent representation
         h = self.representation(g)
-        return self.regressor.condition(
-            h,
-            x_tr=self.x_tr.to(h.device),
-            y_tr=self.y_tr.to(h.device),
-        )
 
-    def loss(self, g, y):
-        h = self.representation(g)
-        self.x_tr = h
-        self.y_tr = y
-        return self.regressor.loss(h, y)
+        # latent representation -> distribution
+        y_pred = self.regressor.condition(h)
+        
+        return y_pred

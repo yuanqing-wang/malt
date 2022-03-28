@@ -1,1 +1,1 @@
-from . import regressor, representation, likelihood, supervised_model
+from . import regressor, representation, likelihood, marginal_likelihood, supervised_model
