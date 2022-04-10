@@ -111,7 +111,7 @@ class ExactGaussianProcessRegressor(Regressor):
     def __init__(
         self,
         train_targets: torch.Tensor,
-        in_features: int = 128,
+        in_features: int = 32,
         out_features: int = 2,
         kernel_factory: torch.nn.Module = RBF,
         log_sigma: float = -3.0,
@@ -256,6 +256,9 @@ class GPyTorchExactRegressor(Regressor, gpytorch.models.ExactGP):
         *args
     ):
 
+        # requires train_targets shape: (n,)
+        train_targets = train_targets.ravel()
+
         # it always has to be a Gaussian likelihood anyway
         likelihood = gpytorch.likelihoods.GaussianLikelihood()
         dummy_inputs = torch.ones(1)
@@ -308,24 +311,3 @@ class GPyTorchExactRegressor(Regressor, gpytorch.models.ExactGP):
 
     # alias forward
     condition = forward
-
-    def loss(self, x_tr, y_tr, *args, **kwargs):
-        r"""Compute the loss.
-        Note
-        ----
-        Defined to be negative Gaussian likelihood.
-        Parameters
-        ----------
-        x_tr : `torch.Tensor`, `shape=(n_training_data, hidden_dimension)`
-            Input of training data.
-        y_tr : `torch.Tensor`, `shape=(n_training_data, 1)`
-            Target of training data.
-        Returns
-        -------
-        nll : `torch.Tensor`, `shape=(,)`
-            Negative log likelihood.
-        """
-        self.set_train_data(x_tr, y_tr.ravel(), strict=False)
-        mll = gpytorch.mlls.ExactMarginalLogLikelihood(self.likelihood, self)
-        y_pred = self(x_tr)
-        return -mll(y_pred, y_tr)

@@ -81,7 +81,7 @@ def get_default_trainer(
 
         # put data into loader
         ds_tr = ds_tr.view(batch_size=batch_size)
-        ds_vl = ds_vl.view(batch_size=len(ds_vl))
+        # ds_vl = ds_vl.view(batch_size=len(ds_vl))
 
         # get optimizer object
         optimizer = getattr(torch.optim, optimizer,)(
@@ -97,14 +97,15 @@ def get_default_trainer(
         )
 
         # train
+        model.train()
         for idx_epoch in range(n_epochs):  # loop through the epochs
 
-            model.train()
             for x in ds_tr:  # loop through the dataset
                 x = [_x.to(device) for _x in x]
                 inputs, targets = x
                 optimizer.zero_grad()
                 output = model(inputs)
+                # print(output.loc[:10])
                 loss = -marginal_likelihood(output, targets).mean()
                 loss.backward()
                 optimizer.step()

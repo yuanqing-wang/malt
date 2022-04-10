@@ -47,7 +47,6 @@ class SupervisedModel(torch.nn.Module, abc.ABC):
         super(SupervisedModel, self).__init__()
 
         assert representation.out_features == regressor.in_features
-        assert regressor.out_features == likelihood.in_features
 
         self.representation = representation
         self.regressor = regressor
@@ -68,11 +67,14 @@ class SimpleSupervisedModel(SupervisedModel):
         regressor: Regressor,
         likelihood: SimpleLikelihood,
     ):
+        assert regressor.out_features == likelihood.in_features
+
         super(SimpleSupervisedModel, self).__init__(
             representation=representation,
             regressor=regressor,
             likelihood=likelihood,
         )
+
 
     def forward(self, g):
         # graph -> latent representation
@@ -94,8 +96,10 @@ class GaussianProcessSupervisedModel(SupervisedModel, gpytorch.models.GP):
         self,
         representation: Representation,
         regressor: Regressor,
-        likelihood: Any = HeteroschedasticGaussianLikelihood,
+        likelihood: Any = HeteroschedasticGaussianLikelihood(),
     ):
+
+        assert representation.out_features == regressor.in_features
 
         super(GaussianProcessSupervisedModel, self).__init__(
             representation=representation,
@@ -115,6 +119,6 @@ class GaussianProcessSupervisedModel(SupervisedModel, gpytorch.models.GP):
         h = self.representation(g)
 
         # latent representation -> distribution
-        y_pred = self.regressor.condition(h)
+        y_pred = self.regressor(h)
         
         return y_pred
