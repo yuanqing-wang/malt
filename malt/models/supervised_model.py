@@ -88,6 +88,8 @@ class SimpleSupervisedModel(SupervisedModel):
 
         return distribution
 
+    condition = forward
+
 
 class GaussianProcessSupervisedModel(SupervisedModel, gpytorch.models.GP):
     """ A supervised model that only takes graph. """
@@ -114,6 +116,9 @@ class GaussianProcessSupervisedModel(SupervisedModel, gpytorch.models.GP):
         )
 
     def forward(self, g):
+
+        # if not hasattr(self.regressor, "train_inputs"):
+        #     return self._blind_condition(g)
         
         # graph -> latent representation
         h = self.representation(g)

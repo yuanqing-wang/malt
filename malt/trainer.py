@@ -105,7 +105,6 @@ def get_default_trainer(
                 inputs, targets = x
                 optimizer.zero_grad()
                 output = model(inputs)
-                # print(output.loc[:10])
                 loss = -marginal_likelihood(output, targets).mean()
                 loss.backward()
                 optimizer.step()

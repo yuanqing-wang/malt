@@ -158,7 +158,7 @@ class Dataset(torch.utils.data.Dataset):
     @staticmethod
     def _batch(
         molecules=None, by=['g', 'y'], assay=None,
-        batch_meta=collate_metadata,
+        batch_meta=collate_metadata, use_gpu=True,
         **kwargs
     ):
         """ Batches molecules by provided keys.

@@ -52,8 +52,7 @@ def test_dataset_view():
     assert isinstance(g, dgl.DGLGraph)
     assert isinstance(y, torch.Tensor)
     assert y.shape[0] == 2
-    assert y.shape[1] == 1
-
+    assert y.dim() == 1
 
 def test_dataset_view_batch_of_g():
     import dgl
@@ -92,4 +91,4 @@ def test_dataset_with_assayed_molecule_view():
     assert isinstance(g, dgl.DGLGraph)
     assert isinstance(y, torch.Tensor)
     assert y.shape[0] == 2
-    assert y.shape[1] == 1
+    assert y.dim() == 1

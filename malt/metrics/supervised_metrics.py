@@ -8,8 +8,7 @@ class SupervisedMetrics(abc.ABC):
         super().__init__()
 
     def __call__(self, model, ds_te):
-        ds_te_loader = ds_te.view(batch_size=len(ds_te))
-        g, y = next(iter(ds_te_loader))
+        g, y = ds_te.batch(by=['g', 'y'])
         with torch.no_grad():
             y_hat = model(g).mean
         return getattr(malt.metrics.base_metrics, self.base_metric)(y_hat, y)

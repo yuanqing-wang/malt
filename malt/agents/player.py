@@ -172,6 +172,7 @@ class SequentialModelBasedPlayer(ModelBasedPlayer):
         best = Dataset([best])
         best = self.merchandize(best)
         best = self.assay(best)
+        # import pdb; pdb.set_trace()
         self.train()
         return best
 
