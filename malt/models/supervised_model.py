@@ -122,3 +122,5 @@ class GaussianProcessSupervisedModel(SupervisedModel, gpytorch.models.GP):
         y_pred = self.regressor(h)
         
         return y_pred
+
+    condition = forward

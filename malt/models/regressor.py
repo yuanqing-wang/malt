@@ -104,7 +104,9 @@ class NeuralNetworkRegressor(Regressor):
         return self.ff(x)
 
 
-class ExactGaussianProcessRegressor(Regressor):
+class HardcodedExactGaussianProcessRegressor(Regressor):
+
+    """ Hardcoded Exact GP. """
     
     epsilon = 1e-5
 
@@ -117,7 +119,7 @@ class ExactGaussianProcessRegressor(Regressor):
         log_sigma: float = -3.0,
     ):
         assert out_features == 2
-        super(ExactGaussianProcessRegressor, self).__init__(
+        super(HardcodedExactGaussianProcessRegressor, self).__init__(
             in_features=in_features,
             out_features=out_features,
         )
@@ -174,6 +176,9 @@ class ExactGaussianProcessRegressor(Regressor):
         # (batch_size_tr, batch_size_tr)
         l_low = torch.linalg.cholesky(k_plus_sigma)
         l_up = l_low.t()
+
+        if y_tr.dim() != 2:
+            y_tr = y_tr.unsqueeze(1)
 
         # (batch_size_tr. 1)
         l_low_over_y, _ = torch.triangular_solve(
@@ -246,7 +251,7 @@ class ExactGaussianProcessRegressor(Regressor):
     condition = forward
 
 
-class GPyTorchExactRegressor(Regressor, gpytorch.models.ExactGP):
+class ExactGaussianProcessRegressor(Regressor, gpytorch.models.ExactGP):
     
     def __init__(
         self,
@@ -256,13 +261,10 @@ class GPyTorchExactRegressor(Regressor, gpytorch.models.ExactGP):
         *args
     ):
 
-        # requires train_targets shape: (n,)
-        train_targets = train_targets.ravel()
-
         # it always has to be a Gaussian likelihood anyway
         likelihood = gpytorch.likelihoods.GaussianLikelihood()
         dummy_inputs = torch.ones(1)
-        super(GPyTorchExactRegressor, self).__init__(
+        super(ExactGaussianProcessRegressor, self).__init__(
             in_features,
             out_features,
             dummy_inputs, # required by class

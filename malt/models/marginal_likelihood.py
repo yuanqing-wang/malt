@@ -1,5 +1,6 @@
 import abc
 import torch
+import gpytorch
 from typing import Union
 from .likelihood import Likelihood
 from .regressor import Regressor
@@ -42,8 +43,7 @@ class SimpleMarginalLogLikelihood(MarginalLikelihood):
         
         return mll
 
-
-class ExactMarginalLogLikelihood(MarginalLikelihood):
+class HardcodedExactMarginalLogLikelihood(MarginalLikelihood):
     """ Exact marginal log likelihood for Gaussian process. """
 
     def __init__(
@@ -51,7 +51,7 @@ class ExactMarginalLogLikelihood(MarginalLikelihood):
         likelihood: Likelihood,
         model: SupervisedModel,
     ) -> None:
-        super(ExactMarginalLogLikelihood, self).__init__(
+        super(HardcodedExactMarginalLogLikelihood, self).__init__(
             likelihood=likelihood,
             model=model
         )
@@ -69,3 +69,5 @@ class ExactMarginalLogLikelihood(MarginalLikelihood):
         )
 
         return mll
+
+ExactMarginalLogLikelihood = gpytorch.mlls.ExactMarginalLogLikelihood

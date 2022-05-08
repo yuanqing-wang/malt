@@ -134,6 +134,7 @@ def get_default_trainer(
         return _default_trainer_without_player(
             player.model,
             player.portfolio,
+            player.marginal_likelihood,
             *args, **kwargs,
         )
 
