@@ -117,8 +117,8 @@ class GaussianProcessSupervisedModel(SupervisedModel, gpytorch.models.GP):
 
     def forward(self, g):
 
-        # if not hasattr(self.regressor, "train_inputs"):
-        #     return self._blind_condition(g)
+        if not hasattr(self.regressor, "train_inputs") and not self.training:
+            return self._blind_condition(g)
         
         # graph -> latent representation
         h = self.representation(g)

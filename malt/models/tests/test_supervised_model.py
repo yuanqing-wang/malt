@@ -45,5 +45,5 @@ def test_forward():
     )
 
     net.train()
-    y_hat = net(point)
+    y_hat = net(point.g)
     mll(y_hat, torch.Tensor([0.0])).backward()

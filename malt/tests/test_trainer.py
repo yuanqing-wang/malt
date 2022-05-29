@@ -34,10 +34,17 @@ def test_training_on_linear_alkane_with_player():
         likelihood=likelihood,
     )
 
+    mll = malt.models.marginal_likelihood.ExactMarginalLogLikelihood(
+        model.regressor.likelihood,
+        model
+    )
+
+
     player = malt.agents.player.SequentialModelBasedPlayer(
         model=model,
         merchant=merchant,
         assayer=assayer,
+        marginal_likelihood=mll,
         policy=malt.policy.Greedy(),
         trainer=malt.trainer.get_default_trainer(),
     )

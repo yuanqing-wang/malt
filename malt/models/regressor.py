@@ -263,7 +263,7 @@ class ExactGaussianProcessRegressor(Regressor, gpytorch.models.ExactGP):
 
         # it always has to be a Gaussian likelihood anyway
         likelihood = gpytorch.likelihoods.GaussianLikelihood()
-        dummy_inputs = torch.ones(1)
+        dummy_inputs = torch.ones(len(train_targets))
         super(ExactGaussianProcessRegressor, self).__init__(
             in_features,
             out_features,

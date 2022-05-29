@@ -75,6 +75,12 @@ def get_default_trainer(
             ds_tr = ds
             ds_vl = ds
 
+        # if exact GP, replace train_targets
+        if hasattr(model.regressor, 'train_targets'):
+            model.regressor.train_targets = ds_tr.batch(by='y')
+
+        # import pdb; pdb.set_trace()
+
         # consider the case of one batch
         if batch_size == -1:
             batch_size = len(ds)
@@ -82,7 +88,7 @@ def get_default_trainer(
         # put data into loader
         ds_tr = ds_tr.view(batch_size=batch_size)
         # ds_vl = ds_vl.view(batch_size=len(ds_vl))
-
+        
         # get optimizer object
         optimizer = getattr(torch.optim, optimizer,)(
             model.parameters(),
@@ -105,6 +111,7 @@ def get_default_trainer(
                 inputs, targets = x
                 optimizer.zero_grad()
                 output = model(inputs)
+                # import pdb; pdb.set_trace()
                 loss = -marginal_likelihood(output, targets).mean()
                 loss.backward()
                 optimizer.step()

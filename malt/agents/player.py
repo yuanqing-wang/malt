@@ -123,6 +123,7 @@ class ModelBasedPlayer(Player):
     def prioritize(self):
         if len(self.merchant.catalogue()) == 0:
             return None
+        self.model.eval()
         posterior = self.model.condition(
             self.merchant.catalogue().batch(by=['g']),
         )
