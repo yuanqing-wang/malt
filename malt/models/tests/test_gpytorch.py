@@ -37,6 +37,7 @@ def test_blind_condition():
     point.featurize()
     graph = dgl.batch([point.g])
 
+    net.eval()
     y = net.condition(graph)
     assert y.mean.item() == 0.0
 

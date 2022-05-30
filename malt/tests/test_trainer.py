@@ -14,11 +14,18 @@ def test_training_on_linear_alkane_without_player():
         likelihood=likelihood,
     )
 
-    trainer = malt.trainer.get_default_trainer(without_player=True)
-    model = trainer(model, data)
+    mll = malt.models.marginal_likelihood.SimpleMarginalLogLikelihood(
+        model.likelihood, model
+    )
+
+    trainer = malt.trainer.get_default_trainer(
+        without_player=True,
+    )
+    model = trainer(model, data, mll)
 
 def test_training_on_linear_alkane_with_player():
     import malt
+    import torch
     data = malt.data.collections.linear_alkanes(10)
     merchant = malt.agents.merchant.DatasetMerchant(data)
     assayer = malt.agents.assayer.DatasetAssayer(data)
@@ -34,11 +41,12 @@ def test_training_on_linear_alkane_with_player():
         likelihood=likelihood,
     )
 
-    mll = malt.models.marginal_likelihood.ExactMarginalLogLikelihood(
-        model.regressor.likelihood,
-        model
-    )
+    if torch.cuda.is_available():
+        model.cuda()
 
+    mll = malt.models.marginal_likelihood.SimpleMarginalLogLikelihood(
+        model.likelihood, model
+    )
 
     player = malt.agents.player.SequentialModelBasedPlayer(
         model=model,

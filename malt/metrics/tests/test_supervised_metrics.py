@@ -12,7 +12,7 @@ class DumbModel(object):
 
     def __call__(self, *args, **kwargs):
         return torch.distributions.Normal(
-            self.y.ravel().cuda(), 1.0
+            self.y.ravel(), 1.0
         )
 
 def test_equality():
@@ -23,13 +23,15 @@ def test_equality():
     input_ = torch.randn(5, 1)
     target = torch.randn(5, 1)
 
-    ds = malt.Dataset()
+    ds = []
 
     for idx in range(5):
         point = malt.Molecule(smiles="C", metadata={'y': target[idx].item()})
         ds.append(point)
 
-    assert MSE()(DumbModel(input_), ds) == mse(input_, target)
-    assert MAPE()(DumbModel(input_), ds) == mape(input_, target)
-    assert RMSE()(DumbModel(input_), ds) == rmse(input_, target)
-    assert R2()(DumbModel(input_), ds) == r2(input_, target)
+    ds = malt.Dataset(ds)
+
+    assert MSE()(DumbModel(input_), ds).item() == mse(input_, target).item()
+    assert MAPE()(DumbModel(input_), ds).item() == mape(input_, target).item()
+    assert RMSE()(DumbModel(input_), ds).item() == rmse(input_, target).item()
+    assert R2()(DumbModel(input_), ds).item() == r2(input_, target).item()

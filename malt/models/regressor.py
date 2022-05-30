@@ -108,6 +108,7 @@ class HardcodedExactGaussianProcessRegressor(Regressor):
 
     """ Hardcoded Exact GP. """
     
+    is_trained = False
     epsilon = 1e-5
 
     def __init__(
@@ -208,6 +209,7 @@ class HardcodedExactGaussianProcessRegressor(Regressor):
         """
         if self.training:
             self.train_inputs = x_te
+            self.is_trained = True
 
         x_tr = self.train_inputs
         y_tr = self.train_targets
@@ -252,6 +254,8 @@ class HardcodedExactGaussianProcessRegressor(Regressor):
 
 
 class ExactGaussianProcessRegressor(Regressor, gpytorch.models.ExactGP):
+
+    is_trained = False
     
     def __init__(
         self,
@@ -263,7 +267,7 @@ class ExactGaussianProcessRegressor(Regressor, gpytorch.models.ExactGP):
 
         # it always has to be a Gaussian likelihood anyway
         likelihood = gpytorch.likelihoods.GaussianLikelihood()
-        dummy_inputs = torch.ones(len(train_targets))
+        dummy_inputs = torch.ones((len(train_targets), in_features))
         super(ExactGaussianProcessRegressor, self).__init__(
             in_features,
             out_features,
@@ -307,6 +311,7 @@ class ExactGaussianProcessRegressor(Regressor, gpytorch.models.ExactGP):
         """
         if self.training:
             self.set_train_data(inputs=x, strict=False)
+            self.is_trained = True
         mean_x = self.mean_module(x)
         covar_x = self.covar_module(x)
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)

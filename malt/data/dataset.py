@@ -201,7 +201,7 @@ class Dataset(torch.utils.data.Dataset):
                 ret['g'] = dgl.batch(ret['g'])
             else:
                 ret[key] = torch.tensor(ret[key])
-            if torch.cuda.is_available():
+            if use_gpu and torch.cuda.is_available():
                 ret[key] = ret[key].to(torch.cuda.current_device())
         
         # return batches

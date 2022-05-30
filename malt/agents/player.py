@@ -127,7 +127,6 @@ class ModelBasedPlayer(Player):
         posterior = self.model.condition(
             self.merchant.catalogue().batch(by=['g']),
         )
-
         best = int(self.policy(posterior).item())
         return self.merchant.catalogue()[best]
 
