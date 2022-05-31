@@ -2,6 +2,7 @@
 # IMPORTS
 # =============================================================================
 import torch
+from tqdm import tqdm
 
 # =============================================================================
 # MODULE FUNCTIONS
@@ -16,6 +17,7 @@ def get_default_trainer(
     warmup: int=50,
     without_player: bool=False,
     min_learning_rate: float=1e-6,
+    verbose: bool=False,
 ):
     """ Get the default training scheme for models.
 
@@ -54,6 +56,7 @@ def get_default_trainer(
         batch_size=batch_size,
         min_learning_rate=min_learning_rate,
         warmup=warmup,
+        verbose=verbose,
     ):
         # see if cuda is available
         if torch.cuda.is_available():
@@ -77,7 +80,11 @@ def get_default_trainer(
 
         # if exact GP, replace train_targets
         if hasattr(model.regressor, 'train_targets'):
-            model.regressor.train_targets = ds_tr.batch(by='y')
+            g, y = ds_tr.batch()
+            h = model.representation(g)
+            model.regressor.set_train_data(
+                inputs=h, targets=y, strict=False
+            )
 
         # import pdb; pdb.set_trace()
 
@@ -91,21 +98,22 @@ def get_default_trainer(
         
         # get optimizer object
         optimizer = getattr(torch.optim, optimizer,)(
-            model.parameters(),
-            learning_rate,
+            [{'params': model.parameters()}],
+            lr=1e-3
+            # learning_rate,
         )
 
-        # get scheduler
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer,
-            factor=reduce_factor,
-            patience=10,
-        )
+        # # get scheduler
+        # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        #     optimizer,
+        #     factor=reduce_factor,
+        #     patience=10,
+        # )
 
         # train
         model.train()
-        for idx_epoch in range(n_epochs):  # loop through the epochs
-
+        iter_epochs = tqdm(range(n_epochs)) if verbose else range(n_epochs)
+        for idx_epoch in iter_epochs: # loop through epochs
             for x in ds_tr:  # loop through the dataset
                 x = [_x.to(device) for _x in x]
                 inputs, targets = x

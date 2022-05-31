@@ -10,6 +10,15 @@ class DumbModel(object):
     def __init__(self, y):
         self.y = y
 
+    def parameters(self):
+        from types import SimpleNamespace
+        parameters = SimpleNamespace()
+        parameters.device = 'cpu'
+        return iter([parameters])
+
+    def eval(self):
+        pass
+
     def __call__(self, *args, **kwargs):
         return torch.distributions.Normal(
             self.y.ravel(), 1.0

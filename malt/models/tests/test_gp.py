@@ -26,7 +26,7 @@ def test_gp_train():
             out_features=128
         ),
         regressor=malt.models.regressor.HardcodedExactGaussianProcessRegressor(
-            dummy_targets,
+            train_targets=dummy_targets,
             in_features=128,
             out_features=2,
         ),
@@ -66,7 +66,7 @@ def test_gp_shape():
             out_features=128
         ),
         regressor=malt.models.regressor.HardcodedExactGaussianProcessRegressor(
-            y,
+            train_targets=y,
             in_features=128,
             out_features=2,
         ),
@@ -105,7 +105,7 @@ def test_gp_integrate():
            out_features=128
        ),
        regressor=malt.models.regressor.HardcodedExactGaussianProcessRegressor(
-           y, in_features=128, out_features=2,
+           train_targets=y, in_features=128, out_features=2,
        ),
        likelihood=malt.models.likelihood.HeteroschedasticGaussianLikelihood(),
     )

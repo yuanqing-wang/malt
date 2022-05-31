@@ -158,7 +158,7 @@ class Dataset(torch.utils.data.Dataset):
     @staticmethod
     def _batch(
         molecules=None, by=['g', 'y'], assay=None,
-        batch_meta=collate_metadata, use_gpu=True,
+        batch_meta=collate_metadata, device='cuda',
         **kwargs
     ):
         """ Batches molecules by provided keys.
@@ -201,8 +201,7 @@ class Dataset(torch.utils.data.Dataset):
                 ret['g'] = dgl.batch(ret['g'])
             else:
                 ret[key] = torch.tensor(ret[key])
-            if use_gpu and torch.cuda.is_available():
-                ret[key] = ret[key].to(torch.cuda.current_device())
+            ret[key] = ret[key].to(device)
         
         # return batches
         ret = (*ret.values(), )

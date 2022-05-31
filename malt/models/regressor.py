@@ -4,6 +4,7 @@
 import abc
 import torch
 import gpytorch
+from typing import Union
 
 # =============================================================================
 # BASE CLASSES
@@ -113,7 +114,8 @@ class HardcodedExactGaussianProcessRegressor(Regressor):
 
     def __init__(
         self,
-        train_targets: torch.Tensor,
+        train_inputs: Union[torch.Tensor, None] = None,
+        train_targets: Union[torch.Tensor, None] = None,
         in_features: int = 32,
         out_features: int = 2,
         kernel_factory: torch.nn.Module = RBF,
@@ -125,6 +127,7 @@ class HardcodedExactGaussianProcessRegressor(Regressor):
             out_features=out_features,
         )
 
+        self.train_inputs = train_inputs
         self.train_targets = train_targets
 
         # construct kernel
@@ -208,7 +211,7 @@ class HardcodedExactGaussianProcessRegressor(Regressor):
 
         """
         if self.training:
-            self.train_inputs = x_te
+            self.set_train_data(inputs=x_te)
             self.is_trained = True
 
         x_tr = self.train_inputs
@@ -250,6 +253,15 @@ class HardcodedExactGaussianProcessRegressor(Regressor):
 
         return y_pred
 
+    def set_train_data(
+        self, inputs=None, targets=None, *args, **kwargs
+    ):
+        if inputs is not None:
+            self.train_inputs = inputs
+        if targets is not None:
+            self.train_targets = targets
+        return self
+
     condition = forward
 
 
@@ -259,7 +271,8 @@ class ExactGaussianProcessRegressor(Regressor, gpytorch.models.ExactGP):
     
     def __init__(
         self,
-        train_targets,
+        train_inputs: Union[torch.Tensor, None] = None,
+        train_targets: Union[torch.Tensor, None] = None,
         in_features: int = 32,
         out_features: int = 2,
         *args
@@ -267,11 +280,17 @@ class ExactGaussianProcessRegressor(Regressor, gpytorch.models.ExactGP):
 
         # it always has to be a Gaussian likelihood anyway
         likelihood = gpytorch.likelihoods.GaussianLikelihood()
-        dummy_inputs = torch.ones((len(train_targets), in_features))
+        
+        # prepare training data
+        if train_targets is None:
+            train_inputs = train_targets
+        elif train_inputs is None:
+            train_inputs = torch.ones(len(train_targets))
+
         super(ExactGaussianProcessRegressor, self).__init__(
             in_features,
             out_features,
-            dummy_inputs, # required by class
+            train_inputs,
             train_targets,
             likelihood,
         )

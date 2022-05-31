@@ -127,8 +127,10 @@ class ModelBasedPlayer(Player):
         posterior = self.model.condition(
             self.merchant.catalogue().batch(by=['g']),
         )
-        best = int(self.policy(posterior).item())
-        return self.merchant.catalogue()[best]
+        best = self.policy(posterior)
+        return self.merchant.catalogue()[list(best)]
+
+
 
 class SequentialModelBasedPlayer(ModelBasedPlayer):
     """Model based player with step size equal one.
@@ -169,14 +171,11 @@ class SequentialModelBasedPlayer(ModelBasedPlayer):
         best = self.prioritize()
         if best is None:
             return None
-        best = Dataset([best])
         best = self.merchandize(best)
         best = self.assay(best)
         # import pdb; pdb.set_trace()
         self.train()
         return best
-
-
 
 
 
@@ -229,17 +228,17 @@ class RandomPlayer(Player):
         self.portfolio += dataset
         return dataset
 
-    def prioritize(self):
+    def prioritize(self, acquisition_size=1):
         catalogue_length = len(self.merchant.catalogue())
         if catalogue_length == 0:
             return None
 
         torch.manual_seed(self.seed)
         best = torch.randint(
-            size = (1,),
+            size = (acquisition_size,),
             high = catalogue_length,
-        ).item()
-        return self.merchant.catalogue()[best]
+        )
+        return self.merchant.catalogue()[list(best)]
 
 
 
@@ -268,11 +267,12 @@ class SequentialRandomPlayer(RandomPlayer):
             *args, **kwargs
         )
 
-    def step(self):
-        best = self.prioritize()
+    def step(self, acquisition_size=1):
+        best = self.prioritize(
+            acquisition_size=acquisition_size
+        )
         if best is None:
             return None
-        best = Dataset([best])
         best = self.merchandize(best)
         best = self.assay(best)
         return best
