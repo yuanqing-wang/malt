@@ -81,11 +81,11 @@ def test_assayed_molecule__add__():
 
     for assay in mol_1.metadata:
         assert assay in mol_3.metadata
-        
+
         len_1 = len_2 = 0
         if assay in mol_1.metadata:
             len_1 = len(mol_1[assay])
-        
+
         if assay in mol_2.metadata:
             len_2 = len(mol_2[assay])
 
@@ -110,7 +110,7 @@ def test_assayed_molecule__getitem__():
         smiles=smiles,
         metadata=metadata
     )
-    
+
     assert metadata['assay_1'] == mol['assay_1']
 
 
@@ -132,7 +132,7 @@ def test_assayed_molecule__contains__():
         smiles=smiles,
         metadata=metadata
     )
-    
+
     assert 'assay_1' in mol
 
 def test_assayed_molecule__eq__():

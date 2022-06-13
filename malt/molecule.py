@@ -1,7 +1,7 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
-from typing import Union, Any
+from typing import Union, Any, Optional, Mapping, Callable, Sequence
 import functools
 import dgl
 import copy
@@ -34,13 +34,23 @@ class Molecule(object):
     featurize()
         Convert the SMILES string to a graph if there isn't one.
 
+    Notes
+    -----
+    * The current CanonicalAtomFeaturizer has implicit Hs.
+
+    Examples
+    --------
+    >>> molecule = Molecule("C")
+    >>> molecule.g.number_of_nodes()
+    1
+
     """
     def __init__(
         self,
         smiles: str,
-        g: Union[dgl.DGLGraph, None] = None,
-        metadata: Any = None,
-        featurizer: callable = functools.partial(
+        g: Optional[dgl.DGLGraph] = None,
+        metadata: Optional[Mapping] = None,
+        featurizer: Optional[Callable] = functools.partial(
             smiles_to_bigraph,
             node_featurizer=CanonicalAtomFeaturizer(atom_data_field="h"),
         ),
@@ -50,10 +60,13 @@ class Molecule(object):
         self.metadata = metadata
         self.featurizer = featurizer
 
-    def __repr__(self):
+        # featurize the first thing after init
+        self.featurize()
+
+    def __repr__(self) -> str:
         return self.smiles
 
-    def featurize(self):
+    def featurize(self) -> None:
         """Featurize the SMILES string to get the graph.
 
         Returns
@@ -70,13 +83,14 @@ class Molecule(object):
 
         return self
 
-    def is_featurized(self):
+    def is_featurized(self) -> bool:
+        """Returns whether this molecule is attached with a graph. """
         return self.g is not None
 
-    def erase_annotation(self):
+    def erase_annotation(self) -> Any:
+        """Erase the metadata. """
         self.metadata = None
         return self
-
 
 class AssayedMolecule(Molecule):
     """ Models assay information associated with a molecule.
@@ -107,12 +121,16 @@ class AssayedMolecule(Molecule):
         self,
         smiles: str,
         g: Union[dgl.DGLGraph, None] = None,
-        metadata: dict = {},
+        metadata: Optional[Mapping] = None,
         featurizer: callable = functools.partial(
             smiles_to_bigraph,
-            node_featurizer=CanonicalAtomFeaturizer(atom_data_field="h"),
+            node_featurizer=CanonicalAtomFeaturizer(
+                atom_data_field="h"
+                ),
         ),
     ) -> None:
+        if metadata is None:
+            metadata = {}
 
         super(AssayedMolecule, self).__init__(
             smiles = smiles,
@@ -121,28 +139,104 @@ class AssayedMolecule(Molecule):
             featurizer = featurizer
         )
 
-    def __eq__(self, other):
-            return (
-                self.g == other.g
-                and self.metadata == other.metadata
-            )
+    def __eq__(self, other: Any):
+        """Determine if two AssayedMolecule objects are equal.
 
-    def __getitem__(self, idx):
+        Parameters
+        ----------
+        other : Any
+            The other object
+
+        Returns
+        -------
+        bool
+            If the two objects are identical.
+
+        Examples
+        --------
+        >>> molecule = AssayedMolecule("C", metadata={"name": "john"})
+
+        Type mismatch:
+        >>> molecule == "john"
+        False
+
+        Graph mismatch:
+        >>> molecule == AssayedMolecule("CC", metadata={"name": "john"})
+        False
+
+        Metadata mismatch:
+        >>> molecule == AssayedMolecule("C", metadata={"name": "jane"})
+        False
+
+        Both graph and metadata match:
+        >>> molecule == AssayedMolecule("C", metadata={"name": "john"})
+        True
+
+        """
+        # if not a molecule, fuggedaboutit
+        if not isinstance(other, type(self)):
+            return False
+
+        # NOTE(yuanqing-wang):
+        # Equality is not well-defined for DGL graph
+        # Use networx isomorphism instead.
+        import networkx as nx
+        return (
+            nx.is_isomorphic(self.g.to_networkx(), other.g.to_networkx())
+            and self.metadata == other.metadata
+        )
+
+    def __getitem__(self, key: Optional[str]):
+        """Alias for __getitem__ for metadata.
+
+        Parameters
+        ----------
+        key : Optional[str]
+            Key for getitem.
+
+        Examples
+        --------
+        >>> molecule = AssayedMolecule("C", metadata={"name": "john"})
+        >>> molecule["name"]
+        'john'
+        >>> molecule[None]
+        'john'
+        """
         if not self.metadata:
             raise RuntimeError("No data associated with Molecule.")
-        elif isinstance(idx, str):
-            return self.metadata[idx]
-        elif idx is None and len(self.metadata) == 1:
+        elif isinstance(key, str):
+            return self.metadata[key]
+
+        # NOTE(yuanqing-wang):
+        # not entirely sure this is overwhelmingly useful
+        elif key is None and len(self.metadata) == 1:
             return list(self.metadata.values())[0]
         else:
-            raise NotImplementedError
+            raise NotImplementedError("Key can only be string or None. ")
 
-    def __contains__(self, key):
+    def __contains__(self, key: str) -> bool:
+        """Alias for __contains__ in metadata.
+
+        Parameters
+        ----------
+        key : str
+            Key for contains.
+
+        Examples
+        --------
+        >>> molecule = AssayedMolecule("C", metadata={"name": "john"})
+        >>> "name" in molecule
+        True
+        >>> "john" in molecule
+        False
+        """
         if not self.metadata:
             raise RuntimeError("No data associated with Molecule.")
         return key in self.metadata
 
     def __add__(self, other):
+        # TODO(yuanqing-wang)
+        # understand the "add" mechanism
         if self.smiles != other.smiles:
             raise RuntimeError(
                 f'SMILES must match; `{other.smiles}` != `{self.smiles}`.'
@@ -157,5 +251,6 @@ class AssayedMolecule(Molecule):
         return mol_temp
 
     def erase_annotation(self):
+        """Erase the metadata. """
         self.metadata = {}
         return self

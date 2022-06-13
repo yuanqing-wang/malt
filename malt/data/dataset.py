@@ -6,7 +6,7 @@ import malt
 import torch
 from malt.molecule import Molecule
 from malt.data.utils import collate_metadata
-from typing import Union, Iterable
+from typing import Union, Iterable, Optional, List
 
 # =============================================================================
 # MODULE CLASSES
@@ -29,7 +29,7 @@ class Dataset(torch.utils.data.Dataset):
     _lookup = None
     _extra = None
 
-    def __init__(self, molecules=[]) -> None:
+    def __init__(self, molecules: Optional[List]=None) -> None:
         super(Dataset, self).__init__()
         assert all(isinstance(molecule, Molecule) for molecule in molecules)
         self.molecules = molecules
@@ -42,14 +42,29 @@ class Dataset(torch.utils.data.Dataset):
 
     @property
     def lookup(self):
+        """Returns the mapping between the SMILES and the molecule. """
         if self._lookup is None:
             self._construct_lookup()
         return self._lookup
 
     def __contains__(self, molecule):
+        """Check if a molecule is in the dataset.
+
+        Parameters
+        ----------
+        molecule : malt.Molecule
+
+        """
         return molecule.smiles in self.lookup
 
     def apply(self, function):
+        """Apply a function to all molecules in the dataset.
+
+        Parameters
+        ----------
+        function : Callable
+        """
+
         self.molecules = [function(molecule) for molecule in self.molecules]
         return self
 
@@ -183,7 +198,7 @@ class Dataset(torch.utils.data.Dataset):
 
         # loop through molecules
         for molecule in molecules:
-            
+
             for key in by:
                 if key == 'g':
                     # featurize graphs
@@ -200,14 +215,15 @@ class Dataset(torch.utils.data.Dataset):
             if key == 'g':
                 ret['g'] = dgl.batch(ret['g'])
             else:
-                ret[key] = torch.tensor(ret[key])
-            ret[key] = ret[key].to(device)
-        
+                ret[key] = torch.tensor(ret[key])[:,None]
+            if torch.cuda.is_available():
+                ret[key] = ret[key].to(torch.cuda.current_device())
+
         # return batches
         ret = (*ret.values(), )
         if len(ret) < 2:
             ret = ret[0]
-        
+
         return ret
 
 
@@ -247,7 +263,7 @@ class Dataset(torch.utils.data.Dataset):
             Resulting data loader.
         """
         from functools import partial
-        
+
         # provide default collate function
         collate_fn = self._batch
 
