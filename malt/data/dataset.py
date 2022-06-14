@@ -14,10 +14,12 @@ from typing import Union, Iterable, Optional, List
 class Dataset(torch.utils.data.Dataset):
     """A collection of Molecules with functionalities to be compatible with
     training and optimization.
+
     Parameters
     ----------
     molecules : List[malt.Molecule]
         A list of Molecules.
+
     Methods
     -------
     featurize(molecules)
@@ -31,6 +33,9 @@ class Dataset(torch.utils.data.Dataset):
 
     def __init__(self, molecules: Optional[List]=None) -> None:
         super(Dataset, self).__init__()
+        if molecules is None:
+            molecules = []
+        assert isinstance(molecules, List)
         assert all(isinstance(molecule, Molecule) for molecule in molecules)
         self.molecules = molecules
 
@@ -38,6 +43,7 @@ class Dataset(torch.utils.data.Dataset):
         return "%s with %s molecules" % (self.__class__.__name__, len(self))
 
     def _construct_lookup(self):
+        """Construct lookup table for molecules."""
         self._lookup = {mol.smiles: mol for mol in self.molecules}
 
     @property
@@ -54,6 +60,15 @@ class Dataset(torch.utils.data.Dataset):
         ----------
         molecule : malt.Molecule
 
+        Examples
+        --------
+        >>> molecule = Molecule("CC")
+        >>> dataset = Dataset([molecule])
+        >>> Molecule("CC") in dataset
+        True
+        >>> Molecule("C") in dataset
+        False
+
         """
         return molecule.smiles in self.lookup
 
@@ -63,42 +78,78 @@ class Dataset(torch.utils.data.Dataset):
         Parameters
         ----------
         function : Callable
+            The function to be applied to all molecules in this dataset
+            in place.
+
+        Examples
+        --------
+        >>> molecule = Molecule("CC")
+        >>> dataset = Dataset([molecule])
+        >>> from ..molecule import AssayedMolecule
+        >>> fn = lambda molecule: AssayedMolecule(
+        ...     smiles=molecule.smiles, metadata={"name": "john"},
+        ... )
+        >>> dataset = dataset.apply(fn)
+        >>> dataset[0]["name"]
+        'john'
         """
 
         self.molecules = [function(molecule) for molecule in self.molecules]
         return self
 
     def __eq__(self, other):
+        """Determin if two objects are identical."""
         if not isinstance(other, self.__class__):
             return False
         return self.molecules == other.molecules
 
     def __len__(self):
+        """Return the number of molecules in the dataset."""
         if self.molecules is None:
             return 0
         return len(self.molecules)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, key: Any) -> Union[Molecule, Dataset]:
+        """Get item from the dataset.
+
+        Parameters
+        ----------
+        key : Any
+
+        Notes
+        -----
+        * If the key is integer, return the single molecule indexed.
+        * If the key is a string, return a dataset of all molecules with
+            this SMILES.
+        * If the key is a molecule, extract the SMILES string and index by
+            its SMILES.
+        * If the key is a tensor, flatten it to treat it as a list.
+        * If the key is a list, return a dataset with molecules indexed by
+            the elements in the list.
+        * If the key is a slice, slice the range and treat at as a list.
+
+        """
         if self.molecules is None:
             raise RuntimeError("Empty Portfolio.")
-        if isinstance(idx, int):
-            return self.molecules[idx]
-        elif isinstance(idx, str):
-            return self.__class__(molecules=self.lookup[idx])
-        elif isinstance(idx, Molecule):
-            return self.lookup[idx.smiles]
-        elif isinstance(idx, torch.Tensor):
-            idx = idx.detach().flatten().cpu().numpy().tolist()
-        if isinstance(idx, list):
-            return self.__class__(molecules=[self.molecules[_idx] for _idx in idx])
-        elif isinstance(idx, slice):
-            return self.__class__(molecules=self.molecules[idx])
+        if isinstance(key, int):
+            return self.molecules[key]
+        elif isinstance(key, str): # NOTE(yuanqing-wang): Are we settled?
+            return self.__class__(molecules=[self.lookup[key]])
+        elif isinstance(key, Molecule):
+            return self.lookup[key.smiles]
+        elif isinstance(key, torch.Tensor):
+            key = key.detach().flatten().cpu().numpy().tolist()
+        elif isinstance(key, list):
+            return self.__class__(
+                molecules=[self.molecules[_idx] for _idx in key]
+            )
+        elif isinstance(key, slice):
+            return self.__class__(molecules=self.molecules[key])
         else:
             raise RuntimeError("The slice is not recognized.")
 
-        return self.__class__(molecules=self.molecules[idx])
-
     def shuffle(self, seed=None):
+        """ Shuffle the dataset and return it. """
         import random
         if seed is not None:
             random.seed(seed)
@@ -108,9 +159,17 @@ class Dataset(torch.utils.data.Dataset):
 
     def split(self, partition):
         """Split the dataset according to some partition.
+
         Parameters
         ----------
         partition : sequence of integers or floats
+
+        Returns
+        -------
+        List[Dataset]
+            List of datasets split according to the partition.
+
+
         """
         n_data = len(self)
         partition = [int(n_data * x / sum(partition)) for x in partition]
@@ -119,11 +178,10 @@ class Dataset(torch.utils.data.Dataset):
         for p_size in partition:
             ds.append(self[idx : idx + p_size])
             idx += p_size
-
         return ds
 
     def __add__(self, molecules):
-        """ Combine two datasets. """
+        """Combine two datasets. """
         if isinstance(molecules, list):
             return self.__class__(molecules=self.molecules + molecules)
 
