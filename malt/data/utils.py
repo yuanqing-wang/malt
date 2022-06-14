@@ -9,13 +9,16 @@ from typing import Union, Iterable
 
 def collate_metadata(molecule, key, **kwargs):
     """ Batches metadata from Molecule.
+
     Parameters
     ----------
     molecule : malt.Molecule
+        Input molecule.
     assay : Union[None, str]
         Filter metadata using assay key.
     key : str
         Attribute of class on which to batch.
+
     Returns
     -------
     meta : list
@@ -27,7 +30,6 @@ def collate_metadata(molecule, key, **kwargs):
         return _collate_assayedmolecule_metadata(molecule, key, **kwargs)
     else:
         return _collate_molecule_metadata(molecule, key)
-
 
 def _collate_molecule_metadata(
         molecule, key

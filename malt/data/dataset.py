@@ -282,7 +282,7 @@ class Dataset(torch.utils.data.Dataset):
         batch_meta=collate_metadata, device='cuda',
         **kwargs,
     ):
-        """ Batches molecules by provided keys.
+        """Batches molecules by provided keys.
 
         Parameters
         ----------
@@ -340,6 +340,7 @@ class Dataset(torch.utils.data.Dataset):
         return self._batch(molecules=self.molecules, **kwargs)
 
     def erase_annotation(self):
+        """Erase the metadata. """
         for molecule in self.molecules:
             molecule.erase_annotation()
         return self
@@ -351,7 +352,7 @@ class Dataset(torch.utils.data.Dataset):
 
     def view(
         self,
-        collate_fn: Union[callable, str] = batch,
+        collate_fn: Optional[Callable]=None,
         assay: Union[None, str] = None,
         by: Union[Iterable, str] = ['g', 'y'],
         batch_meta: callable = collate_metadata,
@@ -359,9 +360,10 @@ class Dataset(torch.utils.data.Dataset):
         **kwargs,
     ):
         """Provide a data loader from portfolio.
+
         Parameters
         ----------
-        collate_fn : None or callable
+        collate_fn : Optional[Callable]
             The function to gather data molecules.
         assay : Union[None, str]
             Batch data from molecules using key provided to filter metadata.
@@ -373,8 +375,9 @@ class Dataset(torch.utils.data.Dataset):
         """
         from functools import partial
 
-        # provide default collate function
-        collate_fn = self._batch
+        if collate_fn is None:
+            # provide default collate function
+            collate_fn = self._batch
 
         return torch.utils.data.DataLoader(
             dataset=self.molecules,

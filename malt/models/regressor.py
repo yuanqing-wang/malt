@@ -108,7 +108,7 @@ class NeuralNetworkRegressor(Regressor):
 class HardcodedExactGaussianProcessRegressor(Regressor):
 
     """ Hardcoded Exact GP. """
-    
+
     is_trained = False
     epsilon = 1e-5
 
@@ -268,7 +268,7 @@ class HardcodedExactGaussianProcessRegressor(Regressor):
 class ExactGaussianProcessRegressor(Regressor, gpytorch.models.ExactGP):
 
     is_trained = False
-    
+
     def __init__(
         self,
         train_inputs: Union[torch.Tensor, None] = None,
@@ -280,7 +280,7 @@ class ExactGaussianProcessRegressor(Regressor, gpytorch.models.ExactGP):
 
         # it always has to be a Gaussian likelihood anyway
         likelihood = gpytorch.likelihoods.GaussianLikelihood()
-        
+
         # prepare training data
         if train_targets is None:
             train_inputs = train_targets
