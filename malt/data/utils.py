@@ -44,7 +44,7 @@ def _collate_molecule_metadata(
         return meta
     else:
         return [meta]
-    
+
 
 def _collate_assayedmolecule_metadata(molecule, key, assay: Union[None, str] = None):
     """ Batches metadata from AssayedMolecule.

@@ -6,7 +6,7 @@ import malt
 import torch
 from malt.molecule import Molecule
 from malt.data.utils import collate_metadata
-from typing import Union, Iterable, Optional, List
+from typing import Union, Iterable, Optional, List, Any
 
 # =============================================================================
 # MODULE CLASSES
@@ -109,7 +109,7 @@ class Dataset(torch.utils.data.Dataset):
             return 0
         return len(self.molecules)
 
-    def __getitem__(self, key: Any) -> Union[Molecule, Dataset]:
+    def __getitem__(self, key: Any):
         """Get item from the dataset.
 
         Parameters
@@ -169,7 +169,12 @@ class Dataset(torch.utils.data.Dataset):
         List[Dataset]
             List of datasets split according to the partition.
 
-
+        Examples
+        --------
+        >>> dataset = Dataset([Molecule("CC"), Molecule("C")])
+        >>> dataset0, dataset1 = dataset.split([1, 1])
+        >>> dataset0[0].smiles
+        'CC'
         """
         n_data = len(self)
         partition = [int(n_data * x / sum(partition)) for x in partition]
@@ -181,17 +186,53 @@ class Dataset(torch.utils.data.Dataset):
         return ds
 
     def __add__(self, molecules):
-        """Combine two datasets. """
+        """Combine two datasets and return a new one.
+
+        Parameters
+        ----------
+        molecules : Union[List[Molecule], Dataset]
+            Molecules to be added to the dataset.
+
+        Returns
+        -------
+        >>> dataset0 = Dataset([Molecule("C")])
+        >>> dataset1 = Dataset([Molecule("CC")])
+        >>> dataset = dataset0 + dataset1
+        >>> len(dataset)
+        2
+
+        """
         if isinstance(molecules, list):
             return self.__class__(molecules=self.molecules + molecules)
 
         elif isinstance(molecules, Dataset):
-            return self.__class__(molecules=self.molecules + molecules.molecules)
+            return self.__class__(
+                molecules=self.molecules + molecules.molecules
+            )
 
         else:
             raise RuntimeError("Addition only supports list and Dataset.")
 
     def __sub__(self, molecules):
+        """ Subtract a list of molecules from a dataset and return a new one.
+
+        Parameters
+        ----------
+        molecules : Union[list[Molecule], Dataset]
+            Molecules to be subtracted from the dataset.
+
+        Returns
+        -------
+        Dataset
+            The resulting dataset.
+
+        Examples
+        --------
+        >>> dataset = Dataset([Molecule("CC"), Molecule("C")])
+        >>> dataset -= [Molecule("C")]
+        >>> len(dataset)
+        1
+        """
         if isinstance(molecules, list):
             molecules = self.__class__(molecules)
 
@@ -204,37 +245,45 @@ class Dataset(torch.utils.data.Dataset):
         )
 
     def __iter__(self):
+        """Alias of iter for molecules. """
         return iter(self.molecules)
 
     def append(self, molecule):
         """Append a molecule to the dataset.
+
+        Alias of append for molecules.
+
+        Note
+        ----
+        * This append in-place.
+
         Parameters
         ----------
         molecule : molecule
             The data molecule to be appended.
+
         """
         self.molecules.append(molecule)
         return self
 
     def featurize_all(self):
         """ Featurize all molecules in dataset. """
-        for molecule in self.molecules:
-            if not molecule.is_featurized():
-                molecule.featurize()
-
+        (molecule.featurize() for molecule in self.molecules())
         return self
 
     @property
     def smiles(self):
+        """Return the list of SMILE strings in the datset. """
         return [molecule.smiles for molecule in self.molecules]
 
     @staticmethod
     def _batch(
         molecules=None, by=['g', 'y'], assay=None,
         batch_meta=collate_metadata, device='cuda',
-        **kwargs
+        **kwargs,
     ):
         """ Batches molecules by provided keys.
+
         Parameters
         ----------
         molecules : list of molecules
@@ -243,10 +292,12 @@ class Dataset(torch.utils.data.Dataset):
             Filter metadata using assay key.
         by : Union[Iterable, str]
             Attributes of molecule on which to batch.
+
         Returns
         -------
         ret : Union[tuple, dgl.Graph, torch.Tensor]
             Batched data, in order of keys passed in `by` argument.
+
         """
         from collections import defaultdict
         ret = defaultdict(list)
