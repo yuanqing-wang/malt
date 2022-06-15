@@ -18,13 +18,10 @@ class Molecule(object):
     ----------
     smiles : str
         SMILES of the molecule.
-
     g : dgl.DGLGraph or None, default=None
         The DGL graph of the molecule.
-
     metadata : Any
         Metadata associated with the molecule.
-
     featurizer : callable, default=CanonicalAtomFeaturizer(
         atom_data_field='feat')
         The function which maps the SMILES string to a DGL graph.
@@ -62,6 +59,17 @@ class Molecule(object):
 
         # featurize the first thing after init
         self.featurize()
+
+    @property
+    def y(self):
+        if "y" in self.metadata:
+            return self.metadata["y"]
+        else:
+            return None
+
+    @y.setter
+    def y(self, value):
+        self.metadata["y"] = value
 
     def __repr__(self) -> str:
         return self.smiles
