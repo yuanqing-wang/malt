@@ -278,8 +278,7 @@ class Dataset(torch.utils.data.Dataset):
 
     @staticmethod
     def _batch(
-        molecules=None, by=['g', 'y'], assay=None,
-        batch_meta=collate_metadata, device='cuda',
+        molecules=None, by=['g', 'y'],
         **kwargs,
     ):
         """Batches molecules by provided keys.
@@ -316,8 +315,8 @@ class Dataset(torch.utils.data.Dataset):
                     ret['g'].append(molecule.g)
 
                 else:
-                    m = batch_meta(molecule, key, assay=assay)
-                    ret[key].extend(m)
+                    m = molecule.metadata[key]
+                    ret[key].append(m)
 
         # collate batches
         for key in by:
@@ -325,16 +324,12 @@ class Dataset(torch.utils.data.Dataset):
                 ret['g'] = dgl.batch(ret['g'])
             else:
                 ret[key] = torch.tensor(ret[key])[:,None]
-            if torch.cuda.is_available():
-                ret[key] = ret[key].to(torch.cuda.current_device())
 
         # return batches
         ret = (*ret.values(), )
         if len(ret) < 2:
             ret = ret[0]
-
         return ret
-
 
     def batch(self, **kwargs):
         return self._batch(molecules=self.molecules, **kwargs)
@@ -353,9 +348,7 @@ class Dataset(torch.utils.data.Dataset):
     def view(
         self,
         collate_fn: Optional[Callable]=None,
-        assay: Union[None, str] = None,
         by: Union[Iterable, str] = ['g', 'y'],
-        batch_meta: callable = collate_metadata,
         *args,
         **kwargs,
     ):
@@ -384,8 +377,6 @@ class Dataset(torch.utils.data.Dataset):
             collate_fn=partial(
                 collate_fn,
                 by=by,
-                assay=assay,
-                batch_meta=batch_meta
             ),
             *args,
             **kwargs,
