@@ -322,7 +322,7 @@ class Dataset(torch.utils.data.Dataset):
             if key == 'g':
                 ret['g'] = dgl.batch(ret['g'])
             else:
-                ret[key] = torch.tensor(ret[key])[:,None]
+                ret[key] = torch.tensor(ret[key])
 
         # return batches
         ret = (*ret.values(), )
