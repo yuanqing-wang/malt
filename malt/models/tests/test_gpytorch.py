@@ -6,7 +6,7 @@ def test_construct_gpytorch():
     import malt
 
     dummy_targets = torch.Tensor([0.0])
-    
+
     regressor = malt.models.regressor.ExactGaussianProcessRegressor(
         dummy_targets,
         in_features=128,
@@ -18,7 +18,7 @@ def test_blind_condition():
     import torch
     import dgl
     import malt
-    
+
     dummy_targets = torch.Tensor([0.0])
 
     net = malt.models.supervised_model.GaussianProcessSupervisedModel(
@@ -82,8 +82,6 @@ def test_gp_shape():
     import dgl
     import malt
 
-    torch.cuda.set_device("cuda:0")
-
     dataset = malt.data.collections.linear_alkanes(10)
     dataset_loader = dataset.view(batch_size=len(dataset))
     g, y = next(iter(dataset_loader))
@@ -116,7 +114,7 @@ def test_gp_shape():
     y_hat = net(g)
     assert y_hat.mean.shape[0] == 10
     assert len(y_hat.mean.shape) == 1
-    
+
 def test_gp_integrate():
     import malt
     import torch

@@ -22,7 +22,7 @@ class Regressor(torch.nn.Module, abc.ABC):
 # KERNELS
 # =============================================================================
 class RBF(torch.nn.Module):
-    r"""A Gaussian Process Kernel that hosts parameters.
+    """A Gaussian Process Kernel that hosts parameters.
 
     Note
     ----

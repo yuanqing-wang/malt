@@ -341,6 +341,9 @@ class Dataset(torch.utils.data.Dataset):
         import copy
         return self.__class__(copy.deepcopy(self.molecules))
 
+    def batch(self, *args, **kwargs):
+        return self._batch(self.molecules, *args, **kwargs)
+
     def view(
         self,
         collate_fn: Optional[Callable]=None,
