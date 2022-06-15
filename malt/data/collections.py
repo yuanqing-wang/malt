@@ -3,7 +3,7 @@
 # =============================================================================
 import dgllife
 from malt.data.dataset import Dataset
-from malt.molecule import Molecule, AssayedMolecule
+from malt.molecule import Molecule
 import copy
 
 # =============================================================================

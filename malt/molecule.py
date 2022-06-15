@@ -82,12 +82,10 @@ class Molecule(object):
         dgl.DGLGraph : The resulting graph.
 
         """
-        # if there is already a graph, raise an error
-        if self.is_featurized():
-            raise RuntimeError("Point is already featurized.")
-
-        # featurize
-        self.g = self.featurizer(self.smiles)
+        # if there is already a graph, do nothing
+        if not self.is_featurized():
+            # featurize
+            self.g = self.featurizer(self.smiles)
 
         return self
 

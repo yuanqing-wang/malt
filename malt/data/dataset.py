@@ -5,8 +5,7 @@ import dgl
 import malt
 import torch
 from malt.molecule import Molecule
-from malt.data.utils import collate_metadata
-from typing import Union, Iterable, Optional, List, Any
+from typing import Union, Iterable, Optional, List, Any, Callable
 
 # =============================================================================
 # MODULE CLASSES
@@ -330,9 +329,6 @@ class Dataset(torch.utils.data.Dataset):
         if len(ret) < 2:
             ret = ret[0]
         return ret
-
-    def batch(self, **kwargs):
-        return self._batch(molecules=self.molecules, **kwargs)
 
     def erase_annotation(self):
         """Erase the metadata. """
