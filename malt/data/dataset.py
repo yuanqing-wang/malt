@@ -267,7 +267,7 @@ class Dataset(torch.utils.data.Dataset):
 
     def featurize_all(self):
         """ Featurize all molecules in dataset. """
-        (molecule.featurize() for molecule in self.molecules())
+        (molecule.featurize() for molecule in self.molecules)
         return self
 
     @property

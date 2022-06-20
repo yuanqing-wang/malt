@@ -66,11 +66,10 @@ def test_gpytorch_train():
     point.featurize()
     graph = dgl.batch([point.g])
 
-    mll = gpytorch.mlls.ExactMarginalLogLikelihood(net.regressor.likelihood, net)
-
     net.train()
     y_pred = net(graph)
-    loss = mll(y_pred, torch.tensor([[2.0]]))
+    # loss = mll(y_pred, torch.tensor([[2.0]]))
+    loss = net.loss(graph, torch.tensor([[2.0]]))
     loss.backward()
 
     net.eval()
@@ -101,13 +100,8 @@ def test_gp_shape():
     if torch.cuda.is_available():
         net.cuda()
 
-    mll = malt.models.marginal_likelihood.ExactMarginalLogLikelihood(
-        net.regressor.likelihood, net
-    )
-
     net.train()
-    y_pred = net(g)
-    loss = mll(y_pred, y).mean()
+    loss = net.loss(g, y)
     loss.backward()
 
     net.eval()
@@ -134,16 +128,10 @@ def test_gp_integrate():
     if torch.cuda.is_available():
         model.cuda()
 
-    mll = malt.models.marginal_likelihood.ExactMarginalLogLikelihood(
-        model.regressor.likelihood,
-        model
-    )
-
     player = SequentialModelBasedPlayer(
         model = model,
         policy=malt.policy.Greedy(),
         trainer=malt.trainer.get_default_trainer(),
-        marginal_likelihood=mll,
         merchant=malt.agents.merchant.DatasetMerchant(dataset),
         assayer=malt.agents.assayer.DatasetAssayer(dataset),
     )

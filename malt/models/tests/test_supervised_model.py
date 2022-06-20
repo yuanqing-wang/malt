@@ -39,11 +39,5 @@ def test_forward():
     assert isinstance(distribution, torch.distributions.Distribution)
     assert distribution.batch_shape == torch.Size([1, 1])
 
-    mll = malt.models.marginal_likelihood.SimpleMarginalLogLikelihood(
-        net.likelihood,
-        net
-    )
-
     net.train()
-    y_hat = net(point.g)
-    mll(y_hat, torch.Tensor([0.0])).backward()
+    loss = net.loss(point.g, torch.tensor([0.0])).backward()
