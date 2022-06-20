@@ -38,35 +38,8 @@ class SimpleMarginalLogLikelihood(MarginalLikelihood):
         )
 
     def forward(self, output, target, *args, **kwargs):
-        
+
         mll = output.log_prob(target).mean()
-        
-        return mll
-
-class HardcodedExactMarginalLogLikelihood(MarginalLikelihood):
-    """ Exact marginal log likelihood for Gaussian process. """
-
-    def __init__(
-        self,
-        likelihood: Likelihood,
-        model: SupervisedModel,
-    ) -> None:
-        super(HardcodedExactMarginalLogLikelihood, self).__init__(
-            likelihood=likelihood,
-            model=model
-        )
-
-    def forward(self, output, target, *args, **kwargs):
-
-        import math
-        
-        alpha, l_low = self.model.regressor.mll_vars
-
-        mll = (
-            -0.5 * (target.t() @ alpha)
-            + torch.trace(l_low)
-            + 0.5 * target.shape[0] * math.log(2.0 * math.pi)
-        )
 
         return mll
 
