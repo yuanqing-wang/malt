@@ -10,7 +10,7 @@ def test_player_with_linear_alkane():
     import malt
     import torch
     from malt.agents.player import SequentialModelBasedPlayer
-    
+
     dataset = malt.data.collections.linear_alkanes(10)
 
     model = malt.models.supervised_model.SimpleSupervisedModel(
@@ -23,10 +23,6 @@ def test_player_with_linear_alkane():
                likelihood=malt.models.likelihood.HomoschedasticGaussianLikelihood(),
     )
 
-    mll = malt.models.marginal_likelihood.SimpleMarginalLogLikelihood(
-        model.likelihood,
-        model
-    )
 
     if torch.cuda.is_available():
         model.cuda()
@@ -36,7 +32,6 @@ def test_player_with_linear_alkane():
        model = model,
        policy=malt.policy.Greedy(),
        trainer=malt.trainer.get_default_trainer(),
-       marginal_likelihood=mll,
        merchant=malt.agents.merchant.DatasetMerchant(dataset),
        assayer=malt.agents.assayer.DatasetAssayer(dataset),
     )

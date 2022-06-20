@@ -84,8 +84,8 @@ class Dataset(torch.utils.data.Dataset):
         --------
         >>> molecule = Molecule("CC")
         >>> dataset = Dataset([molecule])
-        >>> from ..molecule import AssayedMolecule
-        >>> fn = lambda molecule: AssayedMolecule(
+        >>> from ..molecule import Molecule
+        >>> fn = lambda molecule: Molecule(
         ...     smiles=molecule.smiles, metadata={"name": "john"},
         ... )
         >>> dataset = dataset.apply(fn)

@@ -50,7 +50,7 @@ def test_dataset_view():
     assert isinstance(g, dgl.DGLGraph)
     assert isinstance(y, torch.Tensor)
     assert y.shape[0] == 2
-    assert y.dim() == 2
+    assert y.dim() == 1
 
 def test_dataset_view_batch_of_g():
     import dgl

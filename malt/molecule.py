@@ -74,6 +74,16 @@ class Molecule(object):
     def __repr__(self) -> str:
         return self.smiles
 
+    def __getitem__(self, idx):
+        if not self.metadata:
+            raise RuntimeError("No data associated with Molecule.")
+        elif isinstance(idx, str):
+            return self.metadata[idx]
+        elif idx is None and len(self.metadata) == 1:
+            return list(self.metadata.values())[0]
+        else:
+            raise NotImplementedError
+
     def featurize(self) -> None:
         """Featurize the SMILES string to get the graph.
 
@@ -108,22 +118,22 @@ class Molecule(object):
 
         Examples
         --------
-        >>> molecule = AssayedMolecule("C", metadata={"name": "john"})
+        >>> molecule = Molecule("C", metadata={"name": "john"})
 
         Type mismatch:
         >>> molecule == "john"
         False
 
         Graph mismatch:
-        >>> molecule == AssayedMolecule("CC", metadata={"name": "john"})
+        >>> molecule == Molecule("CC", metadata={"name": "john"})
         False
 
         Metadata mismatch:
-        >>> molecule == AssayedMolecule("C", metadata={"name": "jane"})
+        >>> molecule == Molecule("C", metadata={"name": "jane"})
         False
 
         Both graph and metadata match:
-        >>> molecule == AssayedMolecule("C", metadata={"name": "john"})
+        >>> molecule == Molecule("C", metadata={"name": "john"})
         True
 
         """
