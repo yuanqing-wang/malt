@@ -61,7 +61,7 @@ class SupervisedModel(torch.nn.Module, abc.ABC):
     def loss(self, x, y):
         """Default loss function. """
         predictive_distribution = self.forward(x)
-        return -predictive_distribution.log_prob(y).mean()
+        return -predictive_distribution.log_prob(y[..., None]).mean()
 
 
 class SimpleSupervisedModel(SupervisedModel):
