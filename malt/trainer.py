@@ -2,7 +2,6 @@
 # IMPORTS
 # =============================================================================
 import torch
-from tqdm import tqdm
 
 # =============================================================================
 # MODULE FUNCTIONS
@@ -17,7 +16,6 @@ def get_default_trainer(
     warmup: int=50,
     without_player: bool=False,
     min_learning_rate: float=1e-6,
-    verbose: bool=False,
 ):
     """ Get the default training scheme for models.
 
@@ -25,19 +23,14 @@ def get_default_trainer(
     ----------
     optimizer : str
         Name of the optimizer. Must be an attribute of `torch.optim`
-
     learning_rate : float
         Initial learning rate.
-
     n_epochs : int
         Maximum epochs.
-
     batch_size : int
         Batch size.
-
     validation_split : float
         Proportion of validation set.
-
     reduce_factor : float
         Rate of learning rate reduction.
 
@@ -49,14 +42,12 @@ def get_default_trainer(
     def _default_trainer_without_player(
         model,
         ds,
-        marginal_likelihood,
         optimizer=optimizer,
         learning_rate=learning_rate,
         n_epochs=n_epochs,
         batch_size=batch_size,
         min_learning_rate=min_learning_rate,
         warmup=warmup,
-        verbose=verbose,
     ):
         # see if cuda is available
         if torch.cuda.is_available():
@@ -78,66 +69,50 @@ def get_default_trainer(
             ds_tr = ds
             ds_vl = ds
 
-        # if exact GP, replace train_targets
-        if hasattr(model.regressor, 'train_targets'):
-            g, y = ds_tr.batch()
-            h = model.representation(g)
-            model.regressor.set_train_data(
-                inputs=h, targets=y, strict=False
-            )
-
-        # import pdb; pdb.set_trace()
-
         # consider the case of one batch
         if batch_size == -1:
             batch_size = len(ds)
 
         # put data into loader
-        ds_tr = ds_tr.view(batch_size=batch_size)
-        # ds_vl = ds_vl.view(batch_size=len(ds_vl))
-        
+        ds_tr = ds_tr.view(batch_size=batch_size, pin_memory=True)
+        ds_vl = ds_vl.view(batch_size=len(ds_vl), pin_memory=True)
+
         # get optimizer object
         optimizer = getattr(torch.optim, optimizer,)(
-            [{'params': model.parameters()}],
-            lr=1e-3
-            # learning_rate,
+            model.parameters(),
+            learning_rate,
         )
 
-        # # get scheduler
-        # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        #     optimizer,
-        #     factor=reduce_factor,
-        #     patience=10,
-        # )
+        # get scheduler
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer,
+            factor=reduce_factor,
+            patience=10,
+        )
 
         # train
-        model.train()
-        iter_epochs = tqdm(range(n_epochs)) if verbose else range(n_epochs)
-        for idx_epoch in iter_epochs: # loop through epochs
+        for idx_epoch in range(n_epochs):  # loop through the epochs
             for x in ds_tr:  # loop through the dataset
                 x = [_x.to(device) for _x in x]
-                inputs, targets = x
                 optimizer.zero_grad()
-                output = model(inputs)
-                # import pdb; pdb.set_trace()
-                loss = -marginal_likelihood(output, targets).mean()
+                loss = model.loss(*x).mean()  # average just in case
                 loss.backward()
                 optimizer.step()
 
-            # model.eval()
-            # with torch.no_grad():
-            #     x = next(iter(ds_vl))
-            #     x = [_x.to(device) for _x in x]
-            #     inputs, targets = x
-            #     output = model(inputs)
-            #     print(model.regressor.mll_vars[0].shape)
-            #     loss = -marginal_likelihood(output, targets).mean()
 
-            #     if idx_epoch > warmup:
-            #         scheduler.step(loss)
-            #         if optimizer.param_groups[0]['lr'] < min_learning_rate:
-            #             break
+            with torch.no_grad():
+                x = next(iter(ds_vl))
+                x = [_x.to(device) for _x in x]
+                loss = model.loss(*x).mean()
 
+                if idx_epoch > warmup:
+                    scheduler.step(loss)
+                    if optimizer.param_groups[0]['lr'] < min_learning_rate:
+                        break
+
+        x = next(iter(ds_tr))
+        x = [_x.to(device) for _x in x]
+        loss = model.loss(*x).mean()
         model = model.to(original_device)
         return model
 
@@ -148,7 +123,6 @@ def get_default_trainer(
         return _default_trainer_without_player(
             player.model,
             player.portfolio,
-            player.marginal_likelihood,
             *args, **kwargs,
         )
 

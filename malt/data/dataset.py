@@ -5,8 +5,7 @@ import dgl
 import malt
 import torch
 from malt.molecule import Molecule
-from malt.data.utils import collate_metadata
-from typing import Union, Iterable, Optional, List, Any
+from typing import Union, Iterable, Optional, List, Any, Callable
 
 # =============================================================================
 # MODULE CLASSES
@@ -85,8 +84,8 @@ class Dataset(torch.utils.data.Dataset):
         --------
         >>> molecule = Molecule("CC")
         >>> dataset = Dataset([molecule])
-        >>> from ..molecule import AssayedMolecule
-        >>> fn = lambda molecule: AssayedMolecule(
+        >>> from ..molecule import Molecule
+        >>> fn = lambda molecule: Molecule(
         ...     smiles=molecule.smiles, metadata={"name": "john"},
         ... )
         >>> dataset = dataset.apply(fn)
@@ -268,7 +267,7 @@ class Dataset(torch.utils.data.Dataset):
 
     def featurize_all(self):
         """ Featurize all molecules in dataset. """
-        (molecule.featurize() for molecule in self.molecules())
+        (molecule.featurize() for molecule in self.molecules)
         return self
 
     @property
@@ -278,11 +277,10 @@ class Dataset(torch.utils.data.Dataset):
 
     @staticmethod
     def _batch(
-        molecules=None, by=['g', 'y'], assay=None,
-        batch_meta=collate_metadata, device='cuda',
+        molecules=None, by=['g', 'y'],
         **kwargs,
     ):
-        """ Batches molecules by provided keys.
+        """Batches molecules by provided keys.
 
         Parameters
         ----------
@@ -316,30 +314,24 @@ class Dataset(torch.utils.data.Dataset):
                     ret['g'].append(molecule.g)
 
                 else:
-                    m = batch_meta(molecule, key, assay=assay)
-                    ret[key].extend(m)
+                    m = molecule.metadata[key]
+                    ret[key].append(m)
 
         # collate batches
         for key in by:
             if key == 'g':
                 ret['g'] = dgl.batch(ret['g'])
             else:
-                ret[key] = torch.tensor(ret[key])[:,None]
-            if torch.cuda.is_available():
-                ret[key] = ret[key].to(torch.cuda.current_device())
+                ret[key] = torch.tensor(ret[key])
 
         # return batches
         ret = (*ret.values(), )
         if len(ret) < 2:
             ret = ret[0]
-
         return ret
 
-
-    def batch(self, **kwargs):
-        return self._batch(molecules=self.molecules, **kwargs)
-
     def erase_annotation(self):
+        """Erase the metadata. """
         for molecule in self.molecules:
             molecule.erase_annotation()
         return self
@@ -349,19 +341,21 @@ class Dataset(torch.utils.data.Dataset):
         import copy
         return self.__class__(copy.deepcopy(self.molecules))
 
+    def batch(self, *args, **kwargs):
+        return self._batch(self.molecules, *args, **kwargs)
+
     def view(
         self,
-        collate_fn: Union[callable, str] = batch,
-        assay: Union[None, str] = None,
+        collate_fn: Optional[Callable]=None,
         by: Union[Iterable, str] = ['g', 'y'],
-        batch_meta: callable = collate_metadata,
         *args,
         **kwargs,
     ):
         """Provide a data loader from portfolio.
+
         Parameters
         ----------
-        collate_fn : None or callable
+        collate_fn : Optional[Callable]
             The function to gather data molecules.
         assay : Union[None, str]
             Batch data from molecules using key provided to filter metadata.
@@ -373,16 +367,15 @@ class Dataset(torch.utils.data.Dataset):
         """
         from functools import partial
 
-        # provide default collate function
-        collate_fn = self._batch
+        if collate_fn is None:
+            # provide default collate function
+            collate_fn = self._batch
 
         return torch.utils.data.DataLoader(
             dataset=self.molecules,
             collate_fn=partial(
                 collate_fn,
                 by=by,
-                assay=assay,
-                batch_meta=batch_meta
             ),
             *args,
             **kwargs,

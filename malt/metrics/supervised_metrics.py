@@ -15,6 +15,7 @@ class SupervisedMetrics(abc.ABC):
         model.eval()
         with torch.no_grad():
             y_hat = model(g).mean
+        y = y.unsqueeze(-1)
         return getattr(malt.metrics.base_metrics, self.base_metric)(y_hat, y)
 
 class MSE(SupervisedMetrics):

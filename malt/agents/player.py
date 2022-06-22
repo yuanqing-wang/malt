@@ -63,9 +63,6 @@ class ModelBasedPlayer(Player):
     trainer: Callable
         Function to train a model.
 
-    marginal_likelihood : Callable
-        Function to evaluate likelihood of data given posterior predictive distribution.
-
     merchant : Merchant
         Merchant that merchandizes candidates.
 
@@ -86,7 +83,6 @@ class ModelBasedPlayer(Player):
             model: SupervisedModel,
             policy: Callable,
             trainer: Callable,
-            marginal_likelihood: Callable,
             merchant: Merchant,
             assayer: Assayer,
             portfolio: Union[Dataset, None]=None,
@@ -95,7 +91,6 @@ class ModelBasedPlayer(Player):
         self.model = model
         self.policy = policy
         self.trainer = trainer
-        self.marginal_likelihood = marginal_likelihood
         self.merchant = merchant
         self.assayer = assayer
         if portfolio is None:

@@ -13,6 +13,7 @@ from .likelihood import (
     HeteroschedasticGaussianLikelihood,
 )
 
+
 # =============================================================================
 # BASE CLASSES
 # =============================================================================
@@ -56,6 +57,11 @@ class SupervisedModel(torch.nn.Module, abc.ABC):
     def forward(self, *args, **kwargs):
         """ Make predictive posterior. """
         raise NotImplementedError
+
+    def loss(self, x, y):
+        """Default loss function. """
+        predictive_distribution = self.forward(x)
+        return -predictive_distribution.log_prob(y[..., None]).mean()
 
 
 class SimpleSupervisedModel(SupervisedModel):
@@ -109,23 +115,21 @@ class GaussianProcessSupervisedModel(SupervisedModel, gpytorch.models.GP):
             likelihood=likelihood,
         )
 
-    def _blind_condition(self, g):
-        return torch.distributions.Normal(
-            torch.zeros(g.batch_size, 1),
-            torch.ones(g.batch_size, 1),
-        )
-
     def forward(self, g):
-
-        if not self.regressor.is_trained and not self.training:
-            return self._blind_condition(g)
-        
         # graph -> latent representation
         h = self.representation(g)
 
         # latent representation -> distribution
         y_pred = self.regressor(h)
-        
+
         return y_pred
 
     condition = forward
+
+    def loss(self, x, y):
+        predictive_distribution = self.forward(x)
+        return -gpytorch.mlls.ExactMarginalLogLikelihood(
+            self.regressor.likelihood, self,
+        )(
+            predictive_distribution, y
+        )
