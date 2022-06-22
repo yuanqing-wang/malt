@@ -17,6 +17,7 @@ dependencies:
   # Pytorch
   - pytorch
   - dgl
+  - dgllife
   # Testing
   - pytest
   - pytest-cov

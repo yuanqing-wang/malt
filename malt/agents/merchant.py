@@ -43,7 +43,7 @@ class DatasetMerchant(Merchant):
     >>> assert catalogue == dataset.clone().erase_annotation()
     >>> dataset_with_the_first_point = Dataset([dataset[0]])
     >>> dataset_merchant.merchandize(dataset_with_the_first_point)
-    Dataset with 1 points
+    Dataset with 1 molecules
     >>> assert len(dataset_merchant.dataset) == len(dataset) - 1
 
     """

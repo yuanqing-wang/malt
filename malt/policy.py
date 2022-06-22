@@ -54,6 +54,10 @@ class Greedy(Policy):
         self, distribution: torch.distributions.Distribution
     ) -> torch.Tensor:
         score = self.utility_function(distribution)
+
+        if len(score) < self.acquisition_size:
+            self.acquisition_size = len(score)
+        
         _, idxs = torch.topk(
             score,
             self.acquisition_size,

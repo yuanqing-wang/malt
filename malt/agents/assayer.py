@@ -45,7 +45,7 @@ class DatasetAssayer(Assayer):
         super(DatasetAssayer, self).__init__()
         self.dataset = dataset
 
-    def assay(self, dataset):
+    def assay(self, dataset, by=['y']):
         """ Assay based on a given dataset.
 
         Parameters
@@ -59,11 +59,16 @@ class DatasetAssayer(Assayer):
             Assayed dataset, with all `y` annotated.
 
         """
-        for point in dataset:
-            assert point in self.dataset
-            point.y = self.dataset[point].y
-            point.extra = self.dataset[point].extra
-
+        for molecule in dataset:
+            
+            assert molecule in self.dataset
+            
+            if molecule.metadata is None:
+                molecule.metadata = {}
+            
+            for key in by:
+                molecule.metadata[key] = self.dataset[molecule].metadata[key]
+        
         return dataset
 
 class DockingAssayer(Assayer):
