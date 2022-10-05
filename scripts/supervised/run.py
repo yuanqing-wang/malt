@@ -21,9 +21,9 @@ def run():
         n_epochs=500,
     )
     model = trainer(model, data)
-
+    model.eval()
     y_hat = model(g)
-    print(y_hat.sample())
+    print(y_hat.loc)
 
 
 if __name__ == "__main__":
