@@ -23,19 +23,14 @@ def get_default_trainer(
     ----------
     optimizer : str
         Name of the optimizer. Must be an attribute of `torch.optim`
-
     learning_rate : float
         Initial learning rate.
-
     n_epochs : int
         Maximum epochs.
-
     batch_size : int
         Batch size.
-
     validation_split : float
         Proportion of validation set.
-
     reduce_factor : float
         Rate of learning rate reduction.
 

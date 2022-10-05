@@ -45,7 +45,7 @@ class DGLRepresentation(Representation):
     def __init__(
         self,
         layer: type = functools.partial(GraphConv, allow_zero_in_degree=True),
-        in_features: int = 74,
+        in_features: int = 74, # TODO(yuanqing-wang): make this less awkward?
         hidden_features: int = 128,
         out_features: int = 1,
         depth: int = 3,
@@ -53,7 +53,7 @@ class DGLRepresentation(Representation):
         global_pool: str = "sum",
     ):
         super(DGLRepresentation, self).__init__(out_features=out_features)
-        
+
         self.embedding_in = torch.nn.Sequential(
             torch.nn.Linear(in_features, hidden_features),
             activation,
@@ -90,6 +90,19 @@ class DGLRepresentation(Representation):
         ----------
         g : dgl.DGLGraph
             Input graph.
+
+        Returns
+        -------
+        torch.Tensor
+            The result
+
+        Examples
+        --------
+        >>> import malt
+        >>> molecule = malt.Molecule("C")
+        >>> representation = DGLRepresentation()
+        >>> h = representation(molecule.g)
+        >>> assert h.shape == (1, 1)
 
         """
         # make local copy

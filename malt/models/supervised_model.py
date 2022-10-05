@@ -3,6 +3,8 @@
 # =============================================================================
 import abc
 import torch
+import gpytorch
+from typing import Any
 from .regressor import Regressor
 from .representation import Representation
 from .likelihood import (
@@ -10,6 +12,7 @@ from .likelihood import (
     SimpleLikelihood,
     HeteroschedasticGaussianLikelihood,
 )
+
 
 # =============================================================================
 # BASE CLASSES
@@ -45,21 +48,20 @@ class SupervisedModel(torch.nn.Module, abc.ABC):
         super(SupervisedModel, self).__init__()
 
         assert representation.out_features == regressor.in_features
-        assert regressor.out_features == likelihood.in_features
 
         self.representation = representation
         self.regressor = regressor
         self.likelihood = likelihood
 
     @abc.abstractmethod
-    def condition(self, *args, **kwargs):
+    def forward(self, *args, **kwargs):
         """ Make predictive posterior. """
         raise NotImplementedError
 
-    @abc.abstractmethod
-    def loss(self, *args, **kwargs):
-        """ Compute loss. """
-        raise NotImplementedError
+    def loss(self, x, y):
+        """Default loss function. """
+        predictive_distribution = self.forward(x)
+        return -predictive_distribution.log_prob(y[..., None]).mean()
 
 
 class SimpleSupervisedModel(SupervisedModel):
@@ -71,13 +73,16 @@ class SimpleSupervisedModel(SupervisedModel):
         regressor: Regressor,
         likelihood: SimpleLikelihood,
     ):
+        assert regressor.out_features == likelihood.in_features
+
         super(SimpleSupervisedModel, self).__init__(
             representation=representation,
             regressor=regressor,
             likelihood=likelihood,
         )
 
-    def condition(self, g):
+
+    def forward(self, g):
         # graph -> latent representation
         h = self.representation(g)
 
@@ -89,55 +94,42 @@ class SimpleSupervisedModel(SupervisedModel):
 
         return distribution
 
-    def loss(self, g, y):
-        # get predictive posterior distribution
-        distribution = self.condition(g)
-
-        return -distribution.log_prob(y).mean()
+    condition = forward
 
 
-class GaussianProcessSupervisedModel(SupervisedModel):
+class GaussianProcessSupervisedModel(SupervisedModel, gpytorch.models.GP):
     """ A supervised model that only takes graph. """
-
-    x_tr = None
-    y_tr = None
 
     def __init__(
         self,
         representation: Representation,
         regressor: Regressor,
-        likelihood: SimpleLikelihood,
+        likelihood: Any = HeteroschedasticGaussianLikelihood(),
     ):
-        assert isinstance(
-            likelihood,
-            HeteroschedasticGaussianLikelihood,
-        )
+
+        assert representation.out_features == regressor.in_features
+
         super(GaussianProcessSupervisedModel, self).__init__(
             representation=representation,
             regressor=regressor,
             likelihood=likelihood,
         )
 
-    def _blind_condition(self, g):
-        return torch.distributions.Normal(
-            torch.zeros(g.batch_size, 1),
-            torch.ones(g.batch_size, 1),
-        )
-
-    def condition(self, g):
-        if self.x_tr is None or self.y_tr is None:
-            return self._blind_condition(g)
-
+    def forward(self, g):
         # graph -> latent representation
         h = self.representation(g)
-        return self.regressor.condition(
-            h,
-            x_tr=self.x_tr.to(h.device),
-            y_tr=self.y_tr.to(h.device),
-        )
 
-    def loss(self, g, y):
-        h = self.representation(g)
-        self.x_tr = h
-        self.y_tr = y
-        return self.regressor.loss(h, y)
+        # latent representation -> distribution
+        y_pred = self.regressor(h)
+
+        return y_pred
+
+    condition = forward
+
+    def loss(self, x, y):
+        predictive_distribution = self.forward(x)
+        return -gpytorch.mlls.ExactMarginalLogLikelihood(
+            self.regressor.likelihood, self,
+        )(
+            predictive_distribution, y
+        )

@@ -1,10 +1,12 @@
 import abc
+import torch
 from typing import Union, Callable
 from .agent import Agent
 from .merchant import Merchant
 from .assayer import Assayer
 from malt.models.supervised_model import SupervisedModel
 from malt.data.dataset import Dataset
+import torch
 
 class Player(Agent):
     """ Base class for players.
@@ -44,6 +46,9 @@ class Player(Agent):
     def step(self, *args, **kwargs):
         raise NotImplementedError
 
+
+
+
 class ModelBasedPlayer(Player):
     """ Player with model.
 
@@ -65,11 +70,11 @@ class ModelBasedPlayer(Player):
         Assayer that assays the candidates.
 
     portfolio : Dataset
-        Inititial knowledge about data points.
+        Initial knowledge about data points.
 
     Note
     ----
-    1. Perfolio respects order and could be used to analyze acquisition
+    1. Portfolio respects order and could be used to analyze acquisition
         trajectory.
 
     """
@@ -113,12 +118,14 @@ class ModelBasedPlayer(Player):
     def prioritize(self):
         if len(self.merchant.catalogue()) == 0:
             return None
+        self.model.eval()
         posterior = self.model.condition(
-            self.merchant.catalogue().get_batch_of_all_g(),
+            self.merchant.catalogue().batch(by=['g']),
         )
+        best = self.policy(posterior)
+        return self.merchant.catalogue()[list(best)]
 
-        best = int(self.policy(posterior).item())
-        return self.merchant.catalogue()[best]
+
 
 class SequentialModelBasedPlayer(ModelBasedPlayer):
     """Model based player with step size equal one.
@@ -159,8 +166,108 @@ class SequentialModelBasedPlayer(ModelBasedPlayer):
         best = self.prioritize()
         if best is None:
             return None
-        best = Dataset([best])
         best = self.merchandize(best)
         best = self.assay(best)
+        # import pdb; pdb.set_trace()
         self.train()
+        return best
+
+
+
+class RandomPlayer(Player):
+    """Player with a random prioritization policy.
+
+    Parameters
+    ----------
+    merchant : Merchant
+        Merchant that merchandizes candidates.
+
+    assayer : Assayer
+        Assayer that assays the candidates.
+
+    portfolio : Dataset
+        Initial knowledge about data points.
+
+    Note
+    ----
+    1. Portfolio respects order and could be used to analyze acquisition
+        trajectory.
+
+    """
+    def __init__(
+            self,
+            merchant: Merchant,
+            assayer: Assayer,
+            portfolio: Union[Dataset, None]=None,
+            seed: int = 2666,
+        ):
+        super(RandomPlayer, self).__init__()
+        self.merchant = merchant
+        self.assayer = assayer
+        if portfolio is None:
+            portfolio = Dataset([])
+        self.portfolio = portfolio
+        self.seed = seed
+
+    def merchandize(
+        self,
+        dataset: Dataset,
+    ):
+        return super().merchandize(dataset=dataset)
+
+    def assay(
+        self,
+        dataset: Dataset,
+    ):
+        dataset = super().assay(dataset=dataset)
+        self.portfolio += dataset
+        return dataset
+
+    def prioritize(self, acquisition_size=1):
+        catalogue_length = len(self.merchant.catalogue())
+        if catalogue_length == 0:
+            return None
+
+        torch.manual_seed(self.seed)
+        best = torch.randint(
+            size = (acquisition_size,),
+            high = catalogue_length,
+        )
+        return self.merchant.catalogue()[list(best)]
+
+
+
+
+class SequentialRandomPlayer(RandomPlayer):
+    """Random player with step size equal one.
+
+    Examples
+    --------
+    >>> import malt
+    >>> player = SequentialRandomPlayer(
+    ...    merchant=malt.agents.merchant.DatasetMerchant(
+    ...        malt.data.collections.linear_alkanes(10),
+    ...    ),
+    ...    assayer=malt.agents.assayer.DatasetAssayer(
+    ...        malt.data.collections.linear_alkanes(10),
+    ...    )
+    ... )
+
+    >>> while True:
+    ...     if player.step() is None:
+    ...         break
+    """
+    def __init__(self, *args, **kwargs):
+        super(SequentialRandomPlayer, self).__init__(
+            *args, **kwargs
+        )
+
+    def step(self, acquisition_size=1):
+        best = self.prioritize(
+            acquisition_size=acquisition_size
+        )
+        if best is None:
+            return None
+        best = self.merchandize(best)
+        best = self.assay(best)
         return best

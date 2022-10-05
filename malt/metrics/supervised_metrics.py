@@ -8,9 +8,14 @@ class SupervisedMetrics(abc.ABC):
         super().__init__()
 
     def __call__(self, model, ds_te):
-        ds_te_loader = ds_te.view(batch_size=len(ds_te))
-        g, y = next(iter(ds_te_loader))
-        y_hat = model.condition(g).mean
+        g, y = ds_te.batch(
+            by=['g', 'y'],
+            device=next(model.parameters()).device
+        )
+        model.eval()
+        with torch.no_grad():
+            y_hat = model(g).mean
+        y = y.unsqueeze(-1)
         return getattr(malt.metrics.base_metrics, self.base_metric)(y_hat, y)
 
 class MSE(SupervisedMetrics):
