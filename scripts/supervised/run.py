@@ -9,7 +9,7 @@ def run():
             out_features=128
         ),
         regressor=malt.models.regressor.ExactGaussianProcessRegressor(
-            train_targets=torch.zeros(10),
+            train_targets=y,
             in_features=128,
             out_features=2,
         ),
