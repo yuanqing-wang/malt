@@ -13,14 +13,13 @@ def test_player_with_linear_alkane():
 
     dataset = malt.data.collections.linear_alkanes(10)
 
-    model = malt.models.supervised_model.SimpleSupervisedModel(
+    model = malt.models.supervised_model.SupervisedModel(
                representation=malt.models.representation.DGLRepresentation(
                    out_features=128
                ),
                regressor=malt.models.regressor.NeuralNetworkRegressor(
-                   in_features=128, out_features=1
+                   in_features=128,
                ),
-               likelihood=malt.models.likelihood.HomoschedasticGaussianLikelihood(),
     )
 
 

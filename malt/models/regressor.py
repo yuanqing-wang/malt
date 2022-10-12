@@ -75,11 +75,47 @@ class NeuralNetworkLikelihood(abc.ABC):
 # MODULE CLASSES
 # =============================================================================
 class HeteroschedasticGaussianLikelihood(NeuralNetworkLikelihood):
+    """Models a heteroschedastic Gaussian likelihood to be used with
+    neural network regressors. (Admits unconstrained parameters.)
+
+    Attributes
+    ----------
+    in_features = 2
+
+    Parameters
+    ----------
+    mu : torch.Tensor
+
+    log_sigma : torch.Tensor
+
+    Examples
+    --------
+    >>> likelihood = HeteroschedasticGaussianLikelihood()
+    >>> posterior = likelihood(torch.tensor(0.0), torch.tensor(0.0))
+    """
     in_features = 2
     def __call__(self, mu, log_sigma):
         return torch.distributions.Normal(mu, log_sigma.exp())
 
 class HomoschedasticGaussianLikelihood(NeuralNetworkLikelihood):
+    """Models a homoschedastic Gaussian likelihood to be used with
+    neural network regressors. (Admits unconstrained parameters.)
+
+    Attributes
+    ----------
+    in_features = 2
+
+    Parameters
+    ----------
+    mu : torch.Tensor
+
+    log_sigma : torch.Tensor
+
+    Examples
+    --------
+    >>> likelihood = HomoschedasticGaussianLikelihood()
+    >>> posterior = likelihood(torch.tensor(0.0))
+    """
     in_features = 1
     def __call__(self, mu):
         return torch.distributions.Normal(mu, torch.ones_like(mu))

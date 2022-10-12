@@ -30,9 +30,7 @@ def test_gpytorch_train():
     graph = dgl.batch([point.g])
 
     net.train()
-    # y_pred = net(graph)
-    # loss = mll(y_pred, torch.tensor([[2.0]]))
-    loss = net.loss(graph, torch.tensor([[2.0]]))
+    loss = net.loss(graph, torch.tensor([2.0]))
     loss.backward()
 
     net.eval()
