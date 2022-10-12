@@ -3,92 +3,163 @@
 # =============================================================================
 import abc
 import torch
+from typing import Union, Optional
 import gpytorch
-from typing import Union
+gpytorch.settings.debug._state = False
+
 
 # =============================================================================
 # BASE CLASSES
 # =============================================================================
 class Regressor(torch.nn.Module, abc.ABC):
-    """Base class for a regressor."""
+    """Base class for a regressor.
 
-    def __init__(self, in_features, out_features, *args, **kwargs):
-        super(Regressor, self).__init__(*args, **kwargs)
-        self.in_features = in_features
-        self.out_features = out_features
-
-
-# =============================================================================
-# KERNELS
-# =============================================================================
-class RBF(torch.nn.Module):
-    """A Gaussian Process Kernel that hosts parameters.
-
-    Note
-    ----
-    l could be either of shape 1 or hidden dim
+    Parameters
+    ----------
+    in_features : int
+        Input features.
 
     """
 
-    def __init__(self, in_features, scale=0.0, variance=0.0, ard=True):
+    def __init__(self, in_features, *args, **kwargs):
+        super(Regressor, self).__init__()
+        self.in_features = in_features
 
-        super(RBF, self).__init__()
+    def forward(self, representation):
+        """Forward function.
 
-        if ard is True:
-            self.scale = torch.nn.Parameter(scale * torch.ones(in_features))
+        Parameters
+        ----------
+        representation : torch.Tensor
+            Representation of the graph(s).
 
-        else:
-            self.scale = torch.nn.Parameter(torch.tensor(scale))
+        Returns
+        -------
+        torch.distributions.Distribution
+            Resutling distribution.
 
-        self.variance = torch.nn.Parameter(torch.tensor(variance))
+        """
+        raise NotImplementedError
 
-    def distance(self, x, x_):
-        """ Distance between data points. """
-        return torch.norm(x[:, None, :] - x_[None, :, :], p=2, dim=2)
+    def loss(self, representation, observation):
+        """Compute the loss.
 
-    def forward(self, x, x_=None):
-        """ Forward pass. """
-        # replicate x if there's no x_
-        if x_ is None:
-            x_ = x
+        Parameters
+        ----------
+        representation : torch.Tensor
+            Representation of the graph(s).
 
-        # for now, only allow two dimension
-        assert x.dim() == 2
-        assert x_.dim() == 2
+        observation : torch.Tensor
+            Observation associated with the graph.
 
-        x = x * torch.exp(self.scale)
-        x_ = x_ * torch.exp(self.scale)
+        Returns
+        -------
+        torch.Tensor (shape=())
 
-        # (batch_size, batch_size)
-        distance = self.distance(x, x_)
+        """
+        posterior = self.forward(representation)
+        nll = -posterior.log_prob(observation).mean()
+        return nll
 
-        # convariant matrix
-        # (batch_size, batch_size)
-        k = torch.exp(self.variance) * torch.exp(-0.5 * distance)
+class NeuralNetworkLikelihood(abc.ABC):
+    @property
+    @abc.abstractmethod
+    def in_features(self):
+        raise NotImplementedError
 
-        return k
-
+    @abc.abstractmethod
+    def __call__(self, *args, **kwargs):
+        raise NotImplementedError
 
 # =============================================================================
 # MODULE CLASSES
 # =============================================================================
+class HeteroschedasticGaussianLikelihood(NeuralNetworkLikelihood):
+    """Models a heteroschedastic Gaussian likelihood to be used with
+    neural network regressors. (Admits unconstrained parameters.)
+
+    Attributes
+    ----------
+    in_features = 2
+
+    Parameters
+    ----------
+    mu : torch.Tensor
+
+    log_sigma : torch.Tensor
+
+    Examples
+    --------
+    >>> likelihood = HeteroschedasticGaussianLikelihood()
+    >>> posterior = likelihood(torch.tensor(0.0), torch.tensor(0.0))
+    """
+    in_features = 2
+    def __call__(self, mu, log_sigma):
+        return torch.distributions.Normal(mu, log_sigma.exp())
+
+class HomoschedasticGaussianLikelihood(NeuralNetworkLikelihood):
+    """Models a homoschedastic Gaussian likelihood to be used with
+    neural network regressors. (Admits unconstrained parameters.)
+
+    Attributes
+    ----------
+    in_features = 2
+
+    Parameters
+    ----------
+    mu : torch.Tensor
+
+    log_sigma : torch.Tensor
+
+    Examples
+    --------
+    >>> likelihood = HomoschedasticGaussianLikelihood()
+    >>> posterior = likelihood(torch.tensor(0.0))
+    """
+    in_features = 1
+    def __call__(self, mu):
+        return torch.distributions.Normal(mu, torch.ones_like(mu))
+
 class NeuralNetworkRegressor(Regressor):
-    """ Regressor with neural network. """
+    """ Regressor with neural network.
+
+    Parameters
+    ----------
+    in_features : int = 128
+        Input features.
+
+    hidden_features : int = 128
+        Hidden features.
+
+    out_features : int = 2
+        Output features.
+
+    activation : torch.nn.Module = torch.nn.ELU()
+        Activation function.
+
+    likelihood : type
+        Factory of likelihood function.
+
+    """
 
     def __init__(
         self,
-        in_features: int = 128,
-        hidden_features: int = 128,
-        out_features: int = 2,
-        depth: int = 2,
-        activation: torch.nn.Module = torch.nn.ReLU(),
+        in_features : int = 128,
+        hidden_features : int = 128,
+        depth : int = 2,
+        activation : torch.nn.Module = torch.nn.ELU(),
+        likelihood : NeuralNetworkLikelihood = \
+            HeteroschedasticGaussianLikelihood(),
     ):
         super(NeuralNetworkRegressor, self).__init__(
-            in_features=in_features, out_features=out_features
+            in_features=in_features,
         )
         # bookkeeping
+        self.in_features = in_features
         self.hidden_features = hidden_features
-        self.out_features = out_features
+        self.likelihood = likelihood
+
+        out_features = likelihood.in_features
 
         # neural network
         modules = []
@@ -102,77 +173,67 @@ class NeuralNetworkRegressor(Regressor):
         self.ff = torch.nn.Sequential(*modules)
 
     def forward(self, x):
-        return self.ff(x)
+        parameters = self.ff(x).split(1, dim=-1)
+        posterior = self.likelihood(*parameters)
+        return posterior
 
-class ExactGaussianProcessRegressor(Regressor, gpytorch.models.ExactGP):
+class _ExactGaussianProcess(gpytorch.models.ExactGP):
+    def __init__(self, inputs, targets):
+        super().__init__(inputs, targets, gpytorch.likelihoods.GaussianLikelihood())
+        self.mean_module = gpytorch.means.LinearMean(inputs.shape[-1])
+        self.covar_module = gpytorch.kernels.ScaleKernel(
+            gpytorch.kernels.RBFKernel(),
+        )
 
-    is_trained = False
+    def forward(self, x):
+        mean = self.mean_module(x.tanh())
+        covar = self.covar_module(x)
+        return gpytorch.distributions.MultivariateNormal(mean, covar)
+
+class ExactGaussianProcessRegressor(Regressor):
+    """Regressor with exact Gaussian process.
+
+    Parameters
+    ----------
+    in_features : int = 128
+        Input features.
+
+    """
+    initialized = False
 
     def __init__(
         self,
-        train_inputs: Union[torch.Tensor, None] = None,
-        train_targets: Union[torch.Tensor, None] = None,
-        in_features: int = 32,
-        out_features: int = 2,
-        *args
+        in_features : int = 128,
+        num_points: int = 0
     ):
-
-        # it always has to be a Gaussian likelihood anyway
-        likelihood = gpytorch.likelihoods.GaussianLikelihood()
-
-        # prepare training data
-        if train_targets is None:
-            train_inputs = train_targets
-        elif train_inputs is None:
-            train_inputs = torch.ones(len(train_targets))
-
-        super(ExactGaussianProcessRegressor, self).__init__(
-            in_features,
-            out_features,
-            train_inputs,
-            train_targets,
-            likelihood,
+        super().__init__(in_features=in_features)
+        self.register_buffer(
+            "x_placeholder", torch.zeros(num_points, in_features),
+        )
+        self.register_buffer(
+            "y_placeholder", torch.zeros(num_points, ),
         )
 
-        # set debug state to false for DGKL
-        gpytorch.settings.debug._state = False
-        self.mean_module = gpytorch.means.ConstantMean()
-        self.covar_module = gpytorch.kernels.ScaleKernel(
-            gpytorch.kernels.RBFKernel(ard_num_dims=in_features)
+        self.gp = _ExactGaussianProcess(self.x_placeholder, self.y_placeholder)
+        self.likelihood = gpytorch.likelihoods.GaussianLikelihood()
+        self.mll = gpytorch.mlls.ExactMarginalLogLikelihood(
+            self.likelihood, self.gp,
         )
 
+    def forward(self, representation):
+        return self.gp(representation)
 
-    def forward(self, x, *args, **kwargs):
-        r"""Calculate the predictive distribution given `x_te`.
+    def loss(self, representation, observation):
+        if not self.initialized and self.training:
+            self.gp.set_train_data(
+                inputs=representation,
+                targets=observation,
+            )
+            self.initialized = True
 
-        Parameters
-        ----------
-        x_te : `torch.Tensor`, `shape=(n_te, hidden_dimension)`
-            Test input.
+        nll = -self.mll(
+            self.gp(representation),
+            observation,
+        ).mean()
 
-        x_tr : `torch.Tensor`, `shape=(n_tr, hidden_dimension)`
-            (Default value = None)
-            Training input.
-
-        y_tr : `torch.Tensor`, `shape=(n_tr, 1)`
-            (Default value = None)
-            Test input.
-
-        sampler : `torch.optim.Optimizer` or `pinot.Sampler`
-            (Default value = None)
-            Sampler.
-
-        Returns
-        -------
-        distribution : `torch.distributions.Distribution`
-            Predictive distribution.
-        """
-        if self.training:
-            self.set_train_data(inputs=x, strict=False)
-            self.is_trained = True
-        mean_x = self.mean_module(x)
-        covar_x = self.covar_module(x)
-        return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
-
-    # alias forward
-    condition = forward
+        return nll

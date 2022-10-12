@@ -161,7 +161,8 @@ class Dataset(torch.utils.data.Dataset):
 
         Parameters
         ----------
-        partition : sequence of integers or floats
+        partition : Sequence[Optional[int, float]]
+            Splitting partition.
 
         Returns
         -------

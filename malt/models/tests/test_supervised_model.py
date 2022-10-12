@@ -9,14 +9,13 @@ def test_construct():
     import torch
     import malt
 
-    net = malt.models.supervised_model.SimpleSupervisedModel(
+    net = malt.models.supervised_model.SupervisedModel(
         representation=malt.models.representation.DGLRepresentation(
             out_features=128
         ),
         regressor=malt.models.regressor.NeuralNetworkRegressor(
-            in_features=128, out_features=1
+            in_features=128,
         ),
-        likelihood=malt.models.likelihood.HomoschedasticGaussianLikelihood(),
     )
 
 
@@ -24,18 +23,17 @@ def test_forward():
     import torch
     import malt
 
-    net = malt.models.supervised_model.SimpleSupervisedModel(
+    net = malt.models.supervised_model.SupervisedModel(
         representation=malt.models.representation.DGLRepresentation(
             out_features=128
         ),
         regressor=malt.models.regressor.NeuralNetworkRegressor(
-            in_features=128, out_features=1
+            in_features=128,
         ),
-        likelihood=malt.models.likelihood.HomoschedasticGaussianLikelihood(),
     )
 
     point = malt.Molecule(smiles="C").featurize()
-    distribution = net.condition(point.g)
+    distribution = net(point.g)
     assert isinstance(distribution, torch.distributions.Distribution)
     assert distribution.batch_shape == torch.Size([1, 1])
 

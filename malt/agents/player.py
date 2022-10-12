@@ -119,12 +119,11 @@ class ModelBasedPlayer(Player):
         if len(self.merchant.catalogue()) == 0:
             return None
         self.model.eval()
-        posterior = self.model.condition(
+        posterior = self.model(
             self.merchant.catalogue().batch(by=['g']),
         )
         best = self.policy(posterior)
         return self.merchant.catalogue()[list(best)]
-
 
 
 class SequentialModelBasedPlayer(ModelBasedPlayer):
@@ -134,14 +133,13 @@ class SequentialModelBasedPlayer(ModelBasedPlayer):
     --------
     >>> import malt
     >>> player = SequentialModelBasedPlayer(
-    ...    model = malt.models.supervised_model.SimpleSupervisedModel(
+    ...    model = malt.models.supervised_model.SupervisedModel(
     ...        representation=malt.models.representation.DGLRepresentation(
     ...            out_features=128
     ...        ),
     ...        regressor=malt.models.regressor.NeuralNetworkRegressor(
-    ...            in_features=128, out_features=1
+    ...            in_features=128,
     ...        ),
-    ...        likelihood=malt.models.likelihood.HomoschedasticGaussianLikelihood(),
     ...    ),
     ...    policy=malt.policy.Greedy(),
     ...    trainer=malt.trainer.get_default_trainer(),
