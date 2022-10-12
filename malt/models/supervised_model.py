@@ -47,7 +47,6 @@ class SupervisedModel(torch.nn.Module, abc.ABC):
     def forward(self, x):
         """ Make predictive posterior. """
         representation = self.representation(x)
-        print(representation.shape)
         posterior = self.regressor(representation)
         return posterior
 

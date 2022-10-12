@@ -138,9 +138,8 @@ class SequentialModelBasedPlayer(ModelBasedPlayer):
     ...            out_features=128
     ...        ),
     ...        regressor=malt.models.regressor.NeuralNetworkRegressor(
-    ...            in_features=128, out_features=1
+    ...            in_features=128,
     ...        ),
-    ...        likelihood=malt.models.likelihood.HomoschedasticGaussianLikelihood(),
     ...    ),
     ...    policy=malt.policy.Greedy(),
     ...    trainer=malt.trainer.get_default_trainer(),

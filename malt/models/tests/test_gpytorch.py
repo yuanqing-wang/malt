@@ -45,7 +45,6 @@ def test_gp_shape():
     dataset = malt.data.collections.linear_alkanes(10)
     dataset_loader = dataset.view(batch_size=len(dataset))
     g, y = next(iter(dataset_loader))
-    print(y.shape)
 
     net = malt.models.supervised_model.SupervisedModel(
         representation=malt.models.representation.DGLRepresentation(
