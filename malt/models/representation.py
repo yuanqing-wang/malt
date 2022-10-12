@@ -2,6 +2,7 @@
 # IMPORTS
 # =============================================================================
 import abc
+from typing import Optional
 import torch
 import dgl
 import functools
@@ -46,13 +47,16 @@ class DGLRepresentation(Representation):
         self,
         layer: type = functools.partial(GraphConv, allow_zero_in_degree=True),
         in_features: int = 74, # TODO(yuanqing-wang): make this less awkward?
-        hidden_features: int = 128,
-        out_features: int = 1,
+        hidden_features: Optional[int] = None,
+        out_features: int = 128,
         depth: int = 3,
         activation: callable = torch.nn.SiLU(),
         global_pool: str = "sum",
     ):
         super(DGLRepresentation, self).__init__(out_features=out_features)
+
+        if hidden_features is None:
+            hidden_features = out_features
 
         self.embedding_in = torch.nn.Sequential(
             torch.nn.Linear(in_features, hidden_features),
@@ -67,17 +71,10 @@ class DGLRepresentation(Representation):
                 layer(hidden_features, hidden_features),
             )
 
-        self.embedding_out = torch.nn.Sequential(
-            torch.nn.Linear(hidden_features, hidden_features),
-            # activation,
-        )
+        self.embedding_out = torch.nn.Linear(hidden_features, hidden_features)
 
         # output
-        self.ff = torch.nn.Sequential(
-            # torch.nn.Linear(hidden_features, hidden_features),
-            # activation,
-            torch.nn.Linear(hidden_features, out_features),
-        )
+        self.ff = torch.nn.Linear(hidden_features, out_features)
 
         self.depth = depth
         self.global_pool = getattr(dgl, "%s_nodes" % global_pool)

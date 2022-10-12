@@ -177,17 +177,16 @@ class NeuralNetworkRegressor(Regressor):
         posterior = self.likelihood(*parameters)
         return posterior
 
-
 class _ExactGaussianProcess(gpytorch.models.ExactGP):
     def __init__(self, inputs, targets):
         super().__init__(inputs, targets, gpytorch.likelihoods.GaussianLikelihood())
-        self.mean_module = gpytorch.means.ConstantMean()
+        self.mean_module = gpytorch.means.LinearMean(inputs.shape[-1])
         self.covar_module = gpytorch.kernels.ScaleKernel(
             gpytorch.kernels.RBFKernel(),
         )
 
     def forward(self, x):
-        mean = self.mean_module(x)
+        mean = self.mean_module(x.tanh())
         covar = self.covar_module(x)
         return gpytorch.distributions.MultivariateNormal(mean, covar)
 
@@ -225,7 +224,7 @@ class ExactGaussianProcessRegressor(Regressor):
         return self.gp(representation)
 
     def loss(self, representation, observation):
-        if not self.initialized:
+        if not self.initialized and self.training:
             self.gp.set_train_data(
                 inputs=representation,
                 targets=observation,
