@@ -7,15 +7,15 @@ import torch
 # MODULE FUNCTIONS
 # =============================================================================
 def get_default_trainer(
-    optimizer: str="Adam",
-    learning_rate: float=1e-3,
-    n_epochs: int=10,
-    batch_size: int=-1,
-    validation_split: float=0.1,
-    reduce_factor: float=0.5,
-    warmup: int=50,
-    without_player: bool=False,
-    min_learning_rate: float=1e-6,
+    optimizer: str = "Adam",
+    learning_rate: float = 1e-3,
+    n_epochs: int = 10,
+    batch_size: int = -1,
+    validation_split: float = 0.1,
+    reduce_factor: float = 0.5,
+    warmup: int = 50,
+    without_player: bool = False,
+    min_learning_rate: float = 1e-6,
 ):
     """ Get the default training scheme for models.
 
@@ -47,7 +47,6 @@ def get_default_trainer(
         n_epochs=n_epochs,
         batch_size=batch_size,
         min_learning_rate=min_learning_rate,
-        warmup=warmup,
     ):
         # see if cuda is available
         if torch.cuda.is_available():
@@ -61,17 +60,12 @@ def get_default_trainer(
         # move model to cuda if available
         model = model.to(device)
 
-        if len(ds) > warmup:
-            # split into training and validation
-            ds_tr, ds_vl = ds.split([1.0-validation_split, validation_split])
-
-        else:
-            ds_tr = ds
-            ds_vl = ds
+        # split into training and validation
+        ds_tr, ds_vl = ds.split([1.0-validation_split, validation_split])
 
         # consider the case of one batch
         if batch_size == -1:
-            batch_size = len(ds)
+            batch_size = len(ds_tr)
 
         # put data into loader
         ds_tr = ds_tr.view(batch_size=batch_size, pin_memory=True)
