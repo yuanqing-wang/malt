@@ -4,42 +4,7 @@ import pytest
 def test_construct_gpytorch():
     import torch
     import malt
-
-    dummy_targets = torch.Tensor([0.0])
-
-    regressor = malt.models.regressor.ExactGaussianProcessRegressor(
-        dummy_targets,
-        in_features=128,
-        out_features=2,
-    )
-
-
-def test_blind_condition():
-    import torch
-    import dgl
-    import malt
-
-    dummy_targets = torch.Tensor([0.0])
-
-    net = malt.models.supervised_model.GaussianProcessSupervisedModel(
-        representation=malt.models.representation.DGLRepresentation(
-            out_features=128
-        ),
-        regressor=malt.models.regressor.ExactGaussianProcessRegressor(
-            dummy_targets,
-            in_features=128,
-            out_features=2,
-        ),
-        likelihood=malt.models.likelihood.HeteroschedasticGaussianLikelihood(),
-    )
-
-    point = malt.Molecule("C")
-    point.featurize()
-    graph = dgl.batch([point.g])
-
-    net.eval()
-    y = net.condition(graph)
-    assert y.mean.item() == 0.0
+    regressor = malt.models.regressor.ExactGaussianProcessRegressor(128)
 
 def test_gpytorch_train():
 
@@ -50,16 +15,14 @@ def test_gpytorch_train():
 
     dummy_targets = torch.tensor([[4.0]])
 
-    net = malt.models.supervised_model.GaussianProcessSupervisedModel(
+    net = malt.models.supervised_model.SupervisedModel(
         representation=malt.models.representation.DGLRepresentation(
             out_features=32
         ),
         regressor=malt.models.regressor.ExactGaussianProcessRegressor(
-            train_targets=dummy_targets,
             in_features=32,
-            out_features=2,
+            num_points=1,
         ),
-        likelihood=malt.models.likelihood.HeteroschedasticGaussianLikelihood(),
     )
 
     point = malt.Molecule("CCCCCCC")
@@ -84,17 +47,16 @@ def test_gp_shape():
     dataset = malt.data.collections.linear_alkanes(10)
     dataset_loader = dataset.view(batch_size=len(dataset))
     g, y = next(iter(dataset_loader))
+    print(y.shape)
 
-    net = malt.models.supervised_model.GaussianProcessSupervisedModel(
+    net = malt.models.supervised_model.SupervisedModel(
         representation=malt.models.representation.DGLRepresentation(
             out_features=128
         ),
         regressor=malt.models.regressor.ExactGaussianProcessRegressor(
-            train_targets=y,
             in_features=128,
-            out_features=2,
+            num_points = len(y)
         ),
-        likelihood=malt.models.likelihood.HeteroschedasticGaussianLikelihood(),
     )
 
     if torch.cuda.is_available():
@@ -108,34 +70,3 @@ def test_gp_shape():
     y_hat = net(g)
     assert y_hat.mean.shape[0] == 10
     assert len(y_hat.mean.shape) == 1
-
-def test_gp_integrate():
-    import malt
-    import torch
-    from malt.agents.player import SequentialModelBasedPlayer
-
-    dataset = malt.data.collections.linear_alkanes(10)
-    g, y = dataset.batch()
-    model = malt.models.supervised_model.GaussianProcessSupervisedModel(
-       representation=malt.models.representation.DGLRepresentation(
-           out_features=32
-       ),
-       regressor=malt.models.regressor.ExactGaussianProcessRegressor(
-           y, in_features=32, out_features=2,
-       ),
-       likelihood=malt.models.likelihood.HeteroschedasticGaussianLikelihood(),
-    )
-    if torch.cuda.is_available():
-        model.cuda()
-
-    player = SequentialModelBasedPlayer(
-        model = model,
-        policy=malt.policy.Greedy(),
-        trainer=malt.trainer.get_default_trainer(),
-        merchant=malt.agents.merchant.DatasetMerchant(dataset),
-        assayer=malt.agents.assayer.DatasetAssayer(dataset),
-    )
-
-    while True:
-        if player.step() is None:
-            break
