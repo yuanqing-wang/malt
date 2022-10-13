@@ -30,8 +30,23 @@ def run(args):
 
     g, y = next(iter(data_test.view(batch_size=len(data_test))))
     y_hat = model(g).loc
-    rmse = (y_hat - y).pow(2).mean().pow(0.5)
-    print(rmse)
+    rmse_test = (y_hat - y).pow(2).mean().pow(0.5)
+
+    g, y = next(iter(data_valid.view(batch_size=len(data_test))))
+    y_hat = model(g).loc
+    rmse_valid = (y_hat - y).pow(2).mean().pow(0.5)
+
+    import json
+    import pandas as pd
+    key = dict(vars(args))
+    key.pop("out")
+    key = json.dumps(key)
+    df = pd.DataFrame.from_dict(
+        {key: [rmse_valid, rmse_test]},
+        orient="index",
+        columns=["vl", "te"]
+    )
+    df.to_csv(args.out, mode="a")
 
 if __name__ == "__main__":
     import argparse
@@ -41,5 +56,6 @@ if __name__ == "__main__":
     parser.add_argument("--width", type=int, default=32)
     parser.add_argument("--learning_rate", type=float, default=1e-3)
     parser.add_argument("--reduce_factor", type=float, default=0.5)
+    parser.add_argument("--out", type=str, default="out.csv")
     args = parser.parse_args()
     run(args)
