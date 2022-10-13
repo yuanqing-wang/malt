@@ -7,13 +7,19 @@ def run(args):
     data = data.shuffle(seed=2666)
     data_train, data_valid, data_test = data.split([8, 1, 1])
     g, y = next(iter(data_train.view(batch_size=len(data_train))))
+    regressor = getattr(
+        malt.models.regressor,
+        {
+            "nn": "NeuralNetworkRegressor", "gp": "ExactGaussianProcessRegressor"
+        }[args.regressor],
+    )
 
     model = malt.models.SupervisedModel(
         representation=malt.models.representation.DGLRepresentation(
             depth=args.depth,
             out_features=args.width,
         ),
-        regressor=malt.models.regressor.ExactGaussianProcessRegressor(
+        regressor=regressor(
             num_points=len(data_train),
             in_features=args.width,
         ),
@@ -54,6 +60,7 @@ if __name__ == "__main__":
     parser.add_argument("--data", type=str, default="esol")
     parser.add_argument("--depth", type=int, default=3)
     parser.add_argument("--width", type=int, default=32)
+    parser.add_argument("--regressor", type=str, default="gp")
     parser.add_argument("--learning_rate", type=float, default=1e-3)
     parser.add_argument("--reduce_factor", type=float, default=0.5)
     parser.add_argument("--out", type=str, default="out.csv")

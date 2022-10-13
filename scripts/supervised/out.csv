@@ -1,2 +1,0 @@
-,vl,te
-"{""data"": ""esol"", ""depth"": 3, ""width"": 32, ""learning_rate"": 0.001, ""reduce_factor"": 0.5}","tensor(0.7835, grad_fn=<PowBackward0>)","tensor(0.8951, grad_fn=<PowBackward0>)"
