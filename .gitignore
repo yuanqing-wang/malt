@@ -136,3 +136,6 @@ dmypy.json
 
 # mac
 .DS_Store
+
+# performance
+*.csv

@@ -150,6 +150,7 @@ class NeuralNetworkRegressor(Regressor):
         activation : torch.nn.Module = torch.nn.ELU(),
         likelihood : NeuralNetworkLikelihood = \
             HeteroschedasticGaussianLikelihood(),
+        *args, **kwargs,
     ):
         super(NeuralNetworkRegressor, self).__init__(
             in_features=in_features,
