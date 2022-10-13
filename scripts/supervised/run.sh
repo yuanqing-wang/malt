@@ -13,6 +13,7 @@ bsub -q gpuqueue -o %J.stdout -gpu "num=1:j_exclusive=yes" -R "rusage[mem=5] spa
       --width $width \
       --learning_rate $learning_rate \
       --reduce_factor $reduce_factor \
+      --regressor nn \
       --out $LSB_JOBID".csv"
 
 done; done; done; done

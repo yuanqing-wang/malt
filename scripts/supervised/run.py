@@ -25,11 +25,17 @@ def run(args):
         ),
     )
 
+    if args.regressor == "nn":
+        batch_size = args.batch_size
+    else:
+        batch_size = -1
+
     trainer = malt.trainer.get_default_trainer(
         without_player=True,
         n_epochs=2000,
         learning_rate=args.learning_rate,
         reduce_factor=args.reduce_factor,
+        batch_size=batch_size,
     )
     model = trainer(model, data_train, data_valid)
     model.eval()
@@ -64,6 +70,7 @@ if __name__ == "__main__":
     parser.add_argument("--regressor", type=str, default="gp")
     parser.add_argument("--learning_rate", type=float, default=1e-3)
     parser.add_argument("--reduce_factor", type=float, default=0.5)
+    parser.add_argument("--batch_size", type=int, default=16)
     parser.add_argument("--out", type=str, default="out.csv")
     args = parser.parse_args()
     run(args)
