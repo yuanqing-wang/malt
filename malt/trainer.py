@@ -11,7 +11,6 @@ def get_default_trainer(
     learning_rate: float = 1e-3,
     n_epochs: int = 10,
     batch_size: int = -1,
-    validation_split: float = 0.1,
     reduce_factor: float = 0.5,
     patience: int = 10,
     without_player: bool = False,
@@ -106,6 +105,7 @@ def get_default_trainer(
         x = [_x.to(device) for _x in x]
         loss = model.loss(*x).mean()
         model = model.to(original_device)
+        model.train()
         model.eval()
         return model
 

@@ -35,6 +35,7 @@ def run(args):
     model.eval()
 
     g, y = next(iter(data_test.view(batch_size=len(data_test))))
+    print(g.device)
     y_hat = model(g).loc
     rmse_test = (y_hat - y).pow(2).mean().pow(0.5)
 
@@ -48,7 +49,7 @@ def run(args):
     key.pop("out")
     key = json.dumps(key)
     df = pd.DataFrame.from_dict(
-        {key: [rmse_valid, rmse_test]},
+        {key: [rmse_valid.item(), rmse_test.item()]},
         orient="index",
         columns=["vl", "te"]
     )
