@@ -6,6 +6,7 @@ def run(args):
     data = getattr(malt.data.collections, args.data)()
     data = data.shuffle(seed=2666)
     data_train, data_valid, data_test = data.split([8, 1, 1])
+    # data_train = data_valid = data_test = data
     g, y = next(iter(data_train.view(batch_size=len(data_train))))
     regressor = getattr(
         malt.models.regressor,
@@ -22,6 +23,7 @@ def run(args):
         regressor=regressor(
             num_points=len(data_train),
             in_features=args.width,
+            # likelihood=malt.models.regressor.HomoschedasticGaussianLikelihood(),
         ),
     )
 
@@ -41,13 +43,13 @@ def run(args):
     model.eval()
 
     g, y = next(iter(data_test.view(batch_size=len(data_test))))
-    print(g.device)
     y_hat = model(g).loc
     rmse_test = (y_hat - y).pow(2).mean().pow(0.5)
 
     g, y = next(iter(data_valid.view(batch_size=len(data_test))))
     y_hat = model(g).loc
     rmse_valid = (y_hat - y).pow(2).mean().pow(0.5)
+
 
     import json
     import pandas as pd
