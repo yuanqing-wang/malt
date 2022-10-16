@@ -4,4 +4,4 @@ matplotlib
 pandas
 numpy
 dgllife
-
+rdkit

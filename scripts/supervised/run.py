@@ -1,52 +1,78 @@
 import torch
-import dgl
-import malt 
-
+import malt
 
 def run(args):
+    # data = malt.data.collections.linear_alkanes(10)
     data = getattr(malt.data.collections, args.data)()
-    data.shuffle(seed=2666)
-    ds_tr, ds_vl, ds_te = data.split([8, 1, 1])
+    data = data.shuffle(seed=2666)
+    data_train, data_valid, data_test = data.split([8, 1, 1])
+    # data_train = data_valid = data_test = data
+    g, y = next(iter(data_train.view(batch_size=len(data_train))))
+    regressor = getattr(
+        malt.models.regressor,
+        {
+            "nn": "NeuralNetworkRegressor", "gp": "ExactGaussianProcessRegressor"
+        }[args.regressor],
+    )
 
-    if args.model == "gp":
-        model = malt.models.supervised_model.GaussianProcessSupervisedModel(
-            representation=malt.models.representation.DGLRepresentation(
-                out_features=128,
-            ),
-            regressor=malt.models.regressor.ExactGaussianProcessRegressor(
-                in_features=128, out_features=2,
-            ),
-            likelihood=malt.models.likelihood.HeteroschedasticGaussianLikelihood(),
-        )
+    model = malt.models.SupervisedModel(
+        representation=malt.models.representation.DGLRepresentation(
+            depth=args.depth,
+            out_features=args.width,
+        ),
+        regressor=regressor(
+            num_points=len(data_train),
+            in_features=args.width,
+            # likelihood=malt.models.regressor.HomoschedasticGaussianLikelihood(),
+        ),
+    )
+
+    if args.regressor == "nn":
+        batch_size = args.batch_size
+    else:
+        batch_size = -1
+
+    trainer = malt.trainer.get_default_trainer(
+        without_player=True,
+        n_epochs=2000,
+        learning_rate=args.learning_rate,
+        reduce_factor=args.reduce_factor,
+        batch_size=batch_size,
+    )
+    model = trainer(model, data_train, data_valid)
+    model.eval()
+
+    g, y = next(iter(data_test.view(batch_size=len(data_test))))
+    y_hat = model(g).loc
+    rmse_test = (y_hat - y).pow(2).mean().pow(0.5)
+
+    g, y = next(iter(data_valid.view(batch_size=len(data_test))))
+    y_hat = model(g).loc
+    rmse_valid = (y_hat - y).pow(2).mean().pow(0.5)
 
 
-    elif args.model == "nn":
-        model = malt.models.supervised_model.SimpleSupervisedModel(
-            representation=malt.models.representation.DGLRepresentation(
-                out_features=128,
-            ),
-            regressor=malt.models.regressor.NeuralNetworkRegressor(
-                in_features=128, out_features=1,
-            ),
-            likelihood=malt.models.likelihood.HomoschedasticGaussianLikelihood(),
-        )
-
-
-    trainer = malt.trainer.get_default_trainer(without_player=True, batch_size=len(ds_tr), n_epochs=3000, learning_rate=1e-3)
-    model = trainer(model, ds_tr)
-
-    r2 = malt.metrics.supervised_metrics.R2()(model, ds_te)
-    print(r2)
-
-    rmse = malt.metrics.supervised_metrics.RMSE()(model, ds_te)
-    print(rmse)
-
+    import json
+    import pandas as pd
+    key = dict(vars(args))
+    key.pop("out")
+    key = json.dumps(key)
+    df = pd.DataFrame.from_dict(
+        {key: [rmse_valid.item(), rmse_test.item()]},
+        orient="index",
+        columns=["vl", "te"]
+    )
+    df.to_csv(args.out, mode="a")
 
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=str, default="esol")
-    parser.add_argument("--model", type=str, default="gp")
-
+    parser.add_argument("--depth", type=int, default=3)
+    parser.add_argument("--width", type=int, default=32)
+    parser.add_argument("--regressor", type=str, default="gp")
+    parser.add_argument("--learning_rate", type=float, default=1e-3)
+    parser.add_argument("--reduce_factor", type=float, default=0.5)
+    parser.add_argument("--batch_size", type=int, default=16)
+    parser.add_argument("--out", type=str, default="out.csv")
     args = parser.parse_args()
     run(args)
