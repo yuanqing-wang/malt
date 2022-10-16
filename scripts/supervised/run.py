@@ -6,6 +6,7 @@ def run(args):
     data = getattr(malt.data.collections, args.data)()
     data = data.shuffle(seed=2666)
     data_train, data_valid, data_test = data.split([8, 1, 1])
+    # data_train = data_valid = data_test = data
     g, y = next(iter(data_train.view(batch_size=len(data_train))))
     regressor = getattr(
         malt.models.regressor,
@@ -22,14 +23,21 @@ def run(args):
         regressor=regressor(
             num_points=len(data_train),
             in_features=args.width,
+            # likelihood=malt.models.regressor.HomoschedasticGaussianLikelihood(),
         ),
     )
+
+    if args.regressor == "nn":
+        batch_size = args.batch_size
+    else:
+        batch_size = -1
 
     trainer = malt.trainer.get_default_trainer(
         without_player=True,
         n_epochs=2000,
         learning_rate=args.learning_rate,
         reduce_factor=args.reduce_factor,
+        batch_size=batch_size,
     )
     model = trainer(model, data_train, data_valid)
     model.eval()
@@ -42,13 +50,14 @@ def run(args):
     y_hat = model(g).loc
     rmse_valid = (y_hat - y).pow(2).mean().pow(0.5)
 
+
     import json
     import pandas as pd
     key = dict(vars(args))
     key.pop("out")
     key = json.dumps(key)
     df = pd.DataFrame.from_dict(
-        {key: [rmse_valid, rmse_test]},
+        {key: [rmse_valid.item(), rmse_test.item()]},
         orient="index",
         columns=["vl", "te"]
     )
@@ -63,6 +72,7 @@ if __name__ == "__main__":
     parser.add_argument("--regressor", type=str, default="gp")
     parser.add_argument("--learning_rate", type=float, default=1e-3)
     parser.add_argument("--reduce_factor", type=float, default=0.5)
+    parser.add_argument("--batch_size", type=int, default=16)
     parser.add_argument("--out", type=str, default="out.csv")
     args = parser.parse_args()
     run(args)

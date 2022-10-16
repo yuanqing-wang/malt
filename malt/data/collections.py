@@ -1,6 +1,7 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
+import dgl
 import dgllife
 from malt.data.dataset import Dataset
 from malt.molecule import Molecule
@@ -13,6 +14,7 @@ def _dataset_from_dgllife(dgllife_dataset):
     idx = 0
     ds = []
     for smiles, g, y in dgllife_dataset:
+        g = dgl.add_self_loop(g)
         molecule = Molecule(smiles, g, metadata={'idx': idx, 'y': y.item()})
         idx += 1
         ds.append(molecule)

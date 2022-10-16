@@ -71,7 +71,10 @@ class DGLRepresentation(Representation):
                 layer(hidden_features, hidden_features),
             )
 
-        self.embedding_out = torch.nn.Linear(hidden_features, hidden_features)
+        self.embedding_out = torch.nn.Sequential(
+            torch.nn.Linear(hidden_features, hidden_features),
+            activation,
+        )
 
         # output
         self.ff = torch.nn.Linear(hidden_features, out_features)
