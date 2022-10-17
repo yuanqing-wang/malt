@@ -5,3 +5,4 @@ pandas
 numpy
 dgllife
 rdkit
+gpytorch
