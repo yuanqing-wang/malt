@@ -11,7 +11,10 @@ class ConcatenationAttentionHeads(torch.nn.Module):
         layer: type=dgl.nn.GATConv,
     ):
         super().__init__()
-        self.layer = layer(in_features, out_features // num_heads, num_heads)
+        self.layer = layer(
+            in_features, out_features // num_heads, num_heads,
+            allow_zero_in_degree=True,
+        )
         self.__doc__ = self.layer.__doc__
 
     def forward(self, graph, feat):
