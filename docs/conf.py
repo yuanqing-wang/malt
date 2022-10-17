@@ -22,7 +22,7 @@ import malt
 from malt import data, models, molecule, trainer, policy, agents, utils
 
 import os
-os.system("bash download_experiments.sh")
+# os.system("bash download_experiments.sh")
 
 # -- Project information -----------------------------------------------------
 
