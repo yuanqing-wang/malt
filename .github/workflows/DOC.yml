@@ -17,7 +17,7 @@ jobs:
         python -m pip install flake8 pytest versioneer sphinx sphinx_rtd_theme pyyaml networkx m2r2
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         python setup.py install
-        cd docs && make html && cd _build/html && echo 'galax.wangyq.net' > CNAME
+        cd docs && make html && cd _build/html && echo 'malt.wangyq.net' > CNAME
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3
       with:
