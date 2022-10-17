@@ -1,3 +1,5 @@
+"""Decision maker. """
+
 import abc
 import torch
 from typing import Union, Callable

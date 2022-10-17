@@ -1,3 +1,4 @@
+"""Base class of all agents."""
 import abc
 
 class Agent(abc.ABC):

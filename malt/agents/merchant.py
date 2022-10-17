@@ -1,3 +1,4 @@
+"""Agents that provide access to chemical spaces."""
 import abc
 from malt.data.dataset import Dataset
 from .agent import Agent

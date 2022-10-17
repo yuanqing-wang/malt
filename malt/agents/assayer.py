@@ -1,3 +1,4 @@
+"""Agents that characterizes compounds."""
 import abc
 from .agent import Agent
 from malt.data.dataset import Dataset
@@ -60,15 +61,15 @@ class DatasetAssayer(Assayer):
 
         """
         for molecule in dataset:
-            
+
             assert molecule in self.dataset
-            
+
             if molecule.metadata is None:
                 molecule.metadata = {}
-            
+
             for key in by:
                 molecule.metadata[key] = self.dataset[molecule].metadata[key]
-        
+
         return dataset
 
 class DockingAssayer(Assayer):
