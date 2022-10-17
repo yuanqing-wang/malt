@@ -15,7 +15,7 @@ def test_training_on_linear_alkane_without_player():
     trainer = malt.trainer.get_default_trainer(
         without_player=True,
     )
-    model = trainer(model, data)
+    model = trainer(model, data, data)
 
 def test_training_on_linear_alkane_with_player():
     import malt

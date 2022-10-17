@@ -99,9 +99,9 @@ class DGLRepresentation(Representation):
         --------
         >>> import malt
         >>> molecule = malt.Molecule("C")
-        >>> representation = DGLRepresentation()
+        >>> representation = DGLRepresentation(out_features=8)
         >>> h = representation(molecule.g)
-        >>> assert h.shape == (1, 1)
+        >>> assert h.shape == (1, 8)
 
         """
         # make local copy

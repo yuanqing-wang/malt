@@ -15,6 +15,7 @@ def get_default_trainer(
     patience: int = 10,
     without_player: bool = False,
     min_learning_rate: float = 1e-6,
+    no_validation_threshold = 20,
 ):
     """ Get the default training scheme for models.
 
@@ -114,8 +115,11 @@ def get_default_trainer(
         *args, **kwargs
     ):
         player.portfolio.shuffle()
-        data_train, data_valid = player.portfolio.split([9, 1])
-        print("fuck", len(data_train), len(data_valid))
+        if len(player.portfolio) >= no_validation_threshold:
+            data_train, data_valid = player.portfolio.split([9, 1])
+        else:
+            data_train = data_valid = player.portfolio
+
         return _default_trainer_without_player(
             player.model,
             data_train,

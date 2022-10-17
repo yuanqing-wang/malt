@@ -11,6 +11,7 @@ def test_linear_alkane():
         print(point)
     assert len(dataset) == 5
 
+@pytest.mark.skip(reason="taking a bit too long.")
 def test_esol():
     import torch
     import dgl
