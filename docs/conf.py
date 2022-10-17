@@ -171,7 +171,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'malt', 'malt Documentation',
-     author, 'malt', 'Extensible Surrogate Potential of Ab initio Learned and Optimized by Message-passing Algorithm',
+     author, 'malt', 'Molecular Active Learning Testbed',
      'Miscellaneous'),
 ]
 
