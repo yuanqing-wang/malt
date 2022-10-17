@@ -21,7 +21,7 @@ except:
 
 setup(
     # Self-descriptive entries which should always be present
-    name="malt",
+    name="malt.wangyq.net",
     author="Yuanqing Wang",
     author_email="wangyq@wangyq.net",
     description=short_description[0],
