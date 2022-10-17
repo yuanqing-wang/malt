@@ -19,7 +19,7 @@ import sys
 sys.path.insert(0, os.path.abspath('..'))
 
 import malt
-from malt import agents, data, models, point, policy, trainer, utility_functions
+from malt import data, models, molecule, trainer, policy, agents, utils
 
 import os
 os.system("bash download_experiments.sh")
@@ -27,7 +27,7 @@ os.system("bash download_experiments.sh")
 # -- Project information -----------------------------------------------------
 
 project = 'malt'
-copyright = ("2020, Yuanqing Wang @ choderalab // MSKCC.")
+copyright = ("2022, Yuanqing Wang @ choderalab // MSKCC.")
 author = 'Yuanqing Wang'
 
 # The short X.Y version
