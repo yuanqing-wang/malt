@@ -10,4 +10,4 @@ GCN.__doc__ = dgl.nn.GraphConv.__doc__
 GraphSAGE = partial(dgl.nn.SAGEConv, aggregator_type="mean")
 GraphSAGE.__doc__ = dgl.nn.SAGEConv.__doc__
 
-from gat import GAT, GATDot
+from .gat import GAT, GATDot
