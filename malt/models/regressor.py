@@ -58,7 +58,7 @@ class Regressor(torch.nn.Module, abc.ABC):
 
         """
         posterior = self.forward(representation)
-        nll = -posterior.log_prob(observation).mean()
+        nll = -posterior.log_prob(observation.unsqueeze(-1)).mean()
         return nll
 
 class NeuralNetworkLikelihood(abc.ABC):
@@ -164,6 +164,7 @@ class NeuralNetworkRegressor(Regressor):
 
         # neural network
         modules = []
+        modules.append(activation)
         _in_features = in_features
         for idx in range(depth - 1):
             modules.append(torch.nn.Linear(_in_features, hidden_features))
