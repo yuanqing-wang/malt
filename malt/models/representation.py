@@ -71,13 +71,12 @@ class DGLRepresentation(Representation):
                 layer(hidden_features, hidden_features),
             )
 
-        # self.embedding_out = torch.nn.Sequential(
-        #     torch.nn.Linear(hidden_features, hidden_features),
-        #     activation,
-        # )
+        self.embedding_out = torch.nn.Sequential(
+            torch.nn.Linear(hidden_features, hidden_features),
+            activation,
+        )
 
-        # output
-        # self.ff = torch.nn.Linear(hidden_features, out_features)
+        self.ff = torch.nn.Linear(hidden_features, out_features)
 
         self.depth = depth
         self.global_pool = getattr(dgl, "%s_nodes" % global_pool)
@@ -115,13 +114,13 @@ class DGLRepresentation(Representation):
             h = getattr(self, "gn%s" % idx)(g, h)
             h = self.activation(h)
 
-        # h = self.embedding_out(h)
+        h = self.embedding_out(h)
         g.ndata[field] = h
 
         # global pool
         h = self.global_pool(g, field)
 
         # final feedforward
-        # h = self.ff(h)
+        h = self.ff(h)
 
         return h

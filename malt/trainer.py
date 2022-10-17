@@ -113,9 +113,13 @@ def get_default_trainer(
         player,
         *args, **kwargs
     ):
+        player.portfolio.shuffle()
+        data_train, data_valid = player.portfolio.split([9, 1])
+        print("fuck", len(data_train), len(data_valid))
         return _default_trainer_without_player(
             player.model,
-            player.portfolio,
+            data_train,
+            data_valid,
             *args, **kwargs,
         )
 

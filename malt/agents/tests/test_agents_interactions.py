@@ -22,11 +22,6 @@ def test_player_with_linear_alkane():
                ),
     )
 
-
-    if torch.cuda.is_available():
-        model.cuda()
-
-
     player = SequentialModelBasedPlayer(
        model = model,
        policy=malt.policy.Greedy(),
