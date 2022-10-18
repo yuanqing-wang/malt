@@ -11,6 +11,7 @@ def test_linear_alkane():
         print(point)
     assert len(dataset) == 5
 
+@pytest.mark.skip(reason="taking a bit too long.")
 def test_esol():
     import torch
     import dgl
@@ -20,10 +21,10 @@ def test_esol():
     assert len(ds) == 1128
     point = ds[0]
     assert isinstance(point.g, dgl.DGLGraph)
-    assert isinstance(point.y, float)
+    assert isinstance(point.metadata['y'], float)
 
     ds = collections.lipophilicity()
     assert len(ds) == 4200
     point = ds[0]
     assert isinstance(point.g, dgl.DGLGraph)
-    assert isinstance(point.y, float)
+    assert isinstance(point.metadata['y'], float)

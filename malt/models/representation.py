@@ -1,7 +1,9 @@
+"""Graph -> representation."""
 # =============================================================================
 # IMPORTS
 # =============================================================================
 import abc
+from typing import Optional
 import torch
 import dgl
 import functools
@@ -45,15 +47,18 @@ class DGLRepresentation(Representation):
     def __init__(
         self,
         layer: type = functools.partial(GraphConv, allow_zero_in_degree=True),
-        in_features: int = 74,
-        hidden_features: int = 128,
-        out_features: int = 1,
+        in_features: int = 74, # TODO(yuanqing-wang): make this less awkward?
+        hidden_features: Optional[int] = None,
+        out_features: int = 128,
         depth: int = 3,
         activation: callable = torch.nn.SiLU(),
         global_pool: str = "sum",
     ):
         super(DGLRepresentation, self).__init__(out_features=out_features)
-        
+
+        if hidden_features is None:
+            hidden_features = out_features
+
         self.embedding_in = torch.nn.Sequential(
             torch.nn.Linear(in_features, hidden_features),
             activation,
@@ -69,15 +74,10 @@ class DGLRepresentation(Representation):
 
         self.embedding_out = torch.nn.Sequential(
             torch.nn.Linear(hidden_features, hidden_features),
-            # activation,
+            activation,
         )
 
-        # output
-        self.ff = torch.nn.Sequential(
-            # torch.nn.Linear(hidden_features, hidden_features),
-            # activation,
-            torch.nn.Linear(hidden_features, out_features),
-        )
+        self.ff = torch.nn.Linear(hidden_features, out_features)
 
         self.depth = depth
         self.global_pool = getattr(dgl, "%s_nodes" % global_pool)
@@ -90,6 +90,19 @@ class DGLRepresentation(Representation):
         ----------
         g : dgl.DGLGraph
             Input graph.
+
+        Returns
+        -------
+        torch.Tensor
+            The result
+
+        Examples
+        --------
+        >>> import malt
+        >>> molecule = malt.Molecule("C")
+        >>> representation = DGLRepresentation(out_features=8)
+        >>> h = representation(molecule.g)
+        >>> assert h.shape == (1, 8)
 
         """
         # make local copy

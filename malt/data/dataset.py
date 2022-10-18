@@ -1,104 +1,181 @@
+"""Datasets and their serving."""
 # =============================================================================
 # IMPORTS
 # =============================================================================
-import torch
 import dgl
-from typing import Union, List
-from malt.point import Point
+import malt
+import torch
+from malt.molecule import Molecule
+from typing import Union, Iterable, Optional, List, Any, Callable
 
 # =============================================================================
 # MODULE CLASSES
 # =============================================================================
 class Dataset(torch.utils.data.Dataset):
-    """A collection of Points with functionalities to be compatible with
+    """A collection of Molecules with functionalities to be compatible with
     training and optimization.
 
     Parameters
     ----------
-    points : List[Point]
-        A list of points.
+    molecules : List[malt.Molecule]
+        A list of Molecules.
 
     Methods
     -------
-    featurize(points)
-        Featurize all points in the dataset.
+    featurize(molecules)
+        Featurize all molecules in the dataset.
     view()
         Generate a torch.utils.data.DataLoader from this Dataset.
-
     """
 
     _lookup = None
+    _extra = None
 
-    def __init__(self, points=[]) -> None:
+    def __init__(self, molecules: Optional[List]=None) -> None:
         super(Dataset, self).__init__()
-        assert all(isinstance(point, Point) for point in points)
-        self.points = points
+        if molecules is None:
+            molecules = []
+        assert isinstance(molecules, List)
+        assert all(isinstance(molecule, Molecule) for molecule in molecules)
+        self.molecules = molecules
 
     def __repr__(self):
-        return "%s with %s points" % (self.__class__.__name__, len(self))
+        return "%s with %s molecules" % (self.__class__.__name__, len(self))
 
     def _construct_lookup(self):
-        self._lookup = {point.smiles: point for point in self.points}
+        """Construct lookup table for molecules."""
+        self._lookup = {mol.smiles: mol for mol in self.molecules}
 
     @property
     def lookup(self):
+        """Returns the mapping between the SMILES and the molecule. """
         if self._lookup is None:
             self._construct_lookup()
         return self._lookup
 
-    def __contains__(self, point):
-        return point.smiles in self.lookup
+    def __contains__(self, molecule):
+        """Check if a molecule is in the dataset.
+
+        Parameters
+        ----------
+        molecule : malt.Molecule
+
+        Examples
+        --------
+        >>> molecule = Molecule("CC")
+        >>> dataset = Dataset([molecule])
+        >>> Molecule("CC") in dataset
+        True
+        >>> Molecule("C") in dataset
+        False
+
+        """
+        return molecule.smiles in self.lookup
 
     def apply(self, function):
-        self.points = [function(point) for point in self.points]
+        """Apply a function to all molecules in the dataset.
+
+        Parameters
+        ----------
+        function : Callable
+            The function to be applied to all molecules in this dataset
+            in place.
+
+        Examples
+        --------
+        >>> molecule = Molecule("CC")
+        >>> dataset = Dataset([molecule])
+        >>> from ..molecule import Molecule
+        >>> fn = lambda molecule: Molecule(
+        ...     smiles=molecule.smiles, metadata={"name": "john"},
+        ... )
+        >>> dataset = dataset.apply(fn)
+        >>> dataset[0]["name"]
+        'john'
+        """
+
+        self.molecules = [function(molecule) for molecule in self.molecules]
         return self
 
-    def __eq__(self, points):
-        if not isinstance(points, self.__class__):
+    def __eq__(self, other):
+        """Determin if two objects are identical."""
+        if not isinstance(other, self.__class__):
             return False
-        return self.points == points.points
+        return self.molecules == other.molecules
 
     def __len__(self):
-        if self.points is None:
+        """Return the number of molecules in the dataset."""
+        if self.molecules is None:
             return 0
-        return len(self.points)
+        return len(self.molecules)
 
-    def __getitem__(self, idx):
-        if self.points is None:
+    def __getitem__(self, key: Any):
+        """Get item from the dataset.
+
+        Parameters
+        ----------
+        key : Any
+
+        Notes
+        -----
+        * If the key is integer, return the single molecule indexed.
+        * If the key is a string, return a dataset of all molecules with
+            this SMILES.
+        * If the key is a molecule, extract the SMILES string and index by
+            its SMILES.
+        * If the key is a tensor, flatten it to treat it as a list.
+        * If the key is a list, return a dataset with molecules indexed by
+            the elements in the list.
+        * If the key is a slice, slice the range and treat at as a list.
+
+        """
+        if self.molecules is None:
             raise RuntimeError("Empty Portfolio.")
-        if isinstance(idx, int):
-            return self.points[idx]
-        elif isinstance(idx, str):
-            return self.lookup[idx]
-        elif isinstance(idx, Point):
-            return self.lookup[idx.smiles]
-        elif isinstance(idx, torch.Tensor):
-            idx = idx.detach().flatten().cpu().numpy().tolist()
-
-        if isinstance(idx, list):
-            return self.__class__(points=[self.points[_idx] for _idx in idx])
-
-        elif isinstance(idx, slice):
-            return self.__class__(points=self.points[idx])
-
+        if isinstance(key, int):
+            return self.molecules[key]
+        elif isinstance(key, str): # NOTE(yuanqing-wang): Are we settled?
+            return self.__class__(molecules=[self.lookup[key]])
+        elif isinstance(key, Molecule):
+            return self.lookup[key.smiles]
+        elif isinstance(key, torch.Tensor):
+            key = key.detach().flatten().cpu().numpy().tolist()
+        elif isinstance(key, list):
+            return self.__class__(
+                molecules=[self.molecules[_idx] for _idx in key]
+            )
+        elif isinstance(key, slice):
+            return self.__class__(molecules=self.molecules[key])
         else:
             raise RuntimeError("The slice is not recognized.")
 
-        return self.__class__(points=self.points[idx])
-
     def shuffle(self, seed=None):
+        """ Shuffle the dataset and return it. """
         import random
         if seed is not None:
             random.seed(seed)
-        random.shuffle(self.points)
+        random.shuffle(self.molecules)
         return self
 
 
     def split(self, partition):
         """Split the dataset according to some partition.
+
         Parameters
         ----------
-        partition : sequence of integers or floats
+        partition : Sequence[Optional[int, float]]
+            Splitting partition.
+
+        Returns
+        -------
+        List[Dataset]
+            List of datasets split according to the partition.
+
+        Examples
+        --------
+        >>> dataset = Dataset([Molecule("CC"), Molecule("C")])
+        >>> dataset0, dataset1 = dataset.split([1, 1])
+        >>> dataset0[0].smiles
+        'CC'
         """
         n_data = len(self)
         partition = [int(n_data * x / sum(partition)) for x in partition]
@@ -107,114 +184,172 @@ class Dataset(torch.utils.data.Dataset):
         for p_size in partition:
             ds.append(self[idx : idx + p_size])
             idx += p_size
-
         return ds
 
-    def __add__(self, points):
-        """ Combine two datasets. """
-        if isinstance(points, list):
-            return self.__class__(points=self.points + points)
+    def __add__(self, molecules):
+        """Combine two datasets and return a new one.
 
-        elif isinstance(points, Dataset):
-            return self.__class__(points=self.points + points.points)
+        Parameters
+        ----------
+        molecules : Union[List[Molecule], Dataset]
+            Molecules to be added to the dataset.
+
+        Returns
+        -------
+        >>> dataset0 = Dataset([Molecule("C")])
+        >>> dataset1 = Dataset([Molecule("CC")])
+        >>> dataset = dataset0 + dataset1
+        >>> len(dataset)
+        2
+
+        """
+        if isinstance(molecules, list):
+            return self.__class__(molecules=self.molecules + molecules)
+
+        elif isinstance(molecules, Dataset):
+            return self.__class__(
+                molecules=self.molecules + molecules.molecules
+            )
 
         else:
             raise RuntimeError("Addition only supports list and Dataset.")
 
-    def __sub__(self, points):
-        if isinstance(points, list):
-            points = self.__class__(points)
+    def __sub__(self, molecules):
+        """ Subtract a list of molecules from a dataset and return a new one.
+
+        Parameters
+        ----------
+        molecules : Union[list[Molecule], Dataset]
+            Molecules to be subtracted from the dataset.
+
+        Returns
+        -------
+        Dataset
+            The resulting dataset.
+
+        Examples
+        --------
+        >>> dataset = Dataset([Molecule("CC"), Molecule("C")])
+        >>> dataset -= [Molecule("C")]
+        >>> len(dataset)
+        1
+        """
+        if isinstance(molecules, list):
+            molecules = self.__class__(molecules)
 
         return self.__class__(
             [
-                point
-                for point in self.points
-                if point.smiles not in points.lookup
+                molecule
+                for molecule in self.molecules
+                if molecule.smiles not in molecules.lookup
             ]
         )
 
     def __iter__(self):
-        return iter(self.points)
+        """Alias of iter for molecules. """
+        return iter(self.molecules)
 
-    def append(self, point):
-        """Append a point to the dataset.
+    def append(self, molecule):
+        """Append a molecule to the dataset.
+
+        Alias of append for molecules.
+
+        Note
+        ----
+        * This append in-place.
 
         Parameters
         ----------
-        point : Point
-            The data point to be appended.
+        molecule : molecule
+            The data molecule to be appended.
+
         """
-        self.points.append(point)
+        self.molecules.append(molecule)
         return self
 
     def featurize_all(self):
-        """ Featurize all points in dataset. """
-        for point in self.points:
-            if not point.is_featurized():
-                point.featurize()
-
+        """ Featurize all molecules in dataset. """
+        (molecule.featurize() for molecule in self.molecules)
         return self
 
     @property
-    def y(self):
-        return [point.y for point in self.points]
+    def smiles(self):
+        """Return the list of SMILE strings in the datset. """
+        return [molecule.smiles for molecule in self.molecules]
 
     @staticmethod
-    def batch_of_g_and_y(points):
-        # initialize results
-        gs = []
-        ys = []
+    def _batch(
+        molecules=None, by=['g', 'y'],
+        **kwargs,
+    ):
+        """Batches molecules by provided keys.
 
-        # loop through the points
-        for point in points:
-            if not point.is_featurized():  # featurize
-                point.featurize()
-            if point.y is None:
-                raise RuntimeError("No data associated with data. ")
-            gs.append(point.g)
-            ys.append(point.y)
+        Parameters
+        ----------
+        molecules : list of molecules
+            Defaults to all molecules in Dataset if none provided.
+        assay : Union[None, str]
+            Filter metadata using assay key.
+        by : Union[Iterable, str]
+            Attributes of molecule on which to batch.
 
-        g = dgl.batch(gs)
-        y = torch.tensor(ys, dtype=torch.float32)[:, None]
-        return g, y
+        Returns
+        -------
+        ret : Union[tuple, dgl.Graph, torch.Tensor]
+            Batched data, in order of keys passed in `by` argument.
 
-    @staticmethod
-    def batch_of_g(points):
-        # initialize results
-        gs = []
+        """
+        from collections import defaultdict
+        ret = defaultdict(list)
 
-        # loop through the points
-        for point in points:
-            if not point.is_featurized():  # featurize
-                point.featurize()
-            gs.append(point.g)
+        # guarantee keys are a list
+        by = [by] if isinstance(by, str) else by
 
-        g = dgl.batch(gs)
-        return g
+        # loop through molecules
+        for molecule in molecules:
 
-    def get_batch_of_all_g(self):
-        return next(
-            iter(
-                self.view(
-                    "batch_of_g",
-                    batch_size=len(self)
-                )
-            )
-        )
+            for key in by:
+                if key == 'g':
+                    # featurize graphs
+                    if not molecule.is_featurized():
+                        molecule.featurize()
+                    ret['g'].append(molecule.g)
+
+                else:
+                    m = molecule.metadata[key]
+                    ret[key].append(m)
+
+        # collate batches
+        for key in by:
+            if key == 'g':
+                ret['g'] = dgl.batch(ret['g'])
+            else:
+                ret[key] = torch.tensor(ret[key])
+
+        # return batches
+        ret = (*ret.values(), )
+        if len(ret) < 2:
+            ret = ret[0]
+        return ret
 
     def erase_annotation(self):
-        for point in self.points:
-            point.erase_annotation()
+        """Erase the metadata. """
+        for molecule in self.molecules:
+            molecule.erase_annotation()
         return self
 
     def clone(self):
         """ Return a copy of self. """
         import copy
-        return self.__class__(copy.deepcopy(self.points))
+        return self.__class__(copy.deepcopy(self.molecules))
+
+    def batch(self, *args, **kwargs):
+        return self._batch(self.molecules, *args, **kwargs)
 
     def view(
         self,
-        collate_fn: Union[callable, str] = "batch_of_g_and_y",
+        collate_fn: Optional[Callable]=None,
+        by: Union[Iterable, str] = ['g', 'y'],
         *args,
         **kwargs,
     ):
@@ -222,22 +357,28 @@ class Dataset(torch.utils.data.Dataset):
 
         Parameters
         ----------
-        collate_fn : None or callable
-            The function to gather data points.
-
+        collate_fn : Optional[Callable]
+            The function to gather data molecules.
+        assay : Union[None, str]
+            Batch data from molecules using key provided to filter metadata.
+        by : Union[Iterable, str]
         Returns
         -------
         torch.utils.data.DataLoader
             Resulting data loader.
-
         """
-        # provide default collate function
-        if isinstance(collate_fn, str):
-            collate_fn = getattr(self, collate_fn)
+        from functools import partial
+
+        if collate_fn is None:
+            # provide default collate function
+            collate_fn = self._batch
 
         return torch.utils.data.DataLoader(
-            dataset=self.points,
-            collate_fn=collate_fn,
+            dataset=self.molecules,
+            collate_fn=partial(
+                collate_fn,
+                by=by,
+            ),
             *args,
             **kwargs,
         )

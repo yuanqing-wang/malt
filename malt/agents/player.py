@@ -1,10 +1,14 @@
+"""Decision maker. """
+
 import abc
+import torch
 from typing import Union, Callable
 from .agent import Agent
 from .merchant import Merchant
 from .assayer import Assayer
 from malt.models.supervised_model import SupervisedModel
 from malt.data.dataset import Dataset
+import torch
 
 class Player(Agent):
     """ Base class for players.
@@ -65,11 +69,11 @@ class ModelBasedPlayer(Player):
         Assayer that assays the candidates.
 
     portfolio : Dataset
-        Inititial knowledge about data points.
+        Initial knowledge about data points.
 
     Note
     ----
-    1. Perfolio respects order and could be used to analyze acquisition
+    1. Portfolio respects order and could be used to analyze acquisition
         trajectory.
 
     """
@@ -113,12 +117,13 @@ class ModelBasedPlayer(Player):
     def prioritize(self):
         if len(self.merchant.catalogue()) == 0:
             return None
-        posterior = self.model.condition(
-            self.merchant.catalogue().get_batch_of_all_g(),
+        self.model.eval()
+        posterior = self.model(
+            self.merchant.catalogue().batch(by=['g']),
         )
+        best = self.policy(posterior)
+        return self.merchant.catalogue()[list(best)]
 
-        best = int(self.policy(posterior).item())
-        return self.merchant.catalogue()[best]
 
 class SequentialModelBasedPlayer(ModelBasedPlayer):
     """Model based player with step size equal one.
@@ -127,14 +132,13 @@ class SequentialModelBasedPlayer(ModelBasedPlayer):
     --------
     >>> import malt
     >>> player = SequentialModelBasedPlayer(
-    ...    model = malt.models.supervised_model.SimpleSupervisedModel(
+    ...    model = malt.models.supervised_model.SupervisedModel(
     ...        representation=malt.models.representation.DGLRepresentation(
     ...            out_features=128
     ...        ),
     ...        regressor=malt.models.regressor.NeuralNetworkRegressor(
-    ...            in_features=128, out_features=1
+    ...            in_features=128,
     ...        ),
-    ...        likelihood=malt.models.likelihood.HomoschedasticGaussianLikelihood(),
     ...    ),
     ...    policy=malt.policy.Greedy(),
     ...    trainer=malt.trainer.get_default_trainer(),
@@ -159,7 +163,6 @@ class SequentialModelBasedPlayer(ModelBasedPlayer):
         best = self.prioritize()
         if best is None:
             return None
-        best = Dataset([best])
         best = self.merchandize(best)
         best = self.assay(best)
         self.train()
