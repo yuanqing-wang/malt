@@ -1,3 +1,3 @@
-from . import data, models, point, trainer, policy, agents, metrics, utils
-from .point import Point
+from . import data, models, molecule, trainer, policy, agents, utils
+from .molecule import Molecule
 from .data.dataset import Dataset

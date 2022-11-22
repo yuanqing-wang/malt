@@ -19,9 +19,11 @@ except:
     long_description = "\n".join(short_description[2:])
 
 
+INSTALL_REQUIRES = open("requirements.txt", "r").readlines()
+
 setup(
     # Self-descriptive entries which should always be present
-    name="malt",
+    name="malt.wangyq.net",
     author="Yuanqing Wang",
     author_email="wangyq@wangyq.net",
     description=short_description[0],
@@ -30,6 +32,7 @@ setup(
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     license="MIT",
+    install_requires=INSTALL_REQUIRES,
     # Which Python importable modules should be included when your package is installed
     # Handled automatically by setuptools. Use 'exclude' to prevent some specific
     # subpackage(s) from being added, if needed

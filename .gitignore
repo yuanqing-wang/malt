@@ -129,10 +129,13 @@ dmypy.json
 .pyre/
 
 # data
-.bin
+*.bin
 
 # pytorch model
 .th
 
 # mac
-.DS_Store
+*.DS_Store
+
+# performance
+*.csv

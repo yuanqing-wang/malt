@@ -5,34 +5,36 @@ def test_training_on_linear_alkane_without_player():
     data = malt.data.collections.linear_alkanes(10)
     representation = malt.models.representation.DGLRepresentation(out_features=32)
     regressor=malt.models.regressor.NeuralNetworkRegressor(
-        in_features=32, out_features=1,
-    )
-    likelihood=malt.models.likelihood.HomoschedasticGaussianLikelihood()
-    model = malt.models.supervised_model.SimpleSupervisedModel(
-        representation=representation,
-        regressor=regressor,
-        likelihood=likelihood,
+        in_features=32,
     )
 
-    trainer = malt.trainer.get_default_trainer(without_player=True)
-    model = trainer(model, data)
+    model = malt.models.supervised_model.SupervisedModel(
+        representation=representation,
+        regressor=regressor,
+    )
+    trainer = malt.trainer.get_default_trainer(
+        without_player=True,
+    )
+    model = trainer(model, data, data)
 
 def test_training_on_linear_alkane_with_player():
     import malt
+    import torch
     data = malt.data.collections.linear_alkanes(10)
     merchant = malt.agents.merchant.DatasetMerchant(data)
     assayer = malt.agents.assayer.DatasetAssayer(data)
 
     representation = malt.models.representation.DGLRepresentation(out_features=32)
     regressor=malt.models.regressor.NeuralNetworkRegressor(
-        in_features=32, out_features=1,
+        in_features=32,
     )
-    likelihood=malt.models.likelihood.HomoschedasticGaussianLikelihood()
-    model = malt.models.supervised_model.SimpleSupervisedModel(
+    model = malt.models.supervised_model.SupervisedModel(
         representation=representation,
         regressor=regressor,
-        likelihood=likelihood,
     )
+
+    if torch.cuda.is_available():
+        model.cuda()
 
     player = malt.agents.player.SequentialModelBasedPlayer(
         model=model,

@@ -41,8 +41,8 @@ def get_config():
     cfg.VCS = "git"
     cfg.style = "pep440"
     cfg.tag_prefix = ""
-    cfg.parentdir_prefix = "pinot-"
-    cfg.versionfile_source = "pinot/_version.py"
+    cfg.parentdir_prefix = "malt-"
+    cfg.versionfile_source = "malt/_version.py"
     cfg.verbose = False
     return cfg
 
