@@ -382,3 +382,40 @@ class Dataset(torch.utils.data.Dataset):
             *args,
             **kwargs,
         )
+
+def from_pandas(
+    dataframe,
+    smiles_column: str,
+    y_column: str,
+):
+    """Read dataset from pandas DataFrame.
+
+    Parameters
+    ----------
+    dataframe : pandas.DataFrame
+        The dataframe to read from.
+
+    smiles_column : str
+        The name of the column containing SMILES string.
+
+    y_column : str
+        The name of the column containing measurement.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> dataframe = pd.DataFrame.from_dict(
+    ...     {"SMILES": ["C", "CC"], "Y": [1, 2]},
+    ... )
+    >>> dataset = from_pandas(dataframe, "SMILES", "Y")
+    """
+    smiles_strings = dataframe[smiles_column]
+    ys = dataframe[y_column]
+    molecules = []
+
+    for smiles, y in zip(smiles_strings, ys):
+        molecule = Molecule(smiles)
+        molecule.y = y
+        molecules.append(molecule)
+
+    return Dataset(molecules)

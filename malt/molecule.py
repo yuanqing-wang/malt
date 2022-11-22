@@ -55,6 +55,8 @@ class Molecule(object):
     ) -> None:
         self.smiles = smiles
         self.g = g
+        if metadata is None:
+            metadata = {}
         self.metadata = metadata
         self.featurizer = featurizer
 
